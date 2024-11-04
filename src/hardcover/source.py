@@ -29,7 +29,7 @@ class Hardcover(Source):
 
     capabilities = frozenset(["identify", "cover"])
     touched_fields = frozenset(
-        ["title", "authors", f"identifiers:{ID_NAME}", "pubdate", "series", "tags"]
+        ["title", "authors", f"identifier:{ID_NAME}", "pubdate", "series", "tags"]
     )
 
     API_URL = "https://api.hardcover.app/v1/graphql"
