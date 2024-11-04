@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "calibre-plugins"
+version = "0.0.1"
+description = ""
+authors = ["Rob Brazier <git+github@brzr.co>"]
+license = "GPLv3"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.9,<4"
+pyqt5 = "^5.15.11"
+levenshtein = "^0.26.1"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
+pythonpath = ["src"]
