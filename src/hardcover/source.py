@@ -127,6 +127,7 @@ class Hardcover(Source):
         timeout=30,
     ):
         hardcover_id = identifiers.get(self.ID_NAME, None)
+        isbn = identifiers.get("isbn", None)
 
         if hardcover_id:
             books = self.get_book_by_slug(hardcover_id)
@@ -138,9 +139,26 @@ class Hardcover(Source):
 
             candidate_books = books
 
+            isbn_matching_books = []
+            # Check if a book matches the given ISBN
+            for book in books:
+                if len(book.editions) == 0:
+                    continue
+                has_match = False
+                for edition in book.editions:
+                    if isbn == edition.isbn_13 or isbn == edition.isbn_10:
+                        isbn_matching_books.append(book)
+                        has_match = True
+                        break
+                if has_match:
+                    break
+
+            if len(isbn_matching_books) > 0:
+                candidate_books = isbn_matching_books
+
             # Get closest books by Title
             candidate_titles: List[Tuple[int, Book]] = []
-            for book in books:
+            for book in candidate_books:
                 similarity = self.levenshtein_distance(title, book.title)
                 candidate_titles.append((similarity, book))
             candidate_titles = sorted(candidate_titles, key=lambda x: x[0])
@@ -148,17 +166,16 @@ class Hardcover(Source):
                 candidate_titles = candidate_titles[:10]
             candidate_books = [book[1] for book in candidate_titles]
 
+            # Get closest books by Author
             candidate_authors: List[Tuple[int, Book]] = []
             if authors:
                 for book in candidate_books:
                     book_authors = [c.author.name for c in book.contributions]
                     similarity = self.similar_authors(authors, book_authors)
-                    print(similarity, authors, book_authors, book.title, book.slug)
                     candidate_authors.append((similarity, book))
                 candidate_authors = sorted(candidate_authors, key=lambda x: x[0])
                 if len(candidate_authors) > 5:
                     candidate_authors = candidate_authors[:5]
-                print(candidate_authors)
 
                 candidate_books = [book[1] for book in candidate_authors]
 
@@ -195,12 +212,6 @@ class Hardcover(Source):
         return self.levenshtein_distance(source, target)
 
     def build_metadata(self, log, book: Book):
-        """issue = pycomicvine.Issue(issue_id, field_list=[
-        'id', 'name', 'volume', 'issue_number', 'person_credits', 'description',
-        'store_date', 'cover_date'])"""
-        if not book:
-            log.warn(f"Unable to load book({book})")
-            return None
         title = f"{book.title}"
         authors = [c.author.name for c in book.contributions]
         meta = Metadata(title, authors)
@@ -214,8 +225,8 @@ class Hardcover(Source):
             meta.has_cover = True
         else:
             meta.has_cover = False
-        # if book.volume.publisher:
-        #     meta.publisher = book.volume.publisher.name
+        # if book.publisher:
+        #     meta.publisher = book.publisher.name
         if book.release_date:
             try:
                 from datetime import datetime

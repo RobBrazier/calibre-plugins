@@ -20,6 +20,15 @@ class Author:
 
 
 @dataclass
+class Publisher:
+    name: str
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]):
+        return cls(name=safe_default(data, "name", ""))
+
+
+@dataclass
 class Contribution:
     author: Author
 
@@ -61,6 +70,7 @@ class Edition:
     isbn_13: str
     isbn_10: str
     title: str
+    publisher: Publisher
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
@@ -69,6 +79,7 @@ class Edition:
             isbn_13=safe_default(data, "isbn_13", ""),
             isbn_10=safe_default(data, "isbn_10", ""),
             title=safe_default(data, "title", ""),
+            publisher=Publisher.from_dict(safe_default(data, "publisher", {})),
         )
 
 
