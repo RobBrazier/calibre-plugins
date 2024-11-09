@@ -48,7 +48,7 @@ jobs:
       - name: Build Plugins
         run: |
           for plugin in $(pwd)/plugins/*; do
-            uv tool --directory run "$plugin" hatch build -t zipped-directory
+            uv tool --directory "$plugin" run hatch build -t zipped-directory
           done
 
       - name: Upload Plugin Artifacts
