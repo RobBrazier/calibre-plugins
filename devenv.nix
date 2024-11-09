@@ -1,13 +1,11 @@
 { pkgs, lib, config, inputs, ... }:
-let
-  pkgs-unstable = import inputs.nixpkgs-unstable { system = pkgs.stdenv.system; };
-in
 {
   env.PYTHONPATH = "${config.devenv.dotfile}/profile/lib/calibre:${config.devenv.root}/src";
   env.CALIBRE_CONFIG_DIRECTORY = "${config.devenv.dotfile}/config/calibre";
   env.CALIBRE_TEMP_DIR = "${config.devenv.dotfile}/temp/calibre";
   env.CALIBRE_NO_DEFAULT_PROGRAMS = "1";
   env.CALIBRE_LIBRARY = "${config.devenv.dotfile}/state/calibre";
+  env.UV_CACHE_DIR = "${config.devenv.dotfile}/cache/uv";
 
   # https://devenv.sh/packages/
   packages = [
@@ -20,13 +18,13 @@ in
   ];
 
   # https://devenv.sh/languages/
-  languages.python.enable = true;
-  # languages.python.libraries = [
-  #   "${config.devenv.root}/calibre/src"
-  # ];
-  languages.python.poetry.enable = true;
-  languages.python.poetry.activate.enable = true;
-  languages.python.poetry.install.enable = true;
+  languages.python = {
+    enable = true;
+    # package = pkgs.python39;
+    uv.enable = true;
+    uv.sync.enable = true;
+    venv.enable = true;
+  };
 
   # https://devenv.sh/processes/
   # processes.cargo-watch.exec = "cargo-watch";
@@ -40,14 +38,17 @@ in
     calibre --with-library $CALIBRE_LIBRARY
   '';
   scripts.package.exec = ''
-    bash ${config.devenv.root}/scripts/package_plugins.sh
+    (cd "${config.devenv.root}/plugins/$1" && uvx hatch build -t zipped-directory)
   '';
-  scripts.install-plugins.exec = ''
-    find dist -name '*.zip' -type f | xargs calibre-customize --add-plugin
+  scripts.install-plugin.exec = ''
+    find "${config.devenv.root}/plugins/$1/dist" -name '*.zip' -type f | xargs calibre-customize --add-plugin
   '';
   scripts.run-hardcover.exec = ''
-    package && install-plugins
+    package 'hardcover' && install-plugin 'hardcover'
     calibre-debug -r Hardcover -- "$@"
+  '';
+  scripts.hatch.exec = ''
+    uvx hatch -- "$@"
   '';
   #
   # enterShell = ''

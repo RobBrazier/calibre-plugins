@@ -14,3 +14,4 @@ dist/
 .build/
 .ruff-cache/
 .pytest-cache/
+*.egg-info/

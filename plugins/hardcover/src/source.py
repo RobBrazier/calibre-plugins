@@ -2,7 +2,6 @@ from multiprocessing.pool import ThreadPool
 from typing import Tuple, List
 from calibre.ebooks.metadata.sources.base import Source
 from calibre.ebooks.metadata.book.base import Metadata
-from common.graphql import GraphQLClient
 from calibre.utils.config import OptionParser
 import calibre.utils.logging as calibre_logging
 from calibre import setup_cli_handlers
@@ -12,17 +11,17 @@ import re
 from queue import Queue
 from functools import partial
 
-from hardcover import config
-from hardcover.__meta__ import __version__
-from hardcover.config import ConfigWidget
-from hardcover.models import Book
+from . import config
+from ._version import __version_tuple__
+from .config import ConfigWidget
+from .models import Book
 
 
 class Hardcover(Source):
     name = "Hardcover"
     description = "Downloads metadata and covers from Hardcover.app"
     author = "Rob Brazier"
-    version = __version__
+    version = __version_tuple__
     minimum_calibre_version = (7, 7, 0)
 
     ID_NAME = "hardcover"
@@ -36,6 +35,8 @@ class Hardcover(Source):
 
     def __init__(self, *args, **kwargs):
         Source.__init__(self, *args, **kwargs)
+        from common.graphql import GraphQLClient
+
         self.client = GraphQLClient(self.API_URL)
         self._qlock = threading.RLock()
 
