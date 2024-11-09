@@ -5,7 +5,7 @@ on:
   push:
 
 jobs:
-  tests:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -18,13 +18,11 @@ jobs:
         run: uv python install
 
       - name: Install the project
-        run: |
-          uv venv
-          uv sync --all-packages --dev
+        run: uv sync --all-packages --dev
 
       - name: Build Plugins
         run: |
           for plugin in $(pwd)/plugins/*; do
             cd $plugin
-            hatch build -t zipped-directory
+            uvx hatch build -t zipped-directory
           done
