@@ -5,10 +5,10 @@ description = "Add your description here"
 readme = "README.md"
 authors = [{ name = "Rob Brazier", email = "git+github@brzr.co" }]
 requires-python = ">=3.9"
-dependencies = ["pyqt5>=5.15.11", "hatchling"]
+dependencies = ["pyqt5>=5.15.11"]
 
 [tool.uv.workspace]
-members = ["plugins/*"]
+members = ["plugins/*", "hooks/hatch-calibre-bundle"]
 
 [tool.setuptools]
 packages = []

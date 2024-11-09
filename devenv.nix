@@ -22,8 +22,8 @@
     enable = true;
     package = pkgs.python39;
     uv.enable = true;
-    uv.sync.enable = true;
-    venv.enable = true;
+    # uv.sync.enable = true;
+    # venv.enable = true;
   };
 
   # https://devenv.sh/processes/
@@ -45,7 +45,7 @@
     calibre --with-library $CALIBRE_LIBRARY
   '';
   scripts.package.exec = ''
-    (cd "${config.devenv.root}/plugins/$1" && uvx hatch build -t zipped-directory)
+    uv tool --directory "${config.devenv.root}/plugins/$1" run hatch build -t zipped-directory
   '';
   scripts.install-plugin.exec = ''
     find "${config.devenv.root}/plugins/$1/dist" -name '*.zip' -type f | xargs calibre-customize --add-plugin
@@ -54,14 +54,12 @@
     package 'hardcover' && install-plugin 'hardcover'
     calibre-debug -r Hardcover -- "$@"
   '';
-  scripts.hatch.exec = ''
-    uvx hatch -- "$@"
-  '';
   #
-  # enterShell = ''
-  #   hello
-  #   git --version
-  # '';
+  enterShell = ''
+    uv venv --allow-existing
+    source "${config.devenv.dotfile}/state/venv/bin/activate"
+    uv sync --all-packages
+  '';
 
   # https://devenv.sh/tasks/
   # tasks = {

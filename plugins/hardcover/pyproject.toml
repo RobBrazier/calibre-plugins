@@ -4,12 +4,12 @@ build-backend = "hatchling.build"
 
 [project]
 name = "hardcover"
-dynamic = ["version", "urls"]
+dynamic = ["version"]
 description = "Add your description here"
 readme = "README.md"
 authors = [{ name = "Rob Brazier", email = "git+github@brzr.co" }]
 requires-python = ">=3.9"
-dependencies = []
+dependencies = ["dacite>=1.8.1"]
 
 [project.scripts]
 hardcover = "hardcover:main"
@@ -21,8 +21,8 @@ fallback-version = "0.0.1"
 [tool.hatch.build.hooks.vcs]
 version-file = "src/_version.py"
 
-[tool.hatch.build.hooks.custom]
-path = "../../hooks/calibre_build.py"
+[tool.hatch.build.targets.zipped-directory.hooks.custom]
+path = "../../hooks/hatch-calibre-bundle/src/hatch_calibre_bundle/plugin.py"
 include-deps = ["common"]
 
 [tool.hatch.build.targets.zipped-directory]

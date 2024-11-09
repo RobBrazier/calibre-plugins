@@ -1,4 +1,6 @@
 from multiprocessing.pool import ThreadPool
+import os
+import sys
 from typing import Tuple, List
 from calibre.ebooks.metadata.sources.base import Source
 from calibre.ebooks.metadata.book.base import Metadata
@@ -11,9 +13,7 @@ import re
 from queue import Queue
 from functools import partial
 
-from . import config
 from ._version import __version_tuple__
-from .config import ConfigWidget
 from .models import Book
 
 
@@ -35,22 +35,29 @@ class Hardcover(Source):
 
     def __init__(self, *args, **kwargs):
         Source.__init__(self, *args, **kwargs)
+        sys.path.append(os.path.join(os.path.dirname(__file__), "deps"))
         from common.graphql import GraphQLClient
+        from common.api_config import init_prefs
+
+        self.config = init_prefs(self.ID_NAME)
 
         self.client = GraphQLClient(self.API_URL)
         self._qlock = threading.RLock()
 
     def is_configured(self):
-        return bool(config.get_option(config.API_KEY))
+        from common.api_config import get_option, API_KEY
+
+        return bool(get_option(self.prefs, API_KEY))
 
     def config_widget(self):
-        return ConfigWidget()
+        from common.api_config import APIConfigWidget
 
-    def save_settings(self, config_widget):
-        config_widget.commit()
+        return APIConfigWidget(self.prefs)
 
     def _execute(self, query, variables=None):
-        self.client.set_token(config.get_option(config.API_KEY))
+        from common.api_config import get_option, API_KEY
+
+        self.client.set_token(get_option(self.prefs, API_KEY))
         return self.client.execute(query, variables)
 
     def get_book_url(self, identifiers):
@@ -61,6 +68,7 @@ class Hardcover(Source):
                 hardcover_id,
                 f"https://hardcover.app/books/{hardcover_id}",
             )
+        return None
 
     def cli_main(self, args):
         def option_parser():
@@ -101,16 +109,16 @@ class Hardcover(Source):
             log, result_queue, False, title=title, authors=authors, identifiers=ids
         )
         ranking = self.identify_results_keygen(title, authors, ids)
-        for result in sorted(result_queue.queue, key=ranking):
-            self._print_result(result, ranking)
+        for rank, result in enumerate(sorted(result_queue.queue, key=ranking), start=1):
+            self._print_result(result, rank)
 
     def _print_result(self, result, ranking):
         if result.pubdate:
             pubdate = str(result.pubdate.date())
         else:
             pubdate = "Unknown"
-        result_text = "(%s) - %s: %s [%s]" % (
-            ranking(result),
+        result_text = "(%d) - %s: %s [%s]" % (
+            ranking,
             result.identifiers[self.ID_NAME],
             result.title,
             pubdate,
@@ -163,8 +171,8 @@ class Hardcover(Source):
                 similarity = self.levenshtein_distance(title, book.title)
                 candidate_titles.append((similarity, book))
             candidate_titles = sorted(candidate_titles, key=lambda x: x[0])
-            if len(candidate_titles) > 10:
-                candidate_titles = candidate_titles[:10]
+            if len(candidate_titles) > 20:
+                candidate_titles = candidate_titles[:20]
             candidate_books = [book[1] for book in candidate_titles]
 
             # Get closest books by Author
@@ -175,8 +183,8 @@ class Hardcover(Source):
                     similarity = self.similar_authors(authors, book_authors)
                     candidate_authors.append((similarity, book))
                 candidate_authors = sorted(candidate_authors, key=lambda x: x[0])
-                if len(candidate_authors) > 5:
-                    candidate_authors = candidate_authors[:5]
+                if len(candidate_authors) > 10:
+                    candidate_authors = candidate_authors[:10]
 
                 candidate_books = [book[1] for book in candidate_authors]
 
@@ -218,7 +226,8 @@ class Hardcover(Source):
         meta = Metadata(title, authors)
         if len(book.book_series) > 0:
             meta.series = book.book_series[0].series.name
-            meta.series_index = str(book.book_series[0].position)
+            if index := book.book_series[0].position:
+                meta.series_index = str(index)
         meta.set_identifier("hardcover", str(book.slug))
         if book.description:
             meta.comments = book.description
