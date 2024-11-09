@@ -20,7 +20,7 @@
   # https://devenv.sh/languages/
   languages.python = {
     enable = true;
-    # package = pkgs.python39;
+    package = pkgs.python39;
     uv.enable = true;
     uv.sync.enable = true;
     venv.enable = true;
