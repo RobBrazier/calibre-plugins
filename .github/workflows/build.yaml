@@ -5,9 +5,31 @@ on:
   push:
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Install the project
+        run: uv sync --all-packages --dev
+
+      - name: Run Unit Tests
+        run: uv run pytest
+
+  build:
+    runs-on: ubuntu-latest
+    needs:
+      - test
     steps:
       - uses: actions/checkout@v4
 
