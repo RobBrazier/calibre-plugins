@@ -34,7 +34,14 @@
 
   # https://devenv.sh/scripts/
   scripts.setup-calibre.exec = ''
-    bash ${config.devenv.root}/scripts/init_library.sh
+    books="1513.epub.noimages"
+
+    # download books - separated by newline
+    echo "$books" | xargs -I {} wget -P "$CALIBRE_TEMP_DIR" --no-clobber --content-disposition "https://www.gutenberg.org/ebooks/{}"
+
+    # import books
+    find "$CALIBRE_TEMP_DIR" -name "*.epub" | xargs -I {} sh -c 'calibredb add --with-library "$CALIBRE_LIBRARY" "{}" && rm "{}"'
+
     calibre --with-library $CALIBRE_LIBRARY
   '';
   scripts.package.exec = ''
