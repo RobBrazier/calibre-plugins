@@ -27,7 +27,9 @@ class CalibreBuildHook(BuildHookInterface):
     def finalize(
         self, version: str, build_data: dict[str, Any], artifact_path: str
     ) -> None:
-        shutil.rmtree(os.path.join(self.root, "src", "deps"))
+        deps_path = os.path.join(self.root, "src", "deps")
+        if os.path.exists(deps_path):
+            shutil.rmtree(deps_path)
 
     def __get_dep_paths(self) -> Dict[str, str]:
         result = {}
