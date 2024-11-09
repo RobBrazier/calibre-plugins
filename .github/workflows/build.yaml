@@ -20,7 +20,7 @@ jobs:
       - name: Set up Python
         run: uv python install
 
-      - name: set pythonpath
+      - name: Set PYTHONPATH
         run: |
           echo "PYTHONPATH=src" >> $GITHUB_ENV
 
@@ -46,7 +46,7 @@ jobs:
       - name: Set up Python
         run: uv python install
 
-      - name: set pythonpath
+      - name: Set PYTHONPATH
         run: |
           echo "PYTHONPATH=src" >> $GITHUB_ENV
 
