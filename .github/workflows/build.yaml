@@ -26,3 +26,10 @@ jobs:
             cd $plugin
             uvx hatch build -t zipped-directory
           done
+
+      - name: Upload Plugin Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: plugin-zip
+          path: |
+            plugins/**/dist/*.zip
