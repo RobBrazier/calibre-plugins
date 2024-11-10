@@ -165,12 +165,13 @@ class Hardcover(Source):
         # Exact match with a Hardcover Edition ID
         if hardcover_edition:
             books = self.get_book_by_edition(hardcover_edition, timeout)
+            print(books)
             if len(books) > 0:
                 candidate_books = books
                 found_exact = True
 
         # Exact match with a Hardcover ID
-        if hardcover_id:
+        if hardcover_id and not found_exact:
             books = self.get_book_by_slug(hardcover_id, timeout)
             if len(books) > 0:
                 candidate_books = books
@@ -331,6 +332,7 @@ class Hardcover(Source):
             if series.position != 0:
                 meta.series_index = series.position  # pyright: ignore
         meta.set_identifier("hardcover", book.slug)
+        print(matching_edition.id)
         meta.set_identifier("hardcover-edition", str(matching_edition.id))
         if isbn := matching_edition.isbn_13:
             meta.set_identifier("isbn", isbn)

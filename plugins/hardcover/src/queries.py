@@ -16,7 +16,10 @@ query FindBookByName($title: String) {
         tag
       }
     }
-    editions(order_by: {users_count: desc_nulls_last}) {
+    editions(
+      where: {edition_format: {_neq: "Audiobook"}}
+      order_by: {users_count: desc_nulls_last}
+    ) {
       id
       isbn_13
       title
@@ -59,7 +62,10 @@ query FindBookByNameAndAuthors($title: String, $authors: [String!]) {
         tag
       }
     }
-    editions(order_by: {users_count: desc_nulls_last}) {
+    editions(
+      where: {edition_format: {_neq: "Audiobook"}}
+      order_by: {users_count: desc_nulls_last}
+    ) {
       id
       isbn_13
       title
@@ -102,7 +108,10 @@ query FindBookBySlug($slug: String) {
         tag
       }
     }
-    editions(order_by: {users_count: desc_nulls_last}) {
+    editions(
+      where: {edition_format: {_neq: "Audiobook"}}
+      order_by: {users_count: desc_nulls_last}
+    ) {
       id
       isbn_13
       title
@@ -130,7 +139,7 @@ query FindBookBySlug($slug: String) {
 FIND_BOOK_BY_ISBN_OR_ASIN = """
 query FindBookByIsbnOrAsin($isbn: String, $asin: String) {
   books(
-    where: {editions: {_or: [{isbn_13: {_eq: $isbn}}, {isbn_10: {_eq: $isbn}}, {asin: {_eq: $isbn}}, {asin: {_eq: $asin}}]}}
+    where: {editions: {_or: [{isbn_13: {_eq: $isbn}}, {isbn_10: {_eq: $isbn}}, {asin: {_eq: $isbn}}, {asin: {_eq: $asin}}], edition_format: {_neq: "Audiobook"}}}
     order_by: {users_read_count: desc_nulls_last}
   ) {
     title
@@ -146,7 +155,7 @@ query FindBookByIsbnOrAsin($isbn: String, $asin: String) {
       }
     }
     editions(
-      where: {_or: [{isbn_13: {_eq: $isbn}}, {isbn_10: {_eq: $isbn}}, {asin: {_eq: $isbn}}, {asin: {_eq: $asin}}]}
+      where: {_or: [{isbn_13: {_eq: $isbn}}, {isbn_10: {_eq: $isbn}}, {asin: {_eq: $isbn}}, {asin: {_eq: $asin}}], edition_format: {_neq: "Audiobook"}}
       order_by: {users_count: desc_nulls_last}
     ) {
       id
@@ -192,7 +201,7 @@ query FindBookByEdition($edition: Int) {
       }
     }
     editions(
-      where: {id: {_eq: $edition}}
+      where: {id: {_eq: $edition}, edition_format: {_neq: "Audiobook"}}
       order_by: {users_count: desc_nulls_last}
     ) {
       id
