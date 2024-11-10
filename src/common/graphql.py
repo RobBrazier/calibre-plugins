@@ -13,7 +13,7 @@ class GraphQLClient:
     def set_token(self, token: str):
         self.token = token
 
-    def execute(self, query: str, variables: dict | None = None):
+    def execute(self, query: str, variables: dict | None = None, timeout=30):
         data = {"query": query, "variables": variables}
         headers = {"Accept": "application/json", "Content-Type": "application/json"}
 
@@ -30,7 +30,7 @@ class GraphQLClient:
         req = request.Request(self.endpoint, body, headers)
 
         try:
-            res = request.urlopen(req)
+            res = request.urlopen(req, timeout=timeout)
             body = res.read()
             json_result = json.loads(body.decode("utf-8"))
             if "data" in json_result:

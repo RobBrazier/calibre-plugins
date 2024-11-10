@@ -36,13 +36,18 @@ def get_project_dependencies(root: str) -> List[str]:
     return normalise_dependencies(pyproject["project"]["dependencies"])
 
 
+def get_project_name(root: str) -> List[str]:
+    pyproject_toml = Path(root) / "pyproject.toml"
+    pyproject = tomllib.loads(pyproject_toml.read_text(encoding="utf-8"))
+    return pyproject["project"]["name"]
+
+
 class CalibreBuildHook(BuildHookInterface):
     PLUGIN_NAME = "calibre"
 
     def initialize(self, version: str, build_data: dict[str, Any]) -> None:
-        source_path = self.root
-
-        deps_path = os.path.join(source_path, "src", "deps")
+        root_path = self.get_root_path()
+        deps_path = os.path.join(root_path, "deps")
 
         included_deps = self.__get_dep_paths()
         for name, path in included_deps.items():
@@ -51,12 +56,18 @@ class CalibreBuildHook(BuildHookInterface):
             os.makedirs(dep_path, exist_ok=True)
             shutil.copytree(path, dep_path, dirs_exist_ok=True)
 
+        open(os.path.join(root_path, self.get_import_filename()), "a").close()
+
     def finalize(
         self, version: str, build_data: dict[str, Any], artifact_path: str
     ) -> None:
-        deps_path = os.path.join(self.root, "src", "deps")
+        root_path = self.get_root_path()
+        deps_path = os.path.join(root_path, "deps")
         if os.path.exists(deps_path):
             shutil.rmtree(deps_path)
+        import_file = Path(os.path.join(root_path, self.get_import_filename()))
+        if import_file.exists():
+            import_file.unlink(True)
 
     @staticmethod
     def __find_module(name):
@@ -76,6 +87,10 @@ class CalibreBuildHook(BuildHookInterface):
             logger.exception("Unable to find module {module}")
         # import from VIRTUAL_ENV
 
+    def get_import_filename(self) -> str:
+        name = self.get_project_name()
+        return f"plugin-import-name-{name}.txt"
+
     def get_dependencies(self) -> List[str]:
         deps = []
         project_deps = get_project_dependencies(self.root)
@@ -84,6 +99,15 @@ class CalibreBuildHook(BuildHookInterface):
         deps.extend(included_deps)
 
         return deps
+
+    def get_project_name(self) -> str:
+        project_name = get_project_name(self.root)
+        project_name = self.config.get("import-name", project_name)
+        return project_name
+
+    def get_root_path(self) -> str:
+        root_path = self.config.get("root-path", "src")
+        return os.path.join(self.root, root_path)
 
     def __get_dep_paths(self) -> Dict[str, str]:
         result = {}

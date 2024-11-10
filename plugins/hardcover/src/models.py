@@ -58,21 +58,39 @@ class Image:
 
 
 @dataclass
-class Edition:
-    asin: str
-    isbn_13: str
-    isbn_10: str
-    title: str
-    publisher: Publisher
+class Language:
+    code3: str
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
         return cls(
-            asin=safe_default(data, "asin", ""),
+            code3=safe_default(data, "code3", ""),
+        )
+
+
+@dataclass
+class Edition:
+    isbn_13: str
+    title: str
+    contributions: List[Contribution]
+    image: Image
+    language: Language
+    publisher: Publisher
+    release_date: str
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]):
+        return cls(
             isbn_13=safe_default(data, "isbn_13", ""),
-            isbn_10=safe_default(data, "isbn_10", ""),
             title=safe_default(data, "title", ""),
+            contributions=[
+                Contribution.from_dict(c)
+                for c in safe_default(data, "contributions", [])
+            ],
+            image=Image.from_dict(safe_default(data, "image", {})),
+            language=Language.from_dict(safe_default(data, "language", {})),
             publisher=Publisher.from_dict(safe_default(data, "publisher", {})),
+            release_date=safe_default(data, "release_date", ""),
         )
 
 
@@ -105,11 +123,8 @@ class Book:
     title: str
     slug: str
     users_read_count: int
-    contributions: List[Contribution]
-    release_date: str
     book_series: List[BookSeries]
     taggings: List[Tagging]
-    image: Image
     editions: List[Edition]
     description: str
 
@@ -119,16 +134,10 @@ class Book:
             title=safe_default(data, "title", ""),
             slug=safe_default(data, "slug", ""),
             users_read_count=safe_default(data, "users_read_count", 0),
-            contributions=[
-                Contribution.from_dict(c)
-                for c in safe_default(data, "contributions", [])
-            ],
-            release_date=safe_default(data, "release_date", ""),
             book_series=[
                 BookSeries.from_dict(t) for t in safe_default(data, "book_series", [])
             ],
             taggings=[Tagging.from_dict(t) for t in safe_default(data, "taggings", [])],
-            image=Image.from_dict(safe_default(data, "image", {})),
             editions=[Edition.from_dict(e) for e in safe_default(data, "editions", [])],
             description=safe_default(data, "description", ""),
         )

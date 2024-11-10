@@ -1,3 +1,4 @@
+# pyright: reportIncompatibleMethodOverride=false
 from multiprocessing.pool import ThreadPool
 import os
 import sys
@@ -10,11 +11,12 @@ from calibre import setup_cli_handlers
 import logging
 import threading
 import re
-from queue import Queue
+from queue import Queue, Empty
 from functools import partial
 
+from . import queries
 from ._version import __version_tuple__
-from .models import Book
+from .models import Book, Edition
 
 
 class Hardcover(Source):
@@ -54,11 +56,19 @@ class Hardcover(Source):
 
         return APIConfigWidget(self.prefs)
 
-    def _execute(self, query, variables=None):
+    def _execute(self, query, variables=None, timeout=30):
         from common.api_config import get_option, API_KEY
 
-        self.client.set_token(get_option(self.prefs, API_KEY))
-        return self.client.execute(query, variables)
+        if not self.client.token:
+            self.client.set_token(get_option(self.prefs, API_KEY))
+
+        books = self.client.execute(query, variables, timeout)
+        result: List[Book] = []
+        if "books" not in books:
+            return result
+        for entry in books.get("books", []):
+            result.append(Book.from_dict(entry))
+        return result
 
     def get_book_url(self, identifiers):
         hardcover_id = identifiers.get(self.ID_NAME, None)
@@ -136,34 +146,41 @@ class Hardcover(Source):
         timeout=30,
     ):
         hardcover_id = identifiers.get(self.ID_NAME, None)
-        isbn = identifiers.get("isbn", None)
+        isbn = identifiers.get("isbn", "")
+        asin = identifiers.get("mobi-asin", "")
+        shutdown = threading.Event()
 
+        found_exact = False
+        candidate_books = []
+
+        # Exact match with a Hardcover ID
         if hardcover_id:
-            books = self.get_book_by_slug(hardcover_id)
+            books = self.get_book_by_slug(hardcover_id, timeout)
             if len(books) > 0:
-                self.enqueue(log, result_queue, threading.Event(), books[0])
-                return None
-        if title:
-            books = self.get_book_by_name(title)
+                candidate_books = books
+                found_exact = True
+
+        # Exact match with an ISBN or ASIN
+        if (isbn or asin) and not found_exact:
+            books = self.get_book_by_isbn_asin(isbn, asin, timeout)
+            if len(books) > 0:
+                candidate_books = books
+                found_exact = True
+
+        # Search for an Exact match by Fuzzy Title and Authors
+        # NOTE: not sure about this one - it could mean that there are no meaningful results returned
+        #       but should continue if nothing is returned
+        if title and authors and not found_exact:
+            books = self.get_book_by_name_authors(title, authors, timeout)
+            if len(books) > 0:
+                candidate_books = books
+                found_exact = True
+
+        # Fuzzy Search by Title
+        if title and not found_exact:
+            books = self.get_book_by_name(title, timeout)
 
             candidate_books = books
-
-            isbn_matching_books = []
-            # Check if a book matches the given ISBN
-            for book in books:
-                if len(book.editions) == 0:
-                    continue
-                has_match = False
-                for edition in book.editions:
-                    if isbn == edition.isbn_13 or isbn == edition.isbn_10:
-                        isbn_matching_books.append(book)
-                        has_match = True
-                        break
-                if has_match:
-                    break
-
-            if len(isbn_matching_books) > 0:
-                candidate_books = isbn_matching_books
 
             # Get closest books by Title
             candidate_titles: List[Tuple[int, Book]] = []
@@ -176,26 +193,74 @@ class Hardcover(Source):
             candidate_books = [book[1] for book in candidate_titles]
 
             # Get closest books by Author
-            candidate_authors: List[Tuple[int, Book]] = []
-            if authors:
-                for book in candidate_books:
-                    book_authors = [c.author.name for c in book.contributions]
-                    similarity = self.similar_authors(authors, book_authors)
-                    candidate_authors.append((similarity, book))
-                candidate_authors = sorted(candidate_authors, key=lambda x: x[0])
-                if len(candidate_authors) > 10:
-                    candidate_authors = candidate_authors[:10]
+            # candidate_authors: List[Tuple[int, Book]] = []
+            # if authors:
+            #     for book in candidate_books:
+            #         book_authors = [c.author.name for c in book.contributions]
+            #         similarity = self.similar_authors(authors, book_authors)
+            #         candidate_authors.append((similarity, book))
+            #     candidate_authors = sorted(candidate_authors, key=lambda x: x[0])
+            #     if len(candidate_authors) > 10:
+            #         candidate_authors = candidate_authors[:10]
+            #
+            #     candidate_books = [book[1] for book in candidate_authors]
 
-                candidate_books = [book[1] for book in candidate_authors]
-
-            pool = ThreadPool(16)
-            shutdown = threading.Event()
-            enqueue = partial(self.enqueue, log, result_queue, shutdown)
-            try:
-                pool.map(enqueue, [book for book in candidate_books])
-            finally:
-                shutdown.set()
+        pool = ThreadPool(8)
+        enqueue = partial(self.enqueue, log, result_queue, shutdown)
+        try:
+            pool.map(enqueue, [book for book in candidate_books])
+        finally:
+            shutdown.set()
         return None
+
+    def download_cover(
+        self,
+        log,
+        result_queue,
+        abort,
+        title=None,
+        authors=None,
+        identifiers={},
+        timeout=30,
+        get_best_cover=False,
+    ):
+        cached_url = self.get_cached_cover_url(identifiers)
+        if cached_url is None:
+            log.info("No cached cover found, running identify")
+            rq = Queue()
+            self.identify(
+                log, rq, abort, title=title, authors=authors, identifiers=identifiers
+            )
+            if abort.is_set():
+                return
+            results = []
+            while True:
+                try:
+                    results.append(rq.get_nowait())
+                except Empty:
+                    break
+            results.sort(
+                key=self.identify_results_keygen(
+                    title=title, authors=authors, identifiers=identifiers
+                )
+            )
+            for mi in results:
+                cached_url = self.get_cached_cover_url(mi.identifiers)
+                if cached_url is not None:
+                    break
+        if cached_url is None:
+            log.info("No cover found")
+            return
+
+        if abort.is_set():
+            return
+
+        log("Downloading cover from: ", cached_url)
+        try:
+            cdata = self.browser.open_novisit(cached_url, timeout=timeout).read()
+            result_queue.put((self, cdata))
+        except Exception:
+            log.exception("Failed to download cover from: ", cached_url)
 
     @staticmethod
     def levenshtein_distance(s1, s2):
@@ -220,28 +285,46 @@ class Hardcover(Source):
         target = ",".join(sorted(book_author))
         return self.levenshtein_distance(source, target)
 
+    def find_matching_edition(self, editions: List[Edition]):
+        if len(editions) > 0:
+            return editions[0]
+
     def build_metadata(self, log, book: Book):
-        title = f"{book.title}"
-        authors = [c.author.name for c in book.contributions]
+        editions = book.editions
+        matching_edition = self.find_matching_edition(editions)
+        if not matching_edition:
+            return None
+        title = matching_edition.title
+        authors = [c.author.name for c in matching_edition.contributions]
         meta = Metadata(title, authors)
-        if len(book.book_series) > 0:
-            meta.series = book.book_series[0].series.name
-            if index := book.book_series[0].position:
-                meta.series_index = str(index)
-        meta.set_identifier("hardcover", str(book.slug))
+        book_series = book.book_series
+        if len(book_series) > 0:
+            series = book_series[0]
+            meta.series = series.series.name
+            if series.position != 0:
+                meta.series_index = series.position  # pyright: ignore
+        meta.set_identifier("hardcover", book.slug)
+        if isbn := matching_edition.isbn_13:
+            meta.set_identifier("isbn", isbn)
+            self.cache_isbn_to_identifier(isbn, book.slug)
         if book.description:
             meta.comments = book.description
-        if book.image:
+        if matching_edition.image and matching_edition.image.url:
             meta.has_cover = True
+            self.cache_identifier_to_cover_url(book.slug, matching_edition.image.url)
         else:
             meta.has_cover = False
-        # if book.publisher:
-        #     meta.publisher = book.publisher.name
-        if book.release_date:
+        if matching_edition.publisher:
+            meta.publisher = matching_edition.publisher.name
+        if language := matching_edition.language.code3:
+            meta.languages = [language]
+        if matching_edition.release_date:
             try:
                 from datetime import datetime
 
-                meta.pubdate = datetime.strptime(book.release_date, "%Y-%m-%d")
+                meta.pubdate = datetime.strptime(
+                    matching_edition.release_date, "%Y-%m-%d"
+                )
             except ValueError:
                 log.warn("Unable to parse release date")
         if book.taggings:
@@ -251,104 +334,29 @@ class Hardcover(Source):
     def enqueue(self, log, result_queue, shutdown, book: Book):
         if shutdown.is_set():
             raise threading.ThreadError
-        slug = book.slug
         metadata = self.build_metadata(log, book)
         if metadata:
             self.clean_downloaded_metadata(metadata)
             with self._qlock:
                 result_queue.put(metadata)
-        log.info(f"Adding book slug '{slug}' to queue")
+        log.info(f"Adding book slug '{book.slug}' to queue")
 
-    def get_book_by_slug(self, slug) -> list[Book]:
-        query = """
-            query FindBookBySlug($slug: String) {
-              books(
-                where: {slug: {_eq: $slug}}
-                order_by: {users_read_count: desc_nulls_last}
-              ) {
-                title
-                slug
-                users_read_count
-                contributions {
-                  author {
-                    name
-                  }
-                }
-                release_date
-                book_series {
-                  series {
-                    name
-                  }
-                }
-                taggings {
-                  tag {
-                    tag
-                  }
-                }
-                image {
-                  url
-                }
-                editions {
-                  asin
-                  isbn_13
-                  isbn_10
-                  title
-                }
-                description
-              }
-            }
-            """
+    def get_book_by_isbn_asin(self, isbn, asin, timeout=30) -> list[Book]:
+        query = queries.FIND_BOOK_BY_ISBN_OR_ASIN
+        vars = {"isbn": isbn, "asin": asin}
+        return self._execute(query, vars, timeout)
+
+    def get_book_by_slug(self, slug, timeout=30) -> list[Book]:
+        query = queries.FIND_BOOK_BY_SLUG
         vars = {"slug": slug}
-        books = self._execute(query, vars)
-        result = []
-        if "books" in books:
-            for entry in books.get("books", []):
-                result.append(Book.from_dict(entry))
-        return result
+        return self._execute(query, vars, timeout)
 
-    def get_book_by_name(self, name) -> list[Book]:
-        query = """
-            query FindBookByName($title: String) {
-              books(
-                where: {title: {_regex: $title}}
-                order_by: {users_read_count: desc_nulls_last}
-              ) {
-                title
-                slug
-                users_read_count
-                contributions {
-                  author {
-                    name
-                  }
-                }
-                release_date
-                book_series {
-                  series {
-                    name
-                  }
-                }
-                taggings {
-                  tag {
-                    tag
-                  }
-                }
-                image {
-                  url
-                }
-                editions {
-                  asin
-                  isbn_13
-                  isbn_10
-                  title
-                }
-                description
-              }
-            }
-            """
+    def get_book_by_name(self, name, timeout=30) -> list[Book]:
+        query = queries.FIND_BOOK_BY_NAME
         vars = {"title": name}
-        books = self._execute(query, vars)
-        result = []
-        if "books" in books:
-            for entry in books.get("books", []):
-                result.append(Book.from_dict(entry))
-        return result
+        return self._execute(query, vars, timeout)
+
+    def get_book_by_name_authors(self, name, authors, timeout=30) -> list[Book]:
+        query = queries.FIND_BOOK_BY_NAME_AND_AUTHORS
+        vars = {"title": name, "authors": authors}
+        return self._execute(query, vars, timeout)
