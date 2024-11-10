@@ -21,6 +21,9 @@ path = "src/__version__.py"
 path = "../../hooks/hatch-calibre-bundle/src/hatch_calibre_bundle/plugin.py"
 include-deps = ["common"]
 
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
 [tool.hatch.build.targets.zipped-directory]
 install-name = ""
 sources = ["src"]
