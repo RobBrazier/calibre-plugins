@@ -124,7 +124,6 @@ class BookSeries:
 class Book:
     title: str
     slug: str
-    users_read_count: int
     book_series: List[BookSeries]
     taggings: List[Tagging]
     editions: List[Edition]
@@ -135,7 +134,6 @@ class Book:
         return cls(
             title=safe_default(data, "title", ""),
             slug=safe_default(data, "slug", ""),
-            users_read_count=safe_default(data, "users_read_count", 0),
             book_series=[
                 BookSeries.from_dict(t) for t in safe_default(data, "book_series", [])
             ],

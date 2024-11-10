@@ -337,7 +337,7 @@ class Hardcover(Source):
             self.cache_isbn_to_identifier(isbn, book.slug)
         if book.description:
             meta.comments = book.description
-        if matching_edition.image and matching_edition.image.url:
+        if matching_edition.image.url:
             meta.has_cover = True
             self.cache_identifier_to_cover_url(book.slug, matching_edition.image.url)
         else:

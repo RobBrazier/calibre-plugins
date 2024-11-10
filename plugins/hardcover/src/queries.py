@@ -6,7 +6,6 @@ query FindBookByName($title: String) {
   ) {
     title
     slug
-    users_read_count
     book_series {
       series {
         name
@@ -50,7 +49,6 @@ query FindBookByNameAndAuthors($title: String, $authors: [String!]) {
   ) {
     title
     slug
-    users_read_count
     book_series {
       series {
         name
@@ -94,7 +92,6 @@ query FindBookBySlug($slug: String) {
   ) {
     title
     slug
-    users_read_count
     book_series {
       series {
         name
@@ -138,7 +135,6 @@ query FindBookByIsbnOrAsin($isbn: String, $asin: String) {
   ) {
     title
     slug
-    users_read_count
     book_series {
       series {
         name
@@ -185,7 +181,6 @@ query FindBookByEdition($edition: Int) {
   ) {
     title
     slug
-    users_read_count
     book_series {
       series {
         name
