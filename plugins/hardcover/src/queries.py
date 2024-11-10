@@ -18,6 +18,7 @@ query FindBookByName($title: String) {
       }
     }
     editions(order_by: {users_count: desc_nulls_last}) {
+      id
       isbn_13
       title
       contributions {
@@ -61,6 +62,7 @@ query FindBookByNameAndAuthors($title: String, $authors: [String!]) {
       }
     }
     editions(order_by: {users_count: desc_nulls_last}) {
+      id
       isbn_13
       title
       contributions {
@@ -104,6 +106,7 @@ query FindBookBySlug($slug: String) {
       }
     }
     editions(order_by: {users_count: desc_nulls_last}) {
+      id
       isbn_13
       title
       contributions {
@@ -150,6 +153,54 @@ query FindBookByIsbnOrAsin($isbn: String, $asin: String) {
       where: {_or: [{isbn_13: {_eq: $isbn}}, {isbn_10: {_eq: $isbn}}, {asin: {_eq: $isbn}}, {asin: {_eq: $asin}}]}
       order_by: {users_count: desc_nulls_last}
     ) {
+      id
+      isbn_13
+      title
+      contributions {
+        author {
+          name
+        }
+      }
+      image {
+        url
+      }
+      language {
+        code3
+      }
+      publisher {
+        name
+      }
+      release_date
+    }
+    description
+  }
+}
+"""
+
+FIND_BOOK_BY_EDITION = """
+query FindBookByEdition($edition: Int) {
+  books(
+    where: {editions: {id: {_eq: $edition}}}
+    order_by: {users_read_count: desc_nulls_last}
+  ) {
+    title
+    slug
+    users_read_count
+    book_series {
+      series {
+        name
+      }
+    }
+    taggings(where: {spoiler: {_eq: false}}, limit: 10, distinct_on: tag_id) {
+      tag {
+        tag
+      }
+    }
+    editions(
+      where: {id: {_eq: $edition}}
+      order_by: {users_count: desc_nulls_last}
+    ) {
+      id
       isbn_13
       title
       contributions {

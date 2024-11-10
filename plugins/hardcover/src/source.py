@@ -15,7 +15,7 @@ from queue import Queue, Empty
 from functools import partial
 
 from . import queries
-from ._version import __version_tuple__
+from .__version__ import __version_tuple__
 from .models import Book, Edition
 
 
@@ -30,7 +30,15 @@ class Hardcover(Source):
 
     capabilities = frozenset(["identify", "cover"])
     touched_fields = frozenset(
-        ["title", "authors", f"identifier:{ID_NAME}", "pubdate", "series", "tags"]
+        [
+            "title",
+            "authors",
+            f"identifier:{ID_NAME}",
+            f"identifier:{ID_NAME}-edition",
+            "pubdate",
+            "series",
+            "tags",
+        ]
     )
 
     API_URL = "https://api.hardcover.app/v1/graphql"
@@ -146,12 +154,20 @@ class Hardcover(Source):
         timeout=30,
     ):
         hardcover_id = identifiers.get(self.ID_NAME, None)
+        hardcover_edition = identifiers.get(f"{self.ID_NAME}-edition", None)
         isbn = identifiers.get("isbn", "")
         asin = identifiers.get("mobi-asin", "")
         shutdown = threading.Event()
 
         found_exact = False
         candidate_books = []
+
+        # Exact match with a Hardcover Edition ID
+        if hardcover_edition:
+            books = self.get_book_by_edition(hardcover_edition, timeout)
+            if len(books) > 0:
+                candidate_books = books
+                found_exact = True
 
         # Exact match with a Hardcover ID
         if hardcover_id:
@@ -212,6 +228,17 @@ class Hardcover(Source):
         finally:
             shutdown.set()
         return None
+
+    def get_cached_cover_url(self, identifiers):
+        url = None
+        hardcover_id = identifiers.get(self.ID_NAME, None)
+        if hardcover_id is None:
+            isbn = identifiers.get("isbn", None)
+            if isbn is not None:
+                hardcover_id = self.cached_isbn_to_identifier(isbn)
+        if hardcover_id is not None:
+            url = self.cached_identifier_to_cover_url(hardcover_id)
+        return url
 
     def download_cover(
         self,
@@ -304,6 +331,7 @@ class Hardcover(Source):
             if series.position != 0:
                 meta.series_index = series.position  # pyright: ignore
         meta.set_identifier("hardcover", book.slug)
+        meta.set_identifier("hardcover-edition", str(matching_edition.id))
         if isbn := matching_edition.isbn_13:
             meta.set_identifier("isbn", isbn)
             self.cache_isbn_to_identifier(isbn, book.slug)
@@ -349,6 +377,11 @@ class Hardcover(Source):
     def get_book_by_slug(self, slug, timeout=30) -> list[Book]:
         query = queries.FIND_BOOK_BY_SLUG
         vars = {"slug": slug}
+        return self._execute(query, vars, timeout)
+
+    def get_book_by_edition(self, edition, timeout=30) -> list[Book]:
+        query = queries.FIND_BOOK_BY_EDITION
+        vars = {"edition": edition}
         return self._execute(query, vars, timeout)
 
     def get_book_by_name(self, name, timeout=30) -> list[Book]:

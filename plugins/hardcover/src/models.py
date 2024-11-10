@@ -70,6 +70,7 @@ class Language:
 
 @dataclass
 class Edition:
+    id: int
     isbn_13: str
     title: str
     contributions: List[Contribution]
@@ -81,6 +82,7 @@ class Edition:
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
         return cls(
+            id=safe_default(data, "id", 0),
             isbn_13=safe_default(data, "isbn_13", ""),
             title=safe_default(data, "title", ""),
             contributions=[

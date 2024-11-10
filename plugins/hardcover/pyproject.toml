@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling", "hatch-vcs", "hatch-zipped-directory"]
+requires = ["hatchling", "hatch-zipped-directory"]
 build-backend = "hatchling.build"
 
 [project]
@@ -15,11 +15,7 @@ dependencies = []
 hardcover = "hardcover:main"
 
 [tool.hatch.version]
-source = "vcs"
-fallback-version = "0.0.1"
-
-[tool.hatch.build.hooks.vcs]
-version-file = "src/_version.py"
+path = "src/__version__.py"
 
 [tool.hatch.build.targets.zipped-directory.hooks.custom]
 path = "../../hooks/hatch-calibre-bundle/src/hatch_calibre_bundle/plugin.py"
