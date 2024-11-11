@@ -13,46 +13,20 @@
     pkgs.wget
     # Calibre
     pkgs.calibre
+    pkgs.go-task
   ];
 
   # https://devenv.sh/languages/
   languages.python = {
     enable = true;
-    version = "3.9";
+    package = pkgs.python39;
     uv.enable = true;
   };
-
-  scripts.setup-calibre.exec = ''
-    books="1513.epub.noimages"
-
-    # download books - separated by newline
-    echo "$books" | xargs -I {} wget -P "$CALIBRE_TEMP_DIR" --no-clobber --content-disposition "https://www.gutenberg.org/ebooks/{}"
-
-    # import books
-    find "$CALIBRE_TEMP_DIR" -name "*.epub" | xargs -I {} sh -c 'calibredb add --with-library "$CALIBRE_LIBRARY" "{}" && rm "{}"'
-
-    calibre --with-library $CALIBRE_LIBRARY
-  '';
-  scripts.package.exec = ''
-    uv --directory "${config.devenv.root}/plugins/$1" run hatch build -t zipped-directory
-  '';
-  scripts.plugin-install.exec = ''
-    export PYTHONPATH=$(echo "$PYTHONPATH" | sed -e 's!:${config.devenv.root}/src$!!')
-    find "${config.devenv.root}/plugins/$1/dist" -name '*.zip' -type f | xargs calibre-customize --add-plugin
-  '';
-  scripts.hardcover-install.exec = ''
-    package 'hardcover' && plugin-install 'hardcover'
-  '';
-  scripts.hardcover-run.exec = ''
-    hardcover-install
-    export PYTHONPATH=$(echo "$PYTHONPATH" | sed -e 's!:${config.devenv.root}/src$!!')
-    calibre-debug -r Hardcover -- "$@"
-  '';
 
   enterShell = ''
     uv venv --allow-existing
     source "${config.devenv.dotfile}/state/venv/bin/activate"
-    uv sync --all-packages
+    task install
   '';
 
   # https://devenv.sh/tasks/

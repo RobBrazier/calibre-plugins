@@ -177,8 +177,6 @@ class Hardcover(Source):
                 found_exact = True
 
         # Search for an Exact match by Fuzzy Title and Authors
-        # NOTE: not sure about this one - it could mean that there are no meaningful results returned
-        #       but should continue if nothing is returned
         if title and authors and not found_exact:
             books = self.get_book_by_name_authors(log, title, authors, timeout)
             if len(books) > 0:
@@ -344,7 +342,6 @@ class Hardcover(Source):
                 log.warn("Unable to parse release date")
         if book.taggings:
             meta.tags = [tag.tag.tag for tag in book.taggings if tag.tag.tag]
-        log.debug(meta)
         return meta
 
     def enqueue(

@@ -1,0 +1,79 @@
+version: "3"
+
+vars:
+  PLUGINS:
+    sh: "ls plugins"
+
+tasks:
+  install:
+    desc: Install dependencies
+    cmd: uv sync --all-packages
+
+  test:
+    desc: Run tests
+    cmd: uv run pytest
+
+  clean:
+    desc: Clean temporary / build files
+    cmds:
+      - find "{{ .DEVENV_ROOT }}/plugins" -name 'dist' -type d | xargs -r -- rm -r
+
+  package:
+    desc: Package all plugins
+    cmds:
+      - for: { var: PLUGINS }
+        task: "package:{{ .ITEM }}"
+
+  package:*:
+    desc: Package a single plugin
+    vars:
+      PLUGIN: "{{ index .MATCH 0 }}"
+    cmd: uv --directory "{{ .DEVENV_ROOT }}/plugins/{{ .PLUGIN }}" run hatch build -t zipped-directory
+    sources:
+      - "{{ .DEVENV_ROOT }}/plugins/{{ .PLUGIN }}/**/*.py"
+      - "{{ .DEVENV_ROOT }}/src/**/*.py"
+    generates:
+      - "{{ .DEVENV_ROOT }}/plugins/{{ .PLUGIN }}/dist/{{ .PLUGIN }}*.zip"
+
+  install:*:
+    desc: Install a single plugin
+    vars:
+      PLUGIN: "{{ index .MATCH 0 }}"
+      PLUGIN_NAME: "{{ index .MATCH 0 | title }}"
+    deps:
+      - "package:{{.PLUGIN}}"
+    cmds:
+      - for: { var: PLUGINS }
+        cmd: find "{{ .DEVENV_ROOT }}/plugins/{{ .ITEM }}/dist" -name '*.zip' -type f | xargs calibre-customize --add-plugin
+    sources:
+      - "{{ .DEVENV_ROOT }}/plugins/{{ .PLUGIN }}/dist/{{ .PLUGIN }}*.zip"
+    generates:
+      - "{{ .DEVENV_DOTFILE }}/config/calibre/plugins/{{ .PLUGIN_NAME }}.zip"
+
+  run:*:
+    desc: Run a single plugin
+    vars:
+      PLUGIN: "{{ index .MATCH 0 }}"
+      PLUGIN_NAME: "{{ index .MATCH 0 | title }}"
+    deps:
+      - "install:{{.PLUGIN}}"
+    cmd: calibre-debug -r {{ .PLUGIN_NAME }} -- {{.CLI_ARGS}}
+
+  calibre:setup:
+    desc: Setup Calibre for first use
+    vars:
+      BOOKS: ["1513.epub.noimages"]
+    cmds:
+      - for: { var: BOOKS }
+        cmd: wget -P "{{ .CALIBRE_TEMP_DIR }}" --content-disposition "https://www.gutenberg.org/ebooks/{{ .ITEM }}"
+      - defer: find "{{ .CALIBRE_TEMP_DIR }}" -name "*.epub" | xargs -r rm
+      - vars:
+          DOWNLOADED_BOOKS:
+            sh: find "{{ .CALIBRE_TEMP_DIR }}" -name "*.epub"
+        for: { var: DOWNLOADED_BOOKS }
+        cmd: calibredb add --with-library {{ .CALIBRE_LIBRARY }} {{ .ITEM }}
+      - cmd: calibre --with-library {{ .CALIBRE_LIBRARY }}
+
+  calibre:run:
+    desc: Start Calibre in Debug Mode
+    cmd: calibre-debug -g

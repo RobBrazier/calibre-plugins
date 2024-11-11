@@ -25,29 +25,30 @@ nix environment
 setup-calibre
 ```
 
-### package
+### package:plugin
 
 Packages the plugin including dependencies as a zip file
 
 ```bash
-package PLUGIN_NAME
-# e.g. package hardcover
+task package:PLUGIN
+# e.g. task package:hardcover
 ```
 
-### install-plugin
+### install:plugin
 
 Installs the plugin zip to calibre
 
 ```bash
-install-plugin PLUGIN_NAME
-# e.g. install-plugin hardcover
+task install:PLUGIN
+# e.g. task install:hardcover
 ```
 
-### run-hardcover
+### run:plugin
 
 Packages and installs the hardcover plugin, then launching the plugin in
 calibre cli mode
 
 ```bash
-run-hardcover t:BOOK_TITLE a:BOOK_AUTHORS i:BOOK_IDENTIFIERS
+task run:PLUGIN -- t:BOOK_TITLE a:BOOK_AUTHORS i:BOOK_IDENTIFIERS
+# e.g. task run:hardcover -- t:BOOK_TITLE a:BOOK_AUTHORS i:BOOK_IDENTIFIERS
 ```

@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from typing import List, Dict, Any
-from common.utils import safe_default
 
 
 @dataclass
@@ -9,6 +8,8 @@ class Author:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
+        from common.utils import safe_default
+
         return cls(name=safe_default(data, "name", ""))
 
 
@@ -18,6 +19,8 @@ class Publisher:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
+        from common.utils import safe_default
+
         return cls(name=safe_default(data, "name", ""))
 
 
@@ -27,6 +30,8 @@ class Contribution:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
+        from common.utils import safe_default
+
         return cls(author=Author.from_dict(safe_default(data, "author", {})))
 
 
@@ -36,6 +41,8 @@ class Tag:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
+        from common.utils import safe_default
+
         return cls(tag=safe_default(data, "tag", ""))
 
 
@@ -45,6 +52,8 @@ class Tagging:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
+        from common.utils import safe_default
+
         return cls(tag=Tag.from_dict(safe_default(data, "tag", {})))
 
 
@@ -54,6 +63,8 @@ class Image:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
+        from common.utils import safe_default
+
         return cls(url=safe_default(data, "url", ""))
 
 
@@ -63,6 +74,8 @@ class Language:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
+        from common.utils import safe_default
+
         return cls(
             code3=safe_default(data, "code3", ""),
         )
@@ -81,6 +94,8 @@ class Edition:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
+        from common.utils import safe_default
+
         return cls(
             id=safe_default(data, "id", 0),
             isbn_13=safe_default(data, "isbn_13", ""),
@@ -102,6 +117,8 @@ class Series:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
+        from common.utils import safe_default
+
         return cls(
             name=safe_default(data, "name", ""),
         )
@@ -114,6 +131,8 @@ class BookSeries:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
+        from common.utils import safe_default
+
         return cls(
             series=Series.from_dict(safe_default(data, "series", {})),
             position=safe_default(data, "position", 0),
@@ -131,6 +150,8 @@ class Book:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
+        from common.utils import safe_default
+
         return cls(
             title=safe_default(data, "title", ""),
             slug=safe_default(data, "slug", ""),

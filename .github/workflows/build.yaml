@@ -20,15 +20,21 @@ jobs:
       - name: Set up Python
         run: uv python install
 
+      - name: Install Task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Set PYTHONPATH
         run: |
-          echo "PYTHONPATH=src" >> $GITHUB_ENV
+          echo "PYTHONPATH=$GITHUB_ACTION_PATH/src" >> $GITHUB_ENV
 
       - name: Install the project
-        run: uv sync --all-packages --dev
+        run: task install
 
       - name: Run Unit Tests
-        run: uv run pytest
+        run: task test
 
   build:
     runs-on: ubuntu-latest
@@ -48,16 +54,19 @@ jobs:
 
       - name: Set PYTHONPATH
         run: |
-          echo "PYTHONPATH=src" >> $GITHUB_ENV
+          echo "PYTHONPATH=$GITHUB_ACTION_PATH/src" >> $GITHUB_ENV
+
+      - name: Install Task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install the project
-        run: uv sync --all-packages --dev
+        run: task install
 
       - name: Build Plugins
-        run: |
-          for plugin in $(pwd)/plugins/*; do
-            uv tool --directory "$plugin" run hatch build -t zipped-directory
-          done
+        run: task package
 
       - name: Upload Plugin Artifacts
         uses: actions/upload-artifact@v4

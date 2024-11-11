@@ -15,3 +15,4 @@ dist/
 .ruff-cache/
 .pytest-cache/
 *.egg-info/
+.task/
