@@ -30,6 +30,8 @@ utility method
 
 ```bash
 task calibre:run
+# can also be run with arguments
+# e.g. task calibre:run -- --help
 ```
 
 ### package:plugin

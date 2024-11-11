@@ -88,4 +88,4 @@ tasks:
 
   calibre:run:
     desc: Start Calibre in Debug Mode
-    cmd: calibre-debug -g
+    cmd: calibre-debug -g -- {{.CLI_ARGS}}
