@@ -38,7 +38,7 @@ tasks:
     cmds:
       - mkdir -p "{{ .ROOT_DIR }}/dist"
       - uv --directory "{{ .PLUGIN_DIR }}" run hatch build -t zipped-directory
-      - cp "{{ .PLUGIN_DIR }}/dist/{{ .PLUGIN }}*.zip" "{{ .ROOT_DIR }}/dist/"
+      # - cp "{{ .PLUGIN_DIR }}/dist/{{ .PLUGIN }}*.zip" "{{ .ROOT_DIR }}/dist/"
     sources:
       - "{{ .PLUGIN_DIR }}/**/*.py"
       - "{{ .ROOT_DIR }}/src/**/*.py"
