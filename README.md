@@ -4,25 +4,32 @@
 
 Environment setup is fully done via [devenv.sh](https://devenv.sh) and [Nix](https://nixos.org)
 
-UV virtual environment can be a bit finnnicky and I've found that I occasionally
-have to recreate if dependencies get wonky
-
-This can be done via
-
-```bash
-uv venv
-uv sync --all-packages
-```
-
 ## Development Scripts
 
-### setup-calibre
+### install
+
+Install all dependenices
+
+```bash
+task install
+```
+
+### calibre:setup
 
 Downloads free books from the gutenberg project and sets up calibre within the
 nix environment
 
 ```bash
-setup-calibre
+task calibre:setup
+```
+
+### calibre:run
+
+Launches calibre in debug mode - exactly the same as `calibre-debug -g`, just a
+utility method
+
+```bash
+task calibre:run
 ```
 
 ### package:plugin
