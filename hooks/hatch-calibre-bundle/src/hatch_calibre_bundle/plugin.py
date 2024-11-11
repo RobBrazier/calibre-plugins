@@ -5,7 +5,7 @@ import logging
 import importlib
 import importlib.util
 import inspect
-import shutil
+import glob
 import sys
 
 from pathlib import Path
@@ -50,43 +50,26 @@ class CalibreBuildHook(BuildHookInterface):
         return ["tomli>=2.0.2; python_version < '3.11'"]
 
     def initialize(self, version: str, build_data: dict[str, Any]) -> None:
-        root_path = self.get_root_path()
         relative_root = self.get_root_path(relative=True)
-        self.bundled_deps: List[str] = []
 
         self.enhance_pythonpath()
 
         included_deps = self.__get_dep_paths()
         for name, path in included_deps.items():
-            self.bundled_deps.append(name)
             self.app.display_info(f"Bundling {name} into dist")
-            dep_path = os.path.join(root_path, name)
-            build_data["artifacts"].append(f"/{relative_root}/{name}")
-            os.makedirs(dep_path, exist_ok=True)
-            shutil.copytree(path, dep_path, dirs_exist_ok=True)
-
-        open(os.path.join(root_path, self.get_import_filename()), "a").close()
-
-    def finalize(
-        self, version: str, build_data: dict[str, Any], artifact_path: str
-    ) -> None:
-        root_path = self.get_root_path()
-
-        import_file = Path(os.path.join(root_path, self.get_import_filename()))
-        if import_file.exists():
-            import_file.unlink(True)
-
-        if self.bundled_deps:
-            for name in self.bundled_deps:
-                dep_path = os.path.join(root_path, name)
-                if os.path.exists(dep_path):
-                    shutil.rmtree(dep_path)
+            # dep_path = os.path.join(root_path, name)
+            build_data["force_include"].update(
+                {path: os.path.join(relative_root, name)}
+            )
+        print(build_data)
 
     def enhance_pythonpath(self):
         if virtualenv := os.getenv("UV_PROJECT_ENVIRONMENT"):
-            sys.path.append(
-                os.path.join(virtualenv, "lib", "python3.9", "site-packages")
+            paths = glob.glob(
+                os.path.join(virtualenv, "**", "site-packages"), recursive=True
             )
+            print(paths)
+            sys.path.extend(paths)
         if root := os.getenv("DEVENV_ROOT"):
             for path in self.config.get("local-libs", []):
                 if not str(path).startswith(os.sep):
@@ -105,25 +88,13 @@ class CalibreBuildHook(BuildHookInterface):
             return module
         except Exception:
             logger.exception(f"Unable to find module {name}")
-        # import from VIRTUAL_ENV
-
-    def get_import_filename(self) -> str:
-        name = self.get_project_name()
-        return f"plugin-import-name-{name}.txt"
 
     def get_dependencies(self) -> List[str]:
         deps = []
         project_deps = get_project_dependencies(self.root)
-        included_deps = self.config.get("include-deps", [])
         deps.extend(project_deps)
-        deps.extend(included_deps)
 
         return deps
-
-    def get_project_name(self) -> str:
-        project_name = get_project_name(self.root)
-        project_name = self.config.get("import-name", project_name)
-        return project_name
 
     def get_root_path(self, relative=False) -> str:
         root_path = self.config.get("root-path", "src")

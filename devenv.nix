@@ -13,7 +13,10 @@
     pkgs.wget
     # Calibre
     pkgs.calibre
+    # Utilities
     pkgs.go-task
+    pkgs.toml-cli
+    pkgs.jq
   ];
 
   # https://devenv.sh/languages/
