@@ -23,6 +23,8 @@ tasks:
     desc: Clean temporary / build files
     cmds:
       - find "{{ .ROOT_DIR }}" \( ! -regex '.*/\..*' \) -name 'dist' -type d | xargs -r -- rm -r
+      - find "{{ .ROOT_DIR }}" -maxdepth 1 -name '.*cache' -type d | xargs -r -- rm -r
+      - find "{{ .ROOT_DIR }}" -name '*pycache*' -type d | xargs -r -- rm -r
 
   package:
     desc: Package all plugins
@@ -38,12 +40,14 @@ tasks:
     cmds:
       - mkdir -p "{{ .ROOT_DIR }}/dist"
       - uv --directory "{{ .PLUGIN_DIR }}" run hatch build -t zipped-directory
-      # - cp "{{ .PLUGIN_DIR }}/dist/{{ .PLUGIN }}*.zip" "{{ .ROOT_DIR }}/dist/"
+      - find "{{ .PLUGIN_DIR }}/dist" -type f -name '*.zip' | xargs -r -I {} cp "{}" "{{ .ROOT_DIR }}/dist/"
     sources:
+      - "{{ .PLUGIN_DIR }}/**/pyproject.toml"
       - "{{ .PLUGIN_DIR }}/**/*.py"
       - "{{ .ROOT_DIR }}/src/**/*.py"
     generates:
       - "{{ .PLUGIN_DIR }}/dist/{{ .PLUGIN }}*.zip"
+      - "{{ .ROOT_DIR }}/dist/{{ .PLUGIN }}*.zip"
 
   install:*:
     desc: Install a single plugin
