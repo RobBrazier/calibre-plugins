@@ -4,26 +4,35 @@ build-backend = "hatchling.build"
 
 [project]
 name = "hardcover"
-dynamic = ["version"]
+version = "0.0.1"
 description = "Add your description here"
 readme = "README.md"
 authors = [{ name = "Rob Brazier", email = "git+github@brzr.co" }]
 requires-python = ">=3.9"
 dependencies = []
 
+# [tool.uv.sources]
+# hatch-calibre-bundle = { workspace = true }
+
 [project.scripts]
 hardcover = "hardcover:main"
 
-[tool.hatch.version]
-path = "src/__version__.py"
+[tool.hatch.build.hooks.version]
+path = "src/hardcover/__version__.py"
+pattern = true
 
 [tool.hatch.build.targets.zipped-directory.hooks.custom]
 path = "../../hooks/hatch-calibre-bundle/src/hatch_calibre_bundle/plugin.py"
 include-deps = ["common"]
+root-path = "src/hardcover"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
 
 [tool.hatch.build.targets.zipped-directory]
 install-name = ""
-sources = ["src"]
+sources = ["src/hardcover"]
+
+[tool.hatch.envs.default]
+installer = "uv"
+dependencies = []

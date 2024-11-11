@@ -1,18 +1,16 @@
 # pyright: reportIncompatibleMethodOverride=false
-from multiprocessing.pool import ThreadPool
-import os
-import sys
 from typing import Tuple, List
-from calibre.ebooks.metadata.sources.base import Source
+from calibre.ebooks.metadata.sources.base import Option, Source
 from calibre.ebooks.metadata.book.base import Metadata
 from calibre.utils.config import OptionParser
 import calibre.utils.logging as calibre_logging
+from calibre.utils.logging import Log, ThreadSafeLog
 from calibre import setup_cli_handlers
 import logging
 import threading
 import re
 from queue import Queue, Empty
-from functools import partial
+from datetime import datetime
 
 from . import queries
 from .__version__ import __version_tuple__
@@ -27,6 +25,7 @@ class Hardcover(Source):
     minimum_calibre_version = (7, 7, 0)
 
     ID_NAME = "hardcover"
+    API_URL = "https://api.hardcover.app/v1/graphql"
 
     capabilities = frozenset(["identify", "cover"])
     touched_fields = frozenset(
@@ -40,35 +39,29 @@ class Hardcover(Source):
             "tags",
         ]
     )
-
-    API_URL = "https://api.hardcover.app/v1/graphql"
+    options = (
+        Option(
+            name="api_key",
+            type_="string",
+            default="",
+            label=_("API Key"),  # noqa: F821
+            desc=_("Hardcover API Key"),  # noqa: F821
+        ),
+    )
 
     def __init__(self, *args, **kwargs):
         Source.__init__(self, *args, **kwargs)
-        sys.path.append(os.path.join(os.path.dirname(__file__), "deps"))
-        from common.graphql import GraphQLClient
-        from common.api_config import init_prefs
+        with self:
+            from common.graphql import GraphQLClient
 
-        self.config = init_prefs(self.ID_NAME)
-
-        self.client = GraphQLClient(self.API_URL)
-        self._qlock = threading.RLock()
+            self.client = GraphQLClient(self.API_URL)
 
     def is_configured(self):
-        from common.api_config import get_option, API_KEY
-
-        return bool(get_option(self.prefs, API_KEY))
-
-    def config_widget(self):
-        from common.api_config import APIConfigWidget
-
-        return APIConfigWidget(self.prefs)
+        return bool(self.prefs["api_key"])
 
     def _execute(self, query, variables=None, timeout=30):
-        from common.api_config import get_option, API_KEY
-
         if not self.client.token:
-            self.client.set_token(get_option(self.prefs, API_KEY))
+            self.client.set_token(self.prefs["api_key"])
 
         books = self.client.execute(query, variables, timeout)
         result: List[Book] = []
@@ -96,21 +89,21 @@ class Hardcover(Source):
                 "--verbose", "-v", default=False, action="store_true", dest="verbose"
             )
             parser.add_option(
-                "--debug_api", default=False, action="store_true", dest="debug_api"
+                "--debug-api", default=False, action="store_true", dest="debug_api"
             )
             return parser
 
         opts, args = option_parser().parse_args(args)
         if opts.debug_api:
-            calibre_logging.default_log = calibre_logging.Log(
-                level=calibre_logging.DEBUG
-            )
+            calibre_logging.default_log.filter_level = calibre_logging.DEBUG
         if opts.verbose:
-            level = "DEBUG"
+            level = logging.DEBUG
+            calibre_level = calibre_logging.DEBUG
         else:
-            level = "INFO"
-        setup_cli_handlers(logging.getLogger("comicvine"), getattr(logging, level))
-        log = calibre_logging.ThreadSafeLog(level=getattr(calibre_logging, level))
+            level = logging.INFO
+            calibre_level = calibre_logging.INFO
+        setup_cli_handlers(logging.getLogger("hardcover"), level)
+        log = ThreadSafeLog(level=calibre_level)
         (title, authors, ids) = (None, [], {})
         for arg in args:
             if arg.startswith("t:"):
@@ -123,8 +116,9 @@ class Hardcover(Source):
                 ids[idtype] = identifier
 
         result_queue = Queue()
+        abort = threading.Event()
         self.identify(
-            log, result_queue, False, title=title, authors=authors, identifiers=ids
+            log, result_queue, abort, title=title, authors=authors, identifiers=ids
         )
         ranking = self.identify_results_keygen(title, authors, ids)
         for rank, result in enumerate(sorted(result_queue.queue, key=ranking), start=1):
@@ -157,29 +151,27 @@ class Hardcover(Source):
         hardcover_edition = identifiers.get(f"{self.ID_NAME}-edition", None)
         isbn = identifiers.get("isbn", "")
         asin = identifiers.get("mobi-asin", "")
-        shutdown = threading.Event()
 
         found_exact = False
         candidate_books = []
 
         # Exact match with a Hardcover Edition ID
         if hardcover_edition:
-            books = self.get_book_by_edition(hardcover_edition, timeout)
-            print(books)
+            books = self.get_book_by_edition(log, hardcover_edition, timeout)
             if len(books) > 0:
                 candidate_books = books
                 found_exact = True
 
         # Exact match with a Hardcover ID
         if hardcover_id and not found_exact:
-            books = self.get_book_by_slug(hardcover_id, timeout)
+            books = self.get_book_by_slug(log, hardcover_id, timeout)
             if len(books) > 0:
                 candidate_books = books
                 found_exact = True
 
         # Exact match with an ISBN or ASIN
         if (isbn or asin) and not found_exact:
-            books = self.get_book_by_isbn_asin(isbn, asin, timeout)
+            books = self.get_book_by_isbn_asin(log, isbn, asin, timeout)
             if len(books) > 0:
                 candidate_books = books
                 found_exact = True
@@ -188,14 +180,14 @@ class Hardcover(Source):
         # NOTE: not sure about this one - it could mean that there are no meaningful results returned
         #       but should continue if nothing is returned
         if title and authors and not found_exact:
-            books = self.get_book_by_name_authors(title, authors, timeout)
+            books = self.get_book_by_name_authors(log, title, authors, timeout)
             if len(books) > 0:
                 candidate_books = books
                 found_exact = True
 
         # Fuzzy Search by Title
         if title and not found_exact:
-            books = self.get_book_by_name(title, timeout)
+            books = self.get_book_by_name(log, title, timeout)
 
             candidate_books = books
 
@@ -222,12 +214,8 @@ class Hardcover(Source):
             #
             #     candidate_books = [book[1] for book in candidate_authors]
 
-        pool = ThreadPool(8)
-        enqueue = partial(self.enqueue, log, result_queue, shutdown)
-        try:
-            pool.map(enqueue, [book for book in candidate_books])
-        finally:
-            shutdown.set()
+        for book in candidate_books:
+            self.enqueue(log, result_queue, abort, book)
         return None
 
     def get_cached_cover_url(self, identifiers):
@@ -321,6 +309,7 @@ class Hardcover(Source):
         editions = book.editions
         matching_edition = self.find_matching_edition(editions)
         if not matching_edition:
+            log.error("No matching edition")
             return None
         title = matching_edition.title
         authors = [c.author.name for c in matching_edition.contributions]
@@ -329,10 +318,8 @@ class Hardcover(Source):
         if len(book_series) > 0:
             series = book_series[0]
             meta.series = series.series.name
-            if series.position != 0:
-                meta.series_index = series.position  # pyright: ignore
+            meta.series_index = series.position  # pyright: ignore
         meta.set_identifier("hardcover", book.slug)
-        print(matching_edition.id)
         meta.set_identifier("hardcover-edition", str(matching_edition.id))
         if isbn := matching_edition.isbn_13:
             meta.set_identifier("isbn", isbn)
@@ -350,8 +337,6 @@ class Hardcover(Source):
             meta.languages = [language]
         if matching_edition.release_date:
             try:
-                from datetime import datetime
-
                 meta.pubdate = datetime.strptime(
                     matching_edition.release_date, "%Y-%m-%d"
                 )
@@ -359,39 +344,50 @@ class Hardcover(Source):
                 log.warn("Unable to parse release date")
         if book.taggings:
             meta.tags = [tag.tag.tag for tag in book.taggings if tag.tag.tag]
+        log.debug(meta)
         return meta
 
-    def enqueue(self, log, result_queue, shutdown, book: Book):
+    def enqueue(
+        self, log: Log, result_queue: Queue, shutdown: threading.Event, book: Book
+    ):
         if shutdown.is_set():
             raise threading.ThreadError
         metadata = self.build_metadata(log, book)
         if metadata:
+            result_queue.put(metadata)
             self.clean_downloaded_metadata(metadata)
-            with self._qlock:
-                result_queue.put(metadata)
         log.info(f"Adding book slug '{book.slug}' to queue")
 
-    def get_book_by_isbn_asin(self, isbn, asin, timeout=30) -> list[Book]:
+    def get_book_by_isbn_asin(
+        self, log: Log, isbn: str, asin: str, timeout=30
+    ) -> list[Book]:
+        log.info("Finding by ISBN / ASIN")
         query = queries.FIND_BOOK_BY_ISBN_OR_ASIN
         vars = {"isbn": isbn, "asin": asin}
         return self._execute(query, vars, timeout)
 
-    def get_book_by_slug(self, slug, timeout=30) -> list[Book]:
+    def get_book_by_slug(self, log: Log, slug: str, timeout=30) -> list[Book]:
+        log.info("Finding by Slug")
         query = queries.FIND_BOOK_BY_SLUG
         vars = {"slug": slug}
         return self._execute(query, vars, timeout)
 
-    def get_book_by_edition(self, edition, timeout=30) -> list[Book]:
+    def get_book_by_edition(self, log: Log, edition: str, timeout=30) -> list[Book]:
+        log.info("Finding by Edition ID")
         query = queries.FIND_BOOK_BY_EDITION
         vars = {"edition": edition}
         return self._execute(query, vars, timeout)
 
-    def get_book_by_name(self, name, timeout=30) -> list[Book]:
+    def get_book_by_name(self, log: Log, name: str, timeout=30) -> list[Book]:
+        log.info("Finding by Name")
         query = queries.FIND_BOOK_BY_NAME
         vars = {"title": name}
         return self._execute(query, vars, timeout)
 
-    def get_book_by_name_authors(self, name, authors, timeout=30) -> list[Book]:
+    def get_book_by_name_authors(
+        self, log: Log, name: str, authors: List[str], timeout=30
+    ) -> list[Book]:
+        log.info("Finding by Name + Authors")
         query = queries.FIND_BOOK_BY_NAME_AND_AUTHORS
         vars = {"title": name, "authors": authors}
         return self._execute(query, vars, timeout)

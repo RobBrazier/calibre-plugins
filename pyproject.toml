@@ -12,3 +12,8 @@ members = ["plugins/*", "hooks/hatch-calibre-bundle"]
 
 [tool.setuptools]
 packages = []
+
+[dependency-groups]
+dev = [
+    "hatch>=1.13.0",
+]

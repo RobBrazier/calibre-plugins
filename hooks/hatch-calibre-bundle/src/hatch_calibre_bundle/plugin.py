@@ -45,14 +45,18 @@ def get_project_name(root: str) -> List[str]:
 class CalibreBuildHook(BuildHookInterface):
     PLUGIN_NAME = "calibre"
 
+    def dependencies(self) -> list[str]:
+        return ["tomli>=2.0.2; python_version < '3.11'"]
+
     def initialize(self, version: str, build_data: dict[str, Any]) -> None:
         root_path = self.get_root_path()
-        deps_path = os.path.join(root_path, "deps")
+        self.bundled_deps: List[str] = []
 
         included_deps = self.__get_dep_paths()
         for name, path in included_deps.items():
+            self.bundled_deps.append(name)
             self.app.display_info(f"Bundling {name} into dist")
-            dep_path = os.path.join(deps_path, name)
+            dep_path = os.path.join(root_path, name)
             os.makedirs(dep_path, exist_ok=True)
             shutil.copytree(path, dep_path, dirs_exist_ok=True)
 
@@ -62,12 +66,16 @@ class CalibreBuildHook(BuildHookInterface):
         self, version: str, build_data: dict[str, Any], artifact_path: str
     ) -> None:
         root_path = self.get_root_path()
-        deps_path = os.path.join(root_path, "deps")
-        if os.path.exists(deps_path):
-            shutil.rmtree(deps_path)
+
         import_file = Path(os.path.join(root_path, self.get_import_filename()))
         if import_file.exists():
             import_file.unlink(True)
+
+        if self.bundled_deps:
+            for name in self.bundled_deps:
+                dep_path = os.path.join(root_path, name)
+                if os.path.exists(dep_path):
+                    shutil.rmtree(dep_path)
 
     @staticmethod
     def __find_module(name):
@@ -84,7 +92,7 @@ class CalibreBuildHook(BuildHookInterface):
             module = importlib.import_module(name)
             return module
         except Exception:
-            logger.exception("Unable to find module {module}")
+            logger.exception(f"Unable to find module {name}")
         # import from VIRTUAL_ENV
 
     def get_import_filename(self) -> str:

@@ -10,9 +10,7 @@
   # https://devenv.sh/packages/
   packages = [
     # Base packages
-    pkgs.git
     pkgs.wget
-    pkgs.bash
     # Calibre
     pkgs.calibre
   ];
@@ -20,19 +18,10 @@
   # https://devenv.sh/languages/
   languages.python = {
     enable = true;
-    package = pkgs.python39;
+    version = "3.9";
     uv.enable = true;
-    # uv.sync.enable = true;
-    # venv.enable = true;
   };
 
-  # https://devenv.sh/processes/
-  # processes.cargo-watch.exec = "cargo-watch";
-
-  # https://devenv.sh/services/
-  # services.postgres.enable = true;
-
-  # https://devenv.sh/scripts/
   scripts.setup-calibre.exec = ''
     books="1513.epub.noimages"
 
@@ -45,13 +34,16 @@
     calibre --with-library $CALIBRE_LIBRARY
   '';
   scripts.package.exec = ''
-    uv tool --directory "${config.devenv.root}/plugins/$1" run hatch build -t zipped-directory
+    uv --directory "${config.devenv.root}/plugins/$1" run hatch build -t zipped-directory
   '';
-  scripts.install-plugin.exec = ''
+  scripts.plugin-install.exec = ''
     find "${config.devenv.root}/plugins/$1/dist" -name '*.zip' -type f | xargs calibre-customize --add-plugin
   '';
-  scripts.run-hardcover.exec = ''
-    package 'hardcover' && install-plugin 'hardcover'
+  scripts.hardcover-install.exec = ''
+    package 'hardcover' && plugin-install 'hardcover'
+  '';
+  scripts.hardcover-run.exec = ''
+    hardcover-install
     calibre-debug -r Hardcover -- "$@"
   '';
   #
@@ -70,14 +62,14 @@
   # https://devenv.sh/tests/
   # enterTest = ''
   #   echo "Running tests"
-  #   git --version | grep --color=auto "${pkgs.git.version}"
+  #   uv run pytest
   # '';
 
   # https://devenv.sh/pre-commit-hooks/
   pre-commit.hooks = {
     ruff.enable = true;
     ruff-format.enable = true;
-    shellcheck.enable = true;
+    markdownlint.enable = true;
   };
 
   # See full reference at https://devenv.sh/reference/options/
