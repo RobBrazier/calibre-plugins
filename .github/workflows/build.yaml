@@ -69,6 +69,8 @@ jobs:
 
       - name: Build Plugins
         run: task package
+        env:
+          DEVENV_ROOT: "${{github.workspace}}" # nasty hack to get module resolution working
 
       - name: Upload Plugin Artifacts
         uses: actions/upload-artifact@v4
