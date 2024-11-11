@@ -37,6 +37,7 @@
     uv --directory "${config.devenv.root}/plugins/$1" run hatch build -t zipped-directory
   '';
   scripts.plugin-install.exec = ''
+    export PYTHONPATH=$(echo "$PYTHONPATH" | sed -e 's!:${config.devenv.root}/src$!!')
     find "${config.devenv.root}/plugins/$1/dist" -name '*.zip' -type f | xargs calibre-customize --add-plugin
   '';
   scripts.hardcover-install.exec = ''
@@ -44,9 +45,10 @@
   '';
   scripts.hardcover-run.exec = ''
     hardcover-install
+    export PYTHONPATH=$(echo "$PYTHONPATH" | sed -e 's!:${config.devenv.root}/src$!!')
     calibre-debug -r Hardcover -- "$@"
   '';
-  #
+
   enterShell = ''
     uv venv --allow-existing
     source "${config.devenv.dotfile}/state/venv/bin/activate"

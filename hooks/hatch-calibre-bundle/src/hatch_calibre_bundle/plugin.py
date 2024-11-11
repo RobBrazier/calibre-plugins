@@ -50,6 +50,7 @@ class CalibreBuildHook(BuildHookInterface):
 
     def initialize(self, version: str, build_data: dict[str, Any]) -> None:
         root_path = self.get_root_path()
+        relative_root = self.get_root_path(relative=True)
         self.bundled_deps: List[str] = []
 
         included_deps = self.__get_dep_paths()
@@ -57,6 +58,7 @@ class CalibreBuildHook(BuildHookInterface):
             self.bundled_deps.append(name)
             self.app.display_info(f"Bundling {name} into dist")
             dep_path = os.path.join(root_path, name)
+            build_data["artifacts"].append(f"/{relative_root}/{name}")
             os.makedirs(dep_path, exist_ok=True)
             shutil.copytree(path, dep_path, dirs_exist_ok=True)
 
@@ -113,8 +115,10 @@ class CalibreBuildHook(BuildHookInterface):
         project_name = self.config.get("import-name", project_name)
         return project_name
 
-    def get_root_path(self) -> str:
+    def get_root_path(self, relative=False) -> str:
         root_path = self.config.get("root-path", "src")
+        if relative:
+            return root_path
         return os.path.join(self.root, root_path)
 
     def __get_dep_paths(self) -> Dict[str, str]:

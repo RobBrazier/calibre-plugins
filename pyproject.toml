@@ -1,3 +1,7 @@
+[build-system]
+requires = ["hatchling", "hatch-zipped-directory"]
+build-backend = "hatchling.build"
+
 [project]
 name = "calibre-plugins"
 version = "0.1.0"
@@ -8,12 +12,10 @@ requires-python = ">=3.9"
 dependencies = ["pyqt5>=5.15.11"]
 
 [tool.uv.workspace]
-members = ["plugins/*", "hooks/hatch-calibre-bundle"]
-
-[tool.setuptools]
-packages = []
+members = ["plugins/*", "hooks/*"]
 
 [dependency-groups]
-dev = [
-    "hatch>=1.13.0",
-]
+dev = ["hatch>=1.13.0"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
