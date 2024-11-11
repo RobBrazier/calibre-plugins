@@ -28,7 +28,7 @@ jobs:
 
       - name: Set PYTHONPATH
         run: |
-          echo "PYTHONPATH=$GITHUB_ACTION_PATH/src" >> $GITHUB_ENV
+          echo "PYTHONPATH=${{github.workspace}}/src" >> $GITHUB_ENV
 
       - name: Install the project
         run: task install
@@ -54,7 +54,7 @@ jobs:
 
       - name: Set PYTHONPATH
         run: |
-          echo "PYTHONPATH=$GITHUB_ACTION_PATH/src" >> $GITHUB_ENV
+          echo "PYTHONPATH=${{github.workspace}}/src" >> $GITHUB_ENV
 
       - name: Install Task
         uses: arduino/setup-task@v2
