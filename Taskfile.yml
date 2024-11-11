@@ -5,6 +5,10 @@ vars:
     sh: "ls plugins"
 
 tasks:
+  default:
+    silent: true
+    cmd: "{{ .TASK_EXE }} --list-all"
+
   install:
     desc: Install dependencies
     cmd: uv sync --all-packages
@@ -12,11 +16,13 @@ tasks:
   test:
     desc: Run tests
     cmd: uv run pytest
+    env:
+      PYTHONPATH: "{{ .PYTHONPATH }}:"
 
   clean:
     desc: Clean temporary / build files
     cmds:
-      - find "{{ .DEVENV_ROOT }}/plugins" -name 'dist' -type d | xargs -r -- rm -r
+      - find "{{ .ROOT_DIR }}" \( ! -regex '.*/\..*' \) -name 'dist' -type d | xargs -r -- rm -r
 
   package:
     desc: Package all plugins
@@ -28,12 +34,16 @@ tasks:
     desc: Package a single plugin
     vars:
       PLUGIN: "{{ index .MATCH 0 }}"
-    cmd: uv --directory "{{ .DEVENV_ROOT }}/plugins/{{ .PLUGIN }}" run hatch build -t zipped-directory
+      PLUGIN_DIR: "{{ .ROOT_DIR }}/plugins/{{ .PLUGIN }}"
+    cmds:
+      - mkdir -p "{{ .ROOT_DIR }}/dist"
+      - uv --directory "{{ .PLUGIN_DIR }}" run hatch build -t zipped-directory
+      - cp "{{ .PLUGIN_DIR }}/dist/{{ .PLUGIN }}*.zip" "{{ .ROOT_DIR }}/dist/"
     sources:
-      - "{{ .DEVENV_ROOT }}/plugins/{{ .PLUGIN }}/**/*.py"
-      - "{{ .DEVENV_ROOT }}/src/**/*.py"
+      - "{{ .PLUGIN_DIR }}/**/*.py"
+      - "{{ .ROOT_DIR }}/src/**/*.py"
     generates:
-      - "{{ .DEVENV_ROOT }}/plugins/{{ .PLUGIN }}/dist/{{ .PLUGIN }}*.zip"
+      - "{{ .PLUGIN_DIR }}/dist/{{ .PLUGIN }}*.zip"
 
   install:*:
     desc: Install a single plugin
@@ -44,9 +54,9 @@ tasks:
       - "package:{{.PLUGIN}}"
     cmds:
       - for: { var: PLUGINS }
-        cmd: find "{{ .DEVENV_ROOT }}/plugins/{{ .ITEM }}/dist" -name '*.zip' -type f | xargs calibre-customize --add-plugin
+        cmd: find "{{ .ROOT_DIR }}/plugins/{{ .ITEM }}/dist" -name '*.zip' -type f | xargs calibre-customize --add-plugin
     sources:
-      - "{{ .DEVENV_ROOT }}/plugins/{{ .PLUGIN }}/dist/{{ .PLUGIN }}*.zip"
+      - "{{ .ROOT_DIR }}/plugins/{{ .PLUGIN }}/dist/{{ .PLUGIN }}*.zip"
     generates:
       - "{{ .DEVENV_DOTFILE }}/config/calibre/plugins/{{ .PLUGIN_NAME }}.zip"
 
@@ -61,17 +71,19 @@ tasks:
 
   calibre:setup:
     desc: Setup Calibre for first use
+    requires:
+      vars:
+        - CALIBRE_TEMP_DIR
+        - CALIBRE_LIBRARY
     vars:
-      BOOKS: ["1513.epub.noimages"]
+      BOOKS:
+        - "1513.epub.noimages" # Romeo and Juliet
+        - "345.epub.noimages" # Dracula
     cmds:
       - for: { var: BOOKS }
         cmd: wget -P "{{ .CALIBRE_TEMP_DIR }}" --content-disposition "https://www.gutenberg.org/ebooks/{{ .ITEM }}"
       - defer: find "{{ .CALIBRE_TEMP_DIR }}" -name "*.epub" | xargs -r rm
-      - vars:
-          DOWNLOADED_BOOKS:
-            sh: find "{{ .CALIBRE_TEMP_DIR }}" -name "*.epub"
-        for: { var: DOWNLOADED_BOOKS }
-        cmd: calibredb add --with-library {{ .CALIBRE_LIBRARY }} {{ .ITEM }}
+      - cmd: find "{{ .CALIBRE_TEMP_DIR }}" -type f -name "*.epub" | xargs calibredb add --with-library {{ .CALIBRE_LIBRARY }}
       - cmd: calibre --with-library {{ .CALIBRE_LIBRARY }}
 
   calibre:run:
