@@ -61,14 +61,12 @@ class CalibreBuildHook(BuildHookInterface):
             build_data["force_include"].update(
                 {path: os.path.join(relative_root, name)}
             )
-        print(build_data)
 
     def enhance_pythonpath(self):
         if virtualenv := os.getenv("UV_PROJECT_ENVIRONMENT"):
             paths = glob.glob(
                 os.path.join(virtualenv, "**", "site-packages"), recursive=True
             )
-            print(paths)
             sys.path.extend(paths)
         if root := os.getenv("DEVENV_ROOT"):
             for path in self.config.get("local-libs", []):
