@@ -9,10 +9,10 @@ description = "Add your description here"
 readme = "README.md"
 authors = [{ name = "Rob Brazier", email = "git+github@brzr.co" }]
 requires-python = ">=3.9"
-dependencies = []
+dependencies = ["common"]
 
 [tool.uv.sources]
-calibre-plugins = { workspace = true }
+common = { workspace = true }
 
 [project.scripts]
 hardcover = "hardcover:main"
@@ -23,7 +23,8 @@ pattern = true
 
 [tool.hatch.build.targets.zipped-directory.hooks.custom]
 path = "../../hooks/hatch-calibre-bundle/src/hatch_calibre_bundle/plugin.py"
-include-deps = ["common"]
+include-deps = []
+local-libs = ["libs/common/src"]
 root-path = "src/hardcover"
 
 [tool.hatch.build.targets.wheel]
@@ -35,4 +36,4 @@ sources = ["src/hardcover"]
 
 [tool.hatch.envs.default]
 installer = "uv"
-dependencies = []
+dependencies = ["common"]

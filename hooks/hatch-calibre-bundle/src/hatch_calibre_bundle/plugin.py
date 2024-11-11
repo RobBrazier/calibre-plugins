@@ -3,6 +3,7 @@ from typing import Any, Dict, List
 from hatchling.builders.hooks.plugin.interface import BuildHookInterface
 import logging
 import importlib
+import importlib.util
 import inspect
 import shutil
 import sys
@@ -53,6 +54,8 @@ class CalibreBuildHook(BuildHookInterface):
         relative_root = self.get_root_path(relative=True)
         self.bundled_deps: List[str] = []
 
+        self.enhance_pythonpath()
+
         included_deps = self.__get_dep_paths()
         for name, path in included_deps.items():
             self.bundled_deps.append(name)
@@ -79,12 +82,19 @@ class CalibreBuildHook(BuildHookInterface):
                 if os.path.exists(dep_path):
                     shutil.rmtree(dep_path)
 
-    @staticmethod
-    def __find_module(name):
+    def enhance_pythonpath(self):
         if virtualenv := os.getenv("UV_PROJECT_ENVIRONMENT"):
             sys.path.append(
                 os.path.join(virtualenv, "lib", "python3.9", "site-packages")
             )
+        if root := os.getenv("DEVENV_ROOT"):
+            for path in self.config.get("local-libs", []):
+                if not str(path).startswith(os.sep):
+                    path = os.path.join(root, path)
+                sys.path.append(path)
+
+    @staticmethod
+    def __find_module(name):
         # import from sys modules
         sys_module = sys.modules.get(name)
         if sys_module:

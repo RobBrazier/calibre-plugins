@@ -1,6 +1,6 @@
 { pkgs, lib, config, inputs, ... }:
 {
-  env.PYTHONPATH = "${config.devenv.dotfile}/profile/lib/calibre:${config.devenv.root}/src";
+  env.PYTHONPATH = "${config.devenv.dotfile}/profile/lib/calibre";
   env.CALIBRE_CONFIG_DIRECTORY = "${config.devenv.dotfile}/config/calibre";
   env.CALIBRE_TEMP_DIR = "${config.devenv.dotfile}/temp/calibre";
   env.CALIBRE_NO_DEFAULT_PROGRAMS = "1";

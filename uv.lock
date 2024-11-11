@@ -4,6 +4,7 @@ requires-python = ">=3.9"
 [manifest]
 members = [
     "calibre-plugins",
+    "common",
     "hardcover",
     "hatch-calibre-bundle",
 ]
@@ -35,7 +36,7 @@ wheels = [
 [[package]]
 name = "calibre-plugins"
 version = "0.1.0"
-source = { editable = "." }
+source = { virtual = "." }
 dependencies = [
     { name = "pyqt5" },
 ]
@@ -151,6 +152,11 @@ wheels = [
 ]
 
 [[package]]
+name = "common"
+version = "0.1.0"
+source = { editable = "libs/common" }
+
+[[package]]
 name = "cryptography"
 version = "43.0.3"
 source = { registry = "https://pypi.org/simple" }
@@ -217,6 +223,12 @@ wheels = [
 name = "hardcover"
 version = "0.0.1"
 source = { editable = "plugins/hardcover" }
+dependencies = [
+    { name = "common" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "common", editable = "libs/common" }]
 
 [[package]]
 name = "hatch"
