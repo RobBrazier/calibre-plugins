@@ -31,9 +31,10 @@ jobs:
         run: task install
 
       - name: Run Unit Tests
-        run: task test -- --cov-report xml
+        run: task test -- --cov-report xml --junitxml=junit.xml -o junit_family=legacy
 
-      - name: Upload results to Codecov
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
         uses: codecov/codecov-action@v4.6.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
