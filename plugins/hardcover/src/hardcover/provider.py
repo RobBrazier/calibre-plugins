@@ -4,8 +4,6 @@ from queue import Queue
 from typing import List, Tuple
 
 from calibre.ebooks.metadata.book.base import Metadata
-from calibre.ebooks.metadata.sources.base import Source
-from calibre.utils.logging import Log
 
 from . import queries
 from .models import Book, Edition
@@ -15,7 +13,7 @@ class HardcoverProvider:
     ID_NAME = "hardcover"
     API_URL = "https://api.hardcover.app/v1/graphql"
 
-    def __init__(self, source: Source):
+    def __init__(self, source):
         from common.graphql import GraphQLClient
 
         self.client = GraphQLClient(self.API_URL)
@@ -164,9 +162,7 @@ class HardcoverProvider:
             meta.tags = [tag.tag.tag for tag in book.taggings if tag.tag.tag]
         return meta
 
-    def enqueue(
-        self, log: Log, result_queue: Queue, shutdown: threading.Event, book: Book
-    ):
+    def enqueue(self, log, result_queue: Queue, shutdown: threading.Event, book: Book):
         if shutdown.is_set():
             raise threading.ThreadError
         metadata = self.build_metadata(log, book)
@@ -188,33 +184,33 @@ class HardcoverProvider:
         return result
 
     def get_book_by_isbn_asin(
-        self, log: Log, isbn: str, asin: str, timeout=30
+        self, log, isbn: str, asin: str, timeout=30
     ) -> list[Book]:
         log.info("Finding by ISBN / ASIN")
         query = queries.FIND_BOOK_BY_ISBN_OR_ASIN
         variables = {"isbn": isbn, "asin": asin}
         return self._execute(query, variables, timeout)
 
-    def get_book_by_slug(self, log: Log, slug: str, timeout=30) -> list[Book]:
+    def get_book_by_slug(self, log, slug: str, timeout=30) -> list[Book]:
         log.info("Finding by Slug")
         query = queries.FIND_BOOK_BY_SLUG
         variables = {"slug": slug}
         return self._execute(query, variables, timeout)
 
-    def get_book_by_edition(self, log: Log, edition: str, timeout=30) -> list[Book]:
+    def get_book_by_edition(self, log, edition: str, timeout=30) -> list[Book]:
         log.info("Finding by Edition ID")
         query = queries.FIND_BOOK_BY_EDITION
         variables = {"edition": edition}
         return self._execute(query, variables, timeout)
 
-    def get_book_by_name(self, log: Log, name: str, timeout=30) -> list[Book]:
+    def get_book_by_name(self, log, name: str, timeout=30) -> list[Book]:
         log.info("Finding by Name")
         query = queries.FIND_BOOK_BY_NAME
         variables = {"title": name}
         return self._execute(query, variables, timeout)
 
     def get_book_by_name_authors(
-        self, log: Log, name: str, authors: List[str], timeout=30
+        self, log, name: str, authors: List[str], timeout=30
     ) -> list[Book]:
         log.info("Finding by Name + Authors")
         query = queries.FIND_BOOK_BY_NAME_AND_AUTHORS
