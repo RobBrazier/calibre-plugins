@@ -7,6 +7,7 @@ import importlib.util
 import inspect
 import glob
 import sys
+import tempfile
 
 from pathlib import Path
 import re
@@ -46,6 +47,8 @@ def get_project_name(root: str) -> List[str]:
 class CalibreBuildHook(BuildHookInterface):
     PLUGIN_NAME = "calibre"
 
+    temp_file: Any
+
     def dependencies(self) -> list[str]:
         return ["tomli>=2.0.2; python_version < '3.11'"]
 
@@ -54,13 +57,30 @@ class CalibreBuildHook(BuildHookInterface):
 
         self.enhance_pythonpath()
 
+        # Bundle dependencies into artifact
         included_deps = self.__get_dep_paths()
         for name, path in included_deps.items():
             self.app.display_info(f"Bundling {name} into dist")
-            # dep_path = os.path.join(root_path, name)
             build_data["force_include"].update(
                 {path: os.path.join(relative_root, name)}
             )
+        name = get_project_name(self.root)
+
+        # Create calibre plugin import file
+        self.temp_file = tempfile.NamedTemporaryFile()
+        build_data["force_include"].update(
+            {
+                self.temp_file.name: os.path.join(
+                    relative_root, f"plugin-import-name-{name}.txt"
+                )
+            }
+        )
+
+    def finalize(
+        self, version: str, build_data: dict[str, Any], artifact_path: str
+    ) -> None:
+        if self.temp_file:
+            self.temp_file.close()
 
     def enhance_pythonpath(self):
         if virtualenv := os.getenv("UV_PROJECT_ENVIRONMENT"):
@@ -68,11 +88,11 @@ class CalibreBuildHook(BuildHookInterface):
                 os.path.join(virtualenv, "**", "site-packages"), recursive=True
             )
             sys.path.extend(paths)
-        if root := os.getenv("DEVENV_ROOT"):
-            for path in self.config.get("local-libs", []):
-                if not str(path).startswith(os.sep):
-                    path = os.path.join(root, path)
-                sys.path.append(path)
+
+        for path in self.config.get("local-libs", []):
+            if not str(path).startswith(os.sep):
+                path = os.path.join(self.root, path)
+            sys.path.append(path)
 
     @staticmethod
     def __find_module(name):

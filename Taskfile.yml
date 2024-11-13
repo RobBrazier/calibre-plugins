@@ -38,15 +38,15 @@ tasks:
       PLUGIN: "{{ index .MATCH 0 }}"
       PLUGIN_DIR: "{{ .ROOT_DIR }}/plugins/{{ .PLUGIN }}"
     cmds:
+      - defer: rmdir "{{ .PLUGIN_DIR }}/dist" 2>/dev/null
       - mkdir -p "{{ .ROOT_DIR }}/dist"
       - uv --directory "{{ .PLUGIN_DIR }}" run hatch build -t zipped-directory
-      - find "{{ .PLUGIN_DIR }}/dist" -type f -name '*.zip' | xargs -r -I {} cp "{}" "{{ .ROOT_DIR }}/dist/"
+      - find "{{ .PLUGIN_DIR }}/dist" -type f -name '*.zip' | xargs -r -I {} mv -f "{}" "{{ .ROOT_DIR }}/dist/"
     sources:
       - "{{ .PLUGIN_DIR }}/**/pyproject.toml"
       - "{{ .PLUGIN_DIR }}/**/*.py"
       - "{{ .ROOT_DIR }}/src/**/*.py"
     generates:
-      - "{{ .PLUGIN_DIR }}/dist/{{ .PLUGIN }}*.zip"
       - "{{ .ROOT_DIR }}/dist/{{ .PLUGIN }}*.zip"
 
   install:*:

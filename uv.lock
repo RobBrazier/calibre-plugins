@@ -184,14 +184,6 @@ wheels = [
 ]
 
 [[package]]
-name = "dacite"
-version = "1.8.1"
-source = { registry = "https://pypi.org/simple" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/21/0f/cf0943f4f55f0fbc7c6bd60caf1343061dff818b02af5a0d444e473bb78d/dacite-1.8.1-py3-none-any.whl", hash = "sha256:cc31ad6fdea1f49962ea42db9421772afe01ac5442380d9a99fcf3d188c61afe", size = 14309 },
-]
-
-[[package]]
 name = "distlib"
 version = "0.3.9"
 source = { registry = "https://pypi.org/simple" }
@@ -233,14 +225,10 @@ version = "0.0.1"
 source = { editable = "plugins/hardcover" }
 dependencies = [
     { name = "common" },
-    { name = "dacite" },
 ]
 
 [package.metadata]
-requires-dist = [
-    { name = "common", editable = "libs/common" },
-    { name = "dacite" },
-]
+requires-dist = [{ name = "common", editable = "libs/common" }]
 
 [[package]]
 name = "hatch"
