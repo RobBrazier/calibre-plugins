@@ -58,7 +58,7 @@ tasks:
       - "package:{{.PLUGIN}}"
     cmds:
       - for: { var: PLUGINS }
-        cmd: find "{{ .ROOT_DIR }}/plugins/{{ .ITEM }}/dist" -name '*.zip' -type f | xargs calibre-customize --add-plugin
+        cmd: find "{{ .ROOT_DIR }}/dist" -name '{{ .ITEM }}*.zip' | xargs calibre-customize --add-plugin
     sources:
       - "{{ .ROOT_DIR }}/plugins/{{ .PLUGIN }}/dist/{{ .PLUGIN }}*.zip"
     generates:

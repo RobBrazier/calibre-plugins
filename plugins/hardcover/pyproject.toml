@@ -23,7 +23,8 @@ pattern = true
 
 [tool.hatch.build.targets.zipped-directory.hooks.custom]
 path = "../../hooks/hatch-calibre-bundle/src/hatch_calibre_bundle/plugin.py"
-local-libs = ["../../libs/common/src"]
+base-path = "../../"
+local-libs = ["libs/common/src"]
 root-path = "src/hardcover"
 
 [tool.hatch.build.targets.wheel]

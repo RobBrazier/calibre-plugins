@@ -3,7 +3,6 @@ from typing import Any, Dict, List
 from hatchling.builders.hooks.plugin.interface import BuildHookInterface
 import logging
 import importlib
-import importlib.util
 import inspect
 import glob
 import sys
@@ -19,29 +18,6 @@ else:
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-
-
-def normalise_dependencies(deps: List[str]) -> List[str]:
-    normalised = []
-    for dep in deps:
-        # remove whitespace around dependency
-        dep = dep.strip()
-        matches = re.split("([~=!<>])", dep, 2)
-        if len(matches) > 0:
-            normalised.append(matches[0].strip())
-    return normalised
-
-
-def get_project_dependencies(root: str) -> List[str]:
-    pyproject_toml = Path(root) / "pyproject.toml"
-    pyproject = tomllib.loads(pyproject_toml.read_text(encoding="utf-8"))
-    return normalise_dependencies(pyproject["project"]["dependencies"])
-
-
-def get_project_name(root: str) -> List[str]:
-    pyproject_toml = Path(root) / "pyproject.toml"
-    pyproject = tomllib.loads(pyproject_toml.read_text(encoding="utf-8"))
-    return pyproject["project"]["name"]
 
 
 class CalibreBuildHook(BuildHookInterface):
@@ -64,7 +40,7 @@ class CalibreBuildHook(BuildHookInterface):
             build_data["force_include"].update(
                 {path: os.path.join(relative_root, name)}
             )
-        name = get_project_name(self.root)
+        name = self.get_project_name()
 
         # Create calibre plugin import file
         self.temp_file = tempfile.NamedTemporaryFile()
@@ -82,6 +58,27 @@ class CalibreBuildHook(BuildHookInterface):
         if self.temp_file:
             self.temp_file.close()
 
+    def get_project_name(self) -> List[str]:
+        pyproject_toml = Path(self.root) / "pyproject.toml"
+        pyproject = tomllib.loads(pyproject_toml.read_text(encoding="utf-8"))
+        return pyproject["project"]["name"]
+
+    def get_project_dependencies(self) -> List[str]:
+        pyproject_toml = Path(self.root) / "pyproject.toml"
+        pyproject = tomllib.loads(pyproject_toml.read_text(encoding="utf-8"))
+        return self.normalise_dependencies(pyproject["project"]["dependencies"])
+
+    @staticmethod
+    def normalise_dependencies(deps: List[str]) -> List[str]:
+        normalised = []
+        for dep in deps:
+            # remove whitespace around dependency
+            dep = dep.strip()
+            matches = re.split("([~=!<>])", dep, 2)
+            if len(matches) > 0:
+                normalised.append(matches[0].strip())
+        return normalised
+
     def enhance_pythonpath(self):
         if virtualenv := os.getenv("UV_PROJECT_ENVIRONMENT"):
             paths = glob.glob(
@@ -89,9 +86,11 @@ class CalibreBuildHook(BuildHookInterface):
             )
             sys.path.extend(paths)
 
+        base_path = self.get_base_path()
+
         for path in self.config.get("local-libs", []):
             if not str(path).startswith(os.sep):
-                path = os.path.join(self.root, path)
+                path = os.path.normpath(os.path.join(base_path, path))
             sys.path.append(path)
 
     @staticmethod
@@ -109,7 +108,7 @@ class CalibreBuildHook(BuildHookInterface):
 
     def get_dependencies(self) -> List[str]:
         deps = []
-        project_deps = get_project_dependencies(self.root)
+        project_deps = self.get_project_dependencies()
         deps.extend(project_deps)
 
         return deps
@@ -119,6 +118,10 @@ class CalibreBuildHook(BuildHookInterface):
         if relative:
             return root_path
         return os.path.join(self.root, root_path)
+
+    def get_base_path(self) -> str:
+        base_path = self.config.get("base-path", ".")
+        return os.path.join(self.root, base_path)
 
     def __get_dep_paths(self) -> Dict[str, str]:
         result = {}
