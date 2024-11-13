@@ -15,9 +15,7 @@ tasks:
 
   test:
     desc: Run tests
-    cmd: uv run pytest
-    env:
-      PYTHONPATH: "{{ .PYTHONPATH }}:"
+    cmd: uv run pytest {{ .CLI_ARGS }}
 
   clean:
     desc: Clean temporary / build files

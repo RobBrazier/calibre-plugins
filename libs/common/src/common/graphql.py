@@ -1,3 +1,4 @@
+from typing import Union
 from urllib import request, error
 import json
 import logging
@@ -13,7 +14,7 @@ class GraphQLClient:
     def set_token(self, token: str):
         self.token = token
 
-    def execute(self, query: str, variables: dict | None = None, timeout=30):
+    def execute(self, query: str, variables: Union[dict, None] = None, timeout=30):
         data = {"query": query, "variables": variables}
         headers = {"Accept": "application/json", "Content-Type": "application/json"}
 

@@ -11,4 +11,12 @@ dependencies = ["pyqt5>=5.15.11"]
 members = ["plugins/*", "hooks/*", "libs/*"]
 
 [dependency-groups]
-dev = ["hatch>=1.13.0"]
+dev = ["hatch>=1.13.0", "pytest-cov>=6.0.0", "pytest>=8.3.3"]
+
+[tool.coverage.run]
+branch = true
+omit = ["*test*"]
+source = ["hooks", "libs", "plugins"]
+
+[tool.pytest.ini_options]
+addopts = "--cov -v"

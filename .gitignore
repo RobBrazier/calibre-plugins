@@ -16,3 +16,4 @@ dist/
 .pytest-cache/
 *.egg-info/
 .task/
+.coverage
