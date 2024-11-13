@@ -1,5 +1,9 @@
 # calibre-plugins
 
+## Current Plugins
+
+- [Hardcover](./plugins/hardcover/)
+
 ## Local Setup
 
 Environment setup is fully done via [devenv.sh](https://devenv.sh) and [Nix](https://nixos.org)
