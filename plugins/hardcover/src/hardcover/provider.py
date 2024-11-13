@@ -192,31 +192,31 @@ class HardcoverProvider:
     ) -> list[Book]:
         log.info("Finding by ISBN / ASIN")
         query = queries.FIND_BOOK_BY_ISBN_OR_ASIN
-        vars = {"isbn": isbn, "asin": asin}
-        return self._execute(query, vars, timeout)
+        variables = {"isbn": isbn, "asin": asin}
+        return self._execute(query, variables, timeout)
 
     def get_book_by_slug(self, log: Log, slug: str, timeout=30) -> list[Book]:
         log.info("Finding by Slug")
         query = queries.FIND_BOOK_BY_SLUG
-        vars = {"slug": slug}
-        return self._execute(query, vars, timeout)
+        variables = {"slug": slug}
+        return self._execute(query, variables, timeout)
 
     def get_book_by_edition(self, log: Log, edition: str, timeout=30) -> list[Book]:
         log.info("Finding by Edition ID")
         query = queries.FIND_BOOK_BY_EDITION
-        vars = {"edition": edition}
-        return self._execute(query, vars, timeout)
+        variables = {"edition": edition}
+        return self._execute(query, variables, timeout)
 
     def get_book_by_name(self, log: Log, name: str, timeout=30) -> list[Book]:
         log.info("Finding by Name")
         query = queries.FIND_BOOK_BY_NAME
-        vars = {"title": name}
-        return self._execute(query, vars, timeout)
+        variables = {"title": name}
+        return self._execute(query, variables, timeout)
 
     def get_book_by_name_authors(
         self, log: Log, name: str, authors: List[str], timeout=30
     ) -> list[Book]:
         log.info("Finding by Name + Authors")
         query = queries.FIND_BOOK_BY_NAME_AND_AUTHORS
-        vars = {"title": name, "authors": authors}
-        return self._execute(query, vars, timeout)
+        variables = {"title": name, "authors": authors}
+        return self._execute(query, variables, timeout)
