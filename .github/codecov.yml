@@ -1,0 +1,17 @@
+comment:
+  layout: "header, diff, flags, components"
+
+component_management:
+  individual_components:
+    - component_id: plugin_hardcover
+      name: hardcover
+      paths:
+        - plugins/hardcover/**
+    - component_id: hook_hatch_calibre_bundle
+      name: hatch-calibre-bundle
+      paths:
+        - hooks/hatch-calibre-bundle/**
+    - component_id: lib_common
+      name: common
+      paths:
+        - libs/common/**
