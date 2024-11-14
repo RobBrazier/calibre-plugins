@@ -21,3 +21,5 @@ Tools required:
 1. [uv](https://docs.astral.sh/uv/)
 2. task (mentioned above)
 3. Python (uv can install this for you with `uv python install`)
+4. Calibre (you'll want to add the calibre library to your PYTHONPATH for
+   a good IDE/editor experience)
