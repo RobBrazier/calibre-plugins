@@ -79,3 +79,20 @@ jobs:
           name: built-plugins
           path: |
             dist/*.zip
+
+  release:
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    if: github.ref_type == 'tag'
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: built-plugins
+
+      - name: Release
+        run: |
+          SOURCE_TAG="${GITHUB_REF#refs/tags/}"
+          PLUGIN_NAME="$(echo "$SOURCE_TAG" | awk -F'-' '{ print $1 }')"
+
+          gh release create -d --generate-notes --target $GITHUB_REF -t $SOURCE_TAG "./$SOURCE_TAG"*.zip
