@@ -57,8 +57,6 @@ jobs:
         with:
           enable-cache: true
 
-      - run: git status
-
       - uses: actions/setup-python@v5
 
       - name: Install Task
@@ -69,8 +67,6 @@ jobs:
 
       - name: Install the project
         run: task install -- --frozen
-
-      - run: git status
 
       - name: Build Plugins
         run: task package
