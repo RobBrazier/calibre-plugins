@@ -102,4 +102,4 @@ jobs:
           PLUGIN_NAME="$(echo "$SOURCE_TAG" | awk -F'-' '{ print $1 }')"
           VERSION="$(echo "$SOURCE_TAG" | awk -F'-' '{ print $2 }')"
 
-          gh release create -d --generate-notes --target $SOURCE_TAG -t "$PLUGIN_NAME v$VERSION" "./$SOURCE_TAG"*.zip
+          gh release create -d -t "$PLUGIN_NAME v$VERSION" "./$SOURCE_TAG"*.zip
