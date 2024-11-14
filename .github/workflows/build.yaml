@@ -93,6 +93,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: built-plugins
+          path: "dist"
 
       - name: Release
         env:
@@ -102,6 +103,6 @@ jobs:
           PLUGIN_NAME="$(echo "$SOURCE_TAG" | awk -F'-' '{ print $1 }')"
           VERSION="$(echo "$SOURCE_TAG" | awk -F'-' '{ print $2 }')"
 
-          echo "Creating release for $PLUGIN v$VERSION"
+          echo "Creating release for $PLUGIN_NAME v$VERSION"
 
-          gh release create -d "$SOURCE_TAG" -t "$PLUGIN_NAME v$VERSION" "./$SOURCE_TAG"*.zip
+          gh release create -d "$SOURCE_TAG" -t "$PLUGIN_NAME v$VERSION" "./dist/$SOURCE_TAG"*.zip
