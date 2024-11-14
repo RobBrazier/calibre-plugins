@@ -17,10 +17,13 @@ jobs:
 
       - uses: DeterminateSystems/nix-installer-action@v15
 
+      - uses: DeterminateSystems/magic-nix-cache-action@v8
+
       - uses: cachix/cachix-action@v14
         with:
           name: devenv
           skipPush: true
+          useDaemon: false
 
       - name: Install devenv.sh
         run: nix profile install nixpkgs#devenv
@@ -52,10 +55,13 @@ jobs:
 
       - uses: DeterminateSystems/nix-installer-action@v15
 
+      - uses: DeterminateSystems/magic-nix-cache-action@v8
+
       - uses: cachix/cachix-action@v14
         with:
           name: devenv
           skipPush: true
+          useDaemon: false
 
       - name: Install devenv.sh
         run: nix profile install nixpkgs#devenv
