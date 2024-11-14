@@ -20,4 +20,4 @@ Tools required:
 
 1. [uv](https://docs.astral.sh/uv/)
 2. task (mentioned above)
-3. Python 3.11
+3. Python (uv can install this for you with `uv python install`)
