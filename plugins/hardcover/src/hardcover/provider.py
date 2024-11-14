@@ -3,8 +3,6 @@ from datetime import datetime
 from queue import Queue
 from typing import List, Tuple
 
-from calibre.ebooks.metadata.book.base import Metadata
-
 from . import queries
 from .models import Book, Edition
 
@@ -119,6 +117,11 @@ class HardcoverProvider:
         if len(editions) > 0:
             return editions[0]
 
+    def init_metadata(self, title: str, authors: list[str]):
+        from calibre.ebooks.metadata.book.base import Metadata
+
+        return Metadata(title, authors)
+
     def build_metadata(self, log, book: Book):
         editions = book.editions
         matching_edition = self.find_matching_edition(editions)
@@ -127,7 +130,7 @@ class HardcoverProvider:
             return None
         title = matching_edition.title
         authors = [c.author.name for c in matching_edition.contributions]
-        meta = Metadata(title, authors)
+        meta = self.init_metadata(title, authors)
         book_series = book.book_series
         if len(book_series) > 0:
             series = book_series[0]

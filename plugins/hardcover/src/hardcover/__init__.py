@@ -1,3 +1,6 @@
-from .source import Hardcover
+import sys
 
-__all__ = ["Hardcover"]
+if not hasattr(sys, "_called_from_test"):
+    from .source import Hardcover
+
+    __all__ = ["Hardcover"]
