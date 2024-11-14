@@ -38,9 +38,10 @@ class Hardcover(Source):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        from .provider import HardcoverProvider
+        with self:
+            from .provider import HardcoverProvider
 
-        self.provider = HardcoverProvider(self)
+            self.provider = HardcoverProvider(self)
 
     def is_configured(self):
         return bool(self.prefs["api_key"])
