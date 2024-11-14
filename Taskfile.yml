@@ -5,9 +5,11 @@ vars:
     sh: "ls plugins"
 
 tasks:
-  default:
+  list:
+    desc: List all available tasks
     silent: true
-    cmd: "{{ .TASK_EXE }} --list-all"
+    aliases: [default]
+    cmd: "{{ .TASK_EXE }} -a"
 
   install:
     aliases: [i]
@@ -35,7 +37,7 @@ tasks:
         task: "package:{{ .ITEM }}"
 
   package:*:
-    desc: Package a single plugin
+    desc: Package a single plugin (e.g. package:hardcover)
     vars:
       PLUGIN: "{{ index .MATCH 0 }}"
       PLUGIN_DIR: "{{ .ROOT_DIR }}/plugins/{{ .PLUGIN }}"
@@ -52,7 +54,7 @@ tasks:
       - "{{ .ROOT_DIR }}/dist/{{ .PLUGIN }}*.zip"
 
   install:*:
-    desc: Install a single plugin
+    desc: Install a single plugin (e.g. install:hardcover)
     vars:
       PLUGIN: "{{ index .MATCH 0 }}"
       PLUGIN_NAME: "{{ index .MATCH 0 | title }}"
@@ -67,7 +69,7 @@ tasks:
       - "{{ .DEVENV_DOTFILE }}/config/calibre/plugins/{{ .PLUGIN_NAME }}.zip"
 
   run:*:
-    desc: Run a single plugin
+    desc: Run a single plugin (e.g. run:hardcover)
     vars:
       PLUGIN: "{{ index .MATCH 0 }}"
       PLUGIN_NAME: "{{ index .MATCH 0 | title }}"
