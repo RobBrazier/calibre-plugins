@@ -51,22 +51,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: cachix/install-nix-action@v30
-
-      - uses: cachix/cachix-action@v14
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3.2.2
         with:
-          name: devenv
-          skipPush: true
-          useDaemon: false
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
-      - name: Install devenv.sh
-        run: nix profile install nixpkgs#devenv
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-      # - name: Build the devenv shell and run any pre-commit hooks
-      #   run: devenv test
+      - name: Install Task
+        uses: arduino/setup-task@v2.0.0
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install the project
+        run: task install
 
       - name: Build Plugins
-        run: devenv shell task package
+        run: task package
 
       - name: Upload Plugin Artifacts
         uses: actions/upload-artifact@v4
