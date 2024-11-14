@@ -66,8 +66,7 @@ jobs:
         run: devenv test
 
       - name: Build Plugins
-        shell: devenv shell bash -- -e {0}
-        run: task package
+        run: devenv shell task package
 
       - name: Upload Plugin Artifacts
         uses: actions/upload-artifact@v4
