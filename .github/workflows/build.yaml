@@ -20,6 +20,7 @@ jobs:
       - uses: cachix/cachix-action@v14
         with:
           name: devenv
+          skipPush: true
 
       - name: Install devenv.sh
         run: nix profile install nixpkgs#devenv
@@ -54,6 +55,7 @@ jobs:
       - uses: cachix/cachix-action@v14
         with:
           name: devenv
+          skipPush: true
 
       - name: Install devenv.sh
         run: nix profile install nixpkgs#devenv
