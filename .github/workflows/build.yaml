@@ -15,7 +15,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: DeterminateSystems/nix-installer-action@v15
+      - uses: cachix/install-nix-action@vXX
+        with:
+          enable_kvm: true
 
       - uses: cachix/cachix-action@v14
         with:
@@ -51,7 +53,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: DeterminateSystems/nix-installer-action@v15
+      - uses: cachix/install-nix-action@vXX
+        with:
+          enable_kvm: true
 
       - uses: cachix/cachix-action@v14
         with:
