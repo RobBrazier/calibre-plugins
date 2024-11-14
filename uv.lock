@@ -305,7 +305,7 @@ wheels = [
 
 [[package]]
 name = "hardcover"
-version = "0.0.1"
+version = "0.0.1+d19800101"
 source = { editable = "plugins/hardcover" }
 dependencies = [
     { name = "common" },
