@@ -91,8 +91,11 @@ jobs:
           name: built-plugins
 
       - name: Release
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           SOURCE_TAG="${GITHUB_REF#refs/tags/}"
           PLUGIN_NAME="$(echo "$SOURCE_TAG" | awk -F'-' '{ print $1 }')"
+          VERSION="$(echo "$SOURCE_TAG" | awk -F'-' '{ print $2 }')"
 
-          gh release create -d --generate-notes --target $GITHUB_REF -t $SOURCE_TAG "./$SOURCE_TAG"*.zip
+          gh release create -d --generate-notes --target $GITHUB_REF -t "$PLUGIN_NAME v$VERSION" "./$SOURCE_TAG"*.zip
