@@ -11,26 +11,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v3.2.2
-        with:
-          enable-cache: true
-          cache-dependency-glob: "uv.lock"
+      - uses: cachix/install-nix-action@v30
 
-      - uses: actions/setup-python@v5
+      - uses: cachix/cachix-action@v15
         with:
-          python-version: "3.9"
+          name: devenv
 
-      - name: Install Task
-        uses: arduino/setup-task@v2.0.0
-        with:
-          version: 3.x
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install devenv.sh
+        run: nix profile install nixpkgs#devenv
 
-      - name: Install the project
-        run: task install
+      - name: Build the devenv shell and run any pre-commit hooks
+        run: devenv test
 
       - name: Run Unit Tests
+        shell: devenv shell bash -- -e {0}
         run: task test -- --cov-report xml --junitxml=junit.xml -o junit_family=legacy
 
       - name: Upload coverage reports to Codecov
@@ -51,26 +45,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v3.2.2
-        with:
-          enable-cache: true
-          cache-dependency-glob: "uv.lock"
+      - uses: cachix/install-nix-action@v30
 
-      - uses: actions/setup-python@v5
+      - uses: cachix/cachix-action@v15
         with:
-          python-version: "3.9"
+          name: devenv
 
-      - name: Install Task
-        uses: arduino/setup-task@v2.0.0
-        with:
-          version: 3.x
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install devenv.sh
+        run: nix profile install nixpkgs#devenv
 
-      - name: Install the project
-        run: task install
+      - name: Build the devenv shell and run any pre-commit hooks
+        run: devenv test
 
       - name: Build Plugins
+        shell: devenv shell bash -- -e {0}
         run: task package
 
       - name: Upload Plugin Artifacts
