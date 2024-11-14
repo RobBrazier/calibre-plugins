@@ -85,6 +85,8 @@ jobs:
     needs:
       - build
     if: github.ref_type == 'tag'
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
