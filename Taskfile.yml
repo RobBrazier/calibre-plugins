@@ -14,7 +14,7 @@ tasks:
   install:
     aliases: [i]
     desc: Install dependencies
-    cmd: uv sync --all-packages
+    cmd: uv sync --all-packages {{ .CLI_ARGS }}
 
   test:
     aliases: [t]

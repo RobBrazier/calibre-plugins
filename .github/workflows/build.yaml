@@ -68,12 +68,10 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install the project
-        run: task install
+        run: task install -- --frozen
 
       - name: Build Plugins
         run: task package
-
-      - run: git status
 
       - name: Upload Plugin Artifacts
         uses: actions/upload-artifact@v4
@@ -95,7 +93,6 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: built-plugins
-          path: "dist"
 
       - name: Release
         env:
@@ -107,4 +104,4 @@ jobs:
 
           echo "Creating release for $PLUGIN_NAME v$VERSION"
 
-          gh release create -d "$SOURCE_TAG" -t "$PLUGIN_NAME v$VERSION" "./dist/$SOURCE_TAG"*.zip
+          gh release create -d "$SOURCE_TAG" -t "$PLUGIN_NAME v$VERSION" "./$SOURCE_TAG"*.zip
