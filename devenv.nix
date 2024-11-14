@@ -12,6 +12,8 @@
     CALIBRE_NO_DEFAULT_PROGRAMS = "1";
     CALIBRE_LIBRARY = "${config.devenv.dotfile}/state/calibre";
     UV_CACHE_DIR = "${config.devenv.dotfile}/cache/uv";
+    UV_PYTHON_DOWNLOADS = "never";
+    UV_PYTHON = "${pkgs.python39.out}/bin/python";
   };
 
   packages = [
@@ -25,22 +27,17 @@
 
   languages.python = {
     enable = true;
-    package = pkgs.python311;
+    package = pkgs.python39;
     uv.enable = true;
   };
 
   enterShell = ''
     uv venv --allow-existing
-    source "${config.devenv.dotfile}/state/venv/bin/activate"
-    task install
+    source "$UV_PROJECT_ENVIRONMENT/bin/activate"
+    ${pkgs.go-task.out}/bin/task install
   '';
 
   git-hooks = {
-    enabledPackages = [
-      pkgs.python311Packages.ruff
-      pkgs.alejandra
-      pkgs.markdownlint-cli
-    ];
     hooks = {
       ruff.enable = true;
       ruff-format.enable = true;

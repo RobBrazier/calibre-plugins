@@ -10,14 +10,17 @@ tasks:
     cmd: "{{ .TASK_EXE }} --list-all"
 
   install:
+    aliases: [i]
     desc: Install dependencies
     cmd: uv sync --all-packages
 
   test:
+    aliases: [t]
     desc: Run tests
     cmd: uv run pytest {{ .CLI_ARGS }}
 
   clean:
+    aliases: [c]
     desc: Clean temporary / build files
     cmds:
       - find "{{ .ROOT_DIR }}" \( ! -regex '.*/\..*' \) -name 'dist' -type d | xargs -r -- rm -r
@@ -25,6 +28,7 @@ tasks:
       - find "{{ .ROOT_DIR }}" -name '*pycache*' -type d | xargs -r -- rm -r
 
   package:
+    aliases: [build, p]
     desc: Package all plugins
     cmds:
       - for: { var: PLUGINS }
