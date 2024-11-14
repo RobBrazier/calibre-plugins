@@ -5,7 +5,7 @@ from types import SimpleNamespace
 from typing import Any
 from common.graphql import GraphQLClient
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, ANY
 
 from hardcover.provider import HardcoverProvider
 import logging
@@ -69,7 +69,8 @@ def test_identify_hardcover_edition(
     abort = Event()
     title = "The Hobbit"
     authors = ["J. R. R. Tolkien"]
-    identifiers = {"hardcover-edition": "8548995"}
+    edition = "8548995"
+    identifiers = {"hardcover-edition": edition}
 
     data = create_book_response(
         title=title,
@@ -77,7 +78,7 @@ def test_identify_hardcover_edition(
         editions=[
             create_edition(
                 title=title,
-                id=8548995,
+                id=int(edition),
                 isbn="9780618968633",
                 authors=authors,
                 publisher="Houghton Mifflin Harcourt",
@@ -97,10 +98,11 @@ def test_identify_hardcover_edition(
     assert built_metadata.authors == authors
     assert built_metadata.identifiers == {
         "hardcover": "the-hobbit",
-        "hardcover-edition": "8548995",
+        "hardcover-edition": edition,
         "isbn": "9780618968633",
     }
     assert built_metadata.pubdate == datetime.fromisoformat("1937-01-01")
+    mock_client.execute.assert_called_once_with(ANY, {"edition": edition}, 30)
 
 
 def create_edition(
