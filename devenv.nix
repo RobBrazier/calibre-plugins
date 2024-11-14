@@ -1,13 +1,21 @@
-{ pkgs, lib, config, inputs, ... }:
 {
-  env.PYTHONPATH = "${config.devenv.dotfile}/profile/lib/calibre";
-  env.CALIBRE_CONFIG_DIRECTORY = "${config.devenv.dotfile}/config/calibre";
-  env.CALIBRE_TEMP_DIR = "${config.devenv.dotfile}/temp/calibre";
-  env.CALIBRE_NO_DEFAULT_PROGRAMS = "1";
-  env.CALIBRE_LIBRARY = "${config.devenv.dotfile}/state/calibre";
-  env.UV_CACHE_DIR = "${config.devenv.dotfile}/cache/uv";
+  pkgs,
+  lib,
+  config,
+  inputs,
+  ...
+}: {
+  env = {
+    PYTHONPATH = "${config.devenv.dotfile}/profile/lib/calibre";
+    CALIBRE_CONFIG_DIRECTORY = "${config.devenv.dotfile}/config/calibre";
+    CALIBRE_TEMP_DIR = "${config.devenv.dotfile}/temp/calibre";
+    CALIBRE_NO_DEFAULT_PROGRAMS = "1";
+    CALIBRE_LIBRARY = "${config.devenv.dotfile}/state/calibre";
+    UV_CACHE_DIR = "${config.devenv.dotfile}/cache/uv";
+    UV_PYTHON_DOWNLOADS = "never";
+    UV_PYTHON = "${config.languages.python.package}/bin/python";
+  };
 
-  # https://devenv.sh/packages/
   packages = [
     # Base packages
     pkgs.wget
@@ -17,36 +25,25 @@
     pkgs.go-task
   ];
 
-  # https://devenv.sh/languages/
   languages.python = {
     enable = true;
-    package = pkgs.python39;
+    package = pkgs.python311;
     uv.enable = true;
   };
 
   enterShell = ''
     uv venv --allow-existing
-    source "${config.devenv.dotfile}/state/venv/bin/activate"
-    task install
+    source "$UV_PROJECT_ENVIRONMENT/bin/activate"
+    ${pkgs.go-task.out}/bin/task install
   '';
 
-  # https://devenv.sh/tasks/
-  # tasks = {
-  #   "myproj:setup".exec = "mytool build";
-  #   "devenv:enterShell".after = [ "myproj:setup" ];
-  # };
-
-  # https://devenv.sh/tests/
-  # enterTest = ''
-  #   echo "Running tests"
-  #   uv run pytest
-  # '';
-
-  # https://devenv.sh/pre-commit-hooks/
-  pre-commit.hooks = {
-    ruff.enable = true;
-    ruff-format.enable = true;
-    markdownlint.enable = true;
+  git-hooks = {
+    hooks = {
+      ruff.enable = true;
+      ruff-format.enable = true;
+      alejandra.enable = true;
+      markdownlint.enable = true;
+    };
   };
 
   # See full reference at https://devenv.sh/reference/options/
