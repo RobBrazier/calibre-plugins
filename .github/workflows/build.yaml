@@ -69,6 +69,7 @@ jobs:
         shell: devenv shell bash -- -e {0}
         run: |
           uv venv && source "$DEVENV_STATE/venv/bin/activate"
+          task install
           task package
 
       - name: Upload Plugin Artifacts
