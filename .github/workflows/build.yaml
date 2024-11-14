@@ -26,8 +26,8 @@ jobs:
       - name: Install devenv.sh
         run: nix profile install nixpkgs#devenv
 
-      # - name: Build the devenv shell and run any pre-commit hooks
-      #   run: devenv test
+      - name: Build the devenv shell and run any pre-commit hooks
+        run: devenv test -d
 
       - name: Run Unit Tests
         shell: devenv shell bash -- -e {0}
