@@ -16,6 +16,8 @@
     UV_PYTHON = "${config.languages.python.package}/bin/python";
   };
 
+  cachix.enable = false;
+
   packages = [
     # Base packages
     pkgs.wget
