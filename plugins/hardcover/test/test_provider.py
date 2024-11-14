@@ -1,33 +1,15 @@
 from datetime import datetime
 from queue import Queue
 from threading import Event
-from types import SimpleNamespace
-from typing import Any
-from common.graphql import GraphQLClient
 import pytest
 from unittest.mock import MagicMock, ANY
 
 from hardcover.provider import HardcoverProvider
+from .utils import create_book_response, create_edition, MockMetadata
 import logging
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
-
-
-@pytest.fixture
-def mock_source():
-    return MagicMock()
-
-
-class MockMetadata(SimpleNamespace):
-    def __init__(self, title: str, authors: list[str]) -> None:
-        super().__init__()
-        self.__dict__.update({"title": title, "authors": authors})
-
-    def set_identifier(self, key, value):
-        identifiers = self.__dict__.get("identifiers", {})
-        identifiers.update({key: value})
-        self.__dict__.update({"identifiers": identifiers})
 
 
 @pytest.fixture
@@ -39,11 +21,6 @@ def provider(mock_source, monkeypatch):
         MagicMock(side_effect=lambda title, authors: MockMetadata(title, authors)),
     )
     return provider_
-
-
-@pytest.fixture
-def mock_client():
-    return MagicMock(spec=GraphQLClient)()
 
 
 def test_get_book_url_no_identifier(provider: HardcoverProvider):
@@ -63,7 +40,7 @@ def test_get_book_url_with_identifier(provider: HardcoverProvider):
 
 
 def test_identify_hardcover_edition(
-    provider: HardcoverProvider, mock_client, monkeypatch
+    provider: HardcoverProvider, mock_gql_client, monkeypatch
 ):
     result_queue = Queue()
     abort = Event()
@@ -87,9 +64,9 @@ def test_identify_hardcover_edition(
         ],
     )
 
-    monkeypatch.setattr(provider, "client", mock_client)
+    monkeypatch.setattr(provider, "client", mock_gql_client)
 
-    mock_client.execute.return_value = data
+    mock_gql_client.execute.return_value = data
 
     provider.identify(logger, result_queue, abort, title, authors, identifiers)
 
@@ -101,63 +78,5 @@ def test_identify_hardcover_edition(
         "hardcover-edition": edition,
         "isbn": "9780618968633",
     }
-    assert built_metadata.pubdate == datetime.fromisoformat("1937-01-01")
-    mock_client.execute.assert_called_once_with(ANY, {"edition": edition}, 30)
-
-
-def create_edition(
-    title: str,
-    id: int,
-    isbn: str = "",
-    authors: list[str] = [],
-    image_url: str = "",
-    language: str = "eng",
-    publisher: str = "",
-    release_date: str = "",
-):
-    edition: dict[str, Any] = {
-        "id": id,
-        "title": title,
-        "isbn_13": isbn,
-        "contributions": [{"author": {"name": name}} for name in authors],
-        "language": {"code3": language},
-        "release_date": release_date,
-    }
-
-    if image_url:
-        edition.update({"image": {"url": image_url}})
-    if publisher:
-        edition.update({"publisher": {"name": publisher}})
-    return edition
-
-
-def create_book_response(
-    title: str,
-    slug: str,
-    series_name: str = "",
-    series_position: int = 0,
-    tags: list[str] = [],
-    editions: list[dict] = [],
-    description: str = "",
-    unwrapped=False,
-):
-    book: dict[str, Any] = {
-        "title": title,
-        "slug": slug,
-        "description": description,
-        "editions": editions,
-        "book_series": {},
-        "taggings": [{"tag": {"tag": tag}} for tag in tags],
-    }
-    if series_name or series_position:
-        book.update(
-            {
-                "book_series": {
-                    "series": {"name": series_name},
-                    "position": series_position,
-                }
-            }
-        )
-    if unwrapped:
-        return book
-    return {"books": [book]}
+    assert built_metadata.pubdate == datetime(1937, 1, 1)
+    mock_gql_client.execute.assert_called_once_with(ANY, {"edition": edition}, 30)
