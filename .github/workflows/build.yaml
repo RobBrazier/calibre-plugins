@@ -31,10 +31,7 @@ jobs:
 
       - name: Run Unit Tests
         shell: devenv shell bash -- -e {0}
-        run: |
-          uv venv && source "$DEVENV_STATE/venv/bin/activate"
-          task install
-          task test -- --cov-report xml --junitxml=junit.xml -o junit_family=legacy
+        run: task test -- --cov-report xml --junitxml=junit.xml -o junit_family=legacy
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4.6.0
@@ -70,10 +67,7 @@ jobs:
 
       - name: Build Plugins
         shell: devenv shell bash -- -e {0}
-        run: |
-          uv venv && source "$DEVENV_STATE/venv/bin/activate"
-          task install
-          task package
+        run: task package
 
       - name: Upload Plugin Artifacts
         uses: actions/upload-artifact@v4
