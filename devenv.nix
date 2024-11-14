@@ -13,7 +13,7 @@
     CALIBRE_LIBRARY = "${config.devenv.dotfile}/state/calibre";
     UV_CACHE_DIR = "${config.devenv.dotfile}/cache/uv";
     UV_PYTHON_DOWNLOADS = "never";
-    UV_PYTHON = "${pkgs.python39.out}/bin/python";
+    UV_PYTHON = "${config.languages.python.package}/bin/python";
   };
 
   packages = [
@@ -27,7 +27,7 @@
 
   languages.python = {
     enable = true;
-    package = pkgs.python39;
+    package = pkgs.python311;
     uv.enable = true;
   };
 
