@@ -20,6 +20,7 @@ query FindBookBySlug($slug: String) {
       }
       position
     }
+    rating
     taggings(where: {spoiler: {_eq: false}}, limit: 10, distinct_on: tag_id) {
       tag {
         tag
@@ -67,6 +68,7 @@ query FindBookByIsbnOrAsin($isbn: String, $asin: String) {
       }
       position
     }
+    rating
     taggings(where: {spoiler: {_eq: false}}, limit: 10, distinct_on: tag_id) {
       tag {
         tag
@@ -114,6 +116,7 @@ query FindBookByEdition($edition: Int) {
       }
       position
     }
+    rating
     taggings(where: {spoiler: {_eq: false}}, limit: 10, distinct_on: tag_id) {
       tag {
         tag
@@ -162,6 +165,7 @@ query FindBooksByIds($ids: [Int!]) {
       }
       position
     }
+    rating
     taggings(where: {spoiler: {_eq: false}}, limit: 10, distinct_on: tag_id) {
       tag {
         tag

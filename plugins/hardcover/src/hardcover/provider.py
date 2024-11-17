@@ -78,7 +78,8 @@ class HardcoverProvider:
         if len(book_series) > 0:
             series = book_series[0]
             meta.series = series.series.name
-            meta.series_index = series.position  # pyright: ignore
+            if series.position:
+                meta.series_index = series.position  # pyright: ignore
         meta.set_identifier("hardcover", book.slug)
         meta.set_identifier("hardcover-edition", str(edition.id))
         if isbn := edition.isbn_13:
@@ -95,6 +96,9 @@ class HardcoverProvider:
             meta.publisher = edition.publisher.name
         if language := edition.language.code3:
             meta.languages = [language]
+        if book.rating:
+            # hardcover rating is out of 5, calibre is out of 10
+            meta.rating = book.rating * 2
         if edition.release_date:
             try:
                 meta.pubdate = datetime.strptime(edition.release_date, "%Y-%m-%d")

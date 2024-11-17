@@ -126,6 +126,7 @@ class Book:
     slug: str
     book_series: List[BookSeries]
     taggings: List[Tagging]
+    rating: float
     editions: List[Edition]
     description: str
 
@@ -138,6 +139,7 @@ class Book:
                 BookSeries.from_dict(t) for t in safe_default(data, "book_series", [])
             ],
             taggings=[Tagging.from_dict(t) for t in safe_default(data, "taggings", [])],
+            rating=safe_default(data, "rating", 0.0),
             editions=[Edition.from_dict(e) for e in safe_default(data, "editions", [])],
             description=safe_default(data, "description", ""),
         )
