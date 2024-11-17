@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "hardcover"
-version = "0.0.3"
+version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 authors = [{ name = "Rob Brazier", email = "git+github@brzr.co" }]

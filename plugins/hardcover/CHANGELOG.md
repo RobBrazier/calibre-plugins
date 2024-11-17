@@ -1,3 +1,9 @@
+## hardcover-0.1.0 (2024-11-17)
+
+### New Features
+
+- add ratings from hardcover to metadata
+
 ## hardcover-0.0.3 (2024-11-17)
 
 ### Fixes
