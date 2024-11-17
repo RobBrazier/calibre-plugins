@@ -11,7 +11,13 @@ dependencies = ["pyqt5>=5.15.11"]
 members = ["plugins/*", "hooks/*", "libs/*"]
 
 [dependency-groups]
-dev = ["hatch>=1.13.0", "pytest-cov>=6.0.0", "pytest>=8.3.3"]
+dev = [
+    "hatch>=1.13.0",
+    "pytest-cov>=6.0.0",
+    "pytest-datafiles>=3.0.0",
+    "pytest-mock>=3.14.0",
+    "pytest>=8.3.3",
+]
 
 [tool.coverage.run]
 branch = true

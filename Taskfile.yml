@@ -63,10 +63,6 @@ tasks:
     cmds:
       - for: { var: PLUGINS }
         cmd: find "{{ .ROOT_DIR }}/dist" -name '{{ .ITEM }}*.zip' | xargs calibre-customize --add-plugin
-    sources:
-      - "{{ .ROOT_DIR }}/plugins/{{ .PLUGIN }}/dist/{{ .PLUGIN }}*.zip"
-    generates:
-      - "{{ .DEVENV_DOTFILE }}/config/calibre/plugins/{{ .PLUGIN_NAME }}.zip"
 
   run:*:
     desc: Run a single plugin (e.g. run:hardcover)
