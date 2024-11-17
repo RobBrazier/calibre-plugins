@@ -25,7 +25,7 @@ class Hardcover(Source):
             "series",
             "series_index",
             "tags",
-            "description",
+            "comments",
         ]
     )
     options = (
