@@ -64,6 +64,9 @@ class Hardcover(Source):
             url = self.cached_identifier_to_cover_url(hardcover_id)
         return url
 
+    def get_book_url(self, identifiers):
+        return self.provider.get_book_url(identifiers)
+
     def identify(
         self,
         log,
