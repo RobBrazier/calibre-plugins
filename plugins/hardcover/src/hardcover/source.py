@@ -23,7 +23,9 @@ class Hardcover(Source):
             f"identifier:{ID_NAME}-edition",
             "pubdate",
             "series",
+            "series_index",
             "tags",
+            "description",
         ]
     )
     options = (
