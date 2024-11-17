@@ -18,6 +18,7 @@ query FindBookBySlug($slug: String) {
       series {
         name
       }
+      position
     }
     taggings(where: {spoiler: {_eq: false}}, limit: 10, distinct_on: tag_id) {
       tag {
@@ -64,6 +65,7 @@ query FindBookByIsbnOrAsin($isbn: String, $asin: String) {
       series {
         name
       }
+      position
     }
     taggings(where: {spoiler: {_eq: false}}, limit: 10, distinct_on: tag_id) {
       tag {
@@ -110,6 +112,7 @@ query FindBookByEdition($edition: Int) {
       series {
         name
       }
+      position
     }
     taggings(where: {spoiler: {_eq: false}}, limit: 10, distinct_on: tag_id) {
       tag {
@@ -157,6 +160,7 @@ query FindBooksByIds($ids: [Int!]) {
       series {
         name
       }
+      position
     }
     taggings(where: {spoiler: {_eq: false}}, limit: 10, distinct_on: tag_id) {
       tag {
