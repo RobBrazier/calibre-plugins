@@ -203,15 +203,3 @@ class HardcoverIdentifier:
         query = queries.FIND_BOOK_BY_EDITION
         variables = {"edition": edition}
         return self._execute(query, variables)
-
-    def get_book_by_name(self, name: str) -> list[Book]:
-        self.log.info("Finding by Name")
-        query = queries.FIND_BOOK_BY_NAME
-        variables = {"title": name}
-        return self._execute(query, variables)
-
-    def get_book_by_name_authors(self, name: str, authors: list[str]) -> list[Book]:
-        self.log.info("Finding by Name + Authors")
-        query = queries.FIND_BOOK_BY_NAME_AND_AUTHORS
-        variables = {"title": name, "authors": authors}
-        return self._execute(query, variables)
