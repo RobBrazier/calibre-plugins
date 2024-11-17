@@ -35,14 +35,14 @@
     ${pkgs.go-task.out}/bin/task install
   '';
 
-  git-hooks = {
-    hooks = {
-      ruff.enable = true;
-      ruff-format.enable = true;
-      alejandra.enable = true;
-      markdownlint.enable = true;
-    };
-  };
+  # git-hooks = {
+  #   hooks = {
+  #     ruff.enable = true;
+  #     ruff-format.enable = true;
+  #     alejandra.enable = true;
+  #     markdownlint.enable = true;
+  #   };
+  # };
 
   devcontainer.enable = true;
 

@@ -14,7 +14,10 @@ tasks:
   install:
     aliases: [i]
     desc: Install dependencies
-    cmd: uv sync --all-packages {{ .CLI_ARGS }}
+    cmds:
+      - uv sync --all-packages {{ .CLI_ARGS }}
+      - cmd: if ! [ -f "{{ .ROOT_DIR }}/.git/hooks/pre-commit" ]; then uv run pre-commit install; fi
+        silent: true
 
   test:
     aliases: [t]
