@@ -102,4 +102,4 @@ jobs:
 
           echo "Creating release for $PLUGIN_NAME v$VERSION"
 
-          gh release create -d "$SOURCE_TAG" -t "$PLUGIN_NAME v$VERSION" "./$SOURCE_TAG"*.zip
+          gh release create -d "$SOURCE_TAG" -t "$PLUGIN_NAME v$VERSION" "./$SOURCE_TAG"*.zip -F "plugins/$PLUGIN_NAME/CHANGELOG.md"

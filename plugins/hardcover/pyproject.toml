@@ -41,7 +41,9 @@ update_changelog_on_bump = true
 version_files = ["pyproject.toml:version"]
 
 [tool.commitizen.customize]
-changelog_pattern = "^(feat|fix)\\((hardcover|common)\\)(!)?:"
+commit_parser = '^(?P<change_type>feat|fix)(?:\((?:hardcover|common)\)(!)?)?:\s(?P<message>.*)$'
+changelog_pattern = '^(feat|fix)\((hardcover|common)\)(!)?:'
+change_type_map = { "feat" = "New Features", "fix" = "Fixes" }
 
 [tool.hatch.build.hooks.version]
 path = "src/hardcover/__version__.py"
