@@ -90,6 +90,61 @@ def test_identify_by_identifiers(
     mock_gql_client.execute.assert_called_once_with(query, variables, 30)
 
 
+@pytest.mark.parametrize(
+    "identifiers, query, variables",
+    [
+        pytest.param(
+            {"hardcover-edition": EDITION_ID},
+            queries.FIND_BOOK_BY_EDITION,
+            {"edition": EDITION_ID},
+            id="hardcover-edition",
+        ),
+        pytest.param(
+            {"hardcover": SLUG},
+            queries.FIND_BOOK_BY_SLUG,
+            {"slug": SLUG},
+            id="hardcover-slug",
+        ),
+        pytest.param(
+            {"isbn": ISBN},
+            queries.FIND_BOOK_BY_ISBN_OR_ASIN,
+            {"isbn": ISBN, "asin": ""},
+            id="isbn",
+        ),
+        pytest.param(
+            {"mobi-asin": ASIN},
+            queries.FIND_BOOK_BY_ISBN_OR_ASIN,
+            {"isbn": "", "asin": ASIN},
+            id="asin",
+        ),
+        pytest.param(
+            {"isbn": ISBN, "mobi-asin": ASIN},
+            queries.FIND_BOOK_BY_ISBN_OR_ASIN,
+            {"isbn": ISBN, "asin": ASIN},
+            id="isbn+asin",
+        ),
+    ],
+)
+def test_identify_by_identifiers_no_results(
+    identifiers, query, variables, identifier: HardcoverIdentifier, mock_gql_client
+):
+    mock_gql_client.execute.side_effect = [
+        {"books": []},
+        {"search": {"results": {"hits": []}}},
+    ]
+
+    results = identifier.identify("Title", ["Authors"], identifiers)
+
+    assert len(results) == 0
+
+    mock_gql_client.execute.assert_has_calls(
+        [
+            call(query, variables, 30),
+            call(queries.SEARCH_BY_NAME, {"query": "Title"}, 30),
+        ]
+    )
+
+
 def test_identify_by_title_and_author(identifier: HardcoverIdentifier, mock_gql_client):
     title = "The Hobbit"
     authors = ["J. R. R. Tolkien"]
@@ -142,3 +197,11 @@ def test_identify_by_title_and_author(identifier: HardcoverIdentifier, mock_gql_
             call(queries.FIND_BOOKS_BY_IDS, {"ids": result_ids}, 30),
         ]
     )
+
+
+def test_identify_no_title(identifier: HardcoverIdentifier, mock_gql_client):
+    results = identifier.identify(None, None, {})
+
+    assert len(results) == 0
+
+    assert not mock_gql_client.execute.called

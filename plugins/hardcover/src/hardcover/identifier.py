@@ -60,6 +60,8 @@ class HardcoverIdentifier:
         # Fuzzy Search by Title
         if title:
             book_ids = self.search_book(title)
+            if len(book_ids) == 0:
+                return []
             books = self.get_books_by_ids(book_ids)
 
             # Get closest books by Title
@@ -72,7 +74,7 @@ class HardcoverIdentifier:
         # currently `the-hobbit` disappears if queried with
         #   > title: The Hobbit, author: J. R. R. Tolkien
         # as that one also has an author of Christopher Tolkien
-        if authors and False:
+        if authors and candidate_books and False:
             # Join authors and remove spaces
             search_authors = ",".join(sorted(authors))
 
