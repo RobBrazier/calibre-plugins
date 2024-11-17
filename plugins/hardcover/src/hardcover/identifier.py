@@ -119,9 +119,9 @@ class HardcoverIdentifier:
         return [book[1] for book in candidates]
 
     @staticmethod
-    def _sanitize(input: str) -> str:
+    def _sanitize(raw_input: str) -> str:
         # remove whitespace around string
-        result = input.strip()
+        result = raw_input.strip()
         # remove whitespace inside string
         result = result.replace(" ", "")
         # remove non-alphanumeric characters
