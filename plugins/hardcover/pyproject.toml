@@ -1,10 +1,10 @@
 [build-system]
-requires = ["hatchling", "hatch-zipped-directory", "versioningit"]
+requires = ["hatchling", "hatch-zipped-directory"]
 build-backend = "hatchling.build"
 
 [project]
 name = "hardcover"
-dynamic = ["version"]
+version = "0.0.3"
 description = "Add your description here"
 readme = "README.md"
 authors = [{ name = "Rob Brazier", email = "git+github@brzr.co" }]
@@ -16,32 +16,6 @@ common = { workspace = true }
 
 [project.scripts]
 hardcover = "hardcover:main"
-
-[tool.hatch.version]
-source = "versioningit"
-
-[tool.hatch.build]
-artifacts = ["src/hardcover/__version__.py"]
-
-[tool.versioningit.vcs]
-method = "git"
-match = ["hardcover-*"]
-default-tag = "0.0.0+unknown"
-
-[tool.versioningit.format]
-distance = "{next_version}.dev{distance}+{vcs}{rev}"
-dirty = "{version}"
-distance-dirty = "{next_version}.dev{distance}+{vcs}{rev}.dirty"
-
-[tool.versioningit.tag2version]
-rmprefix = "hardcover-"
-
-[tool.versioningit.write]
-file = "src/hardcover/__version__.py"
-template = '''
-__version__ = "{version}"
-__version_tuple__ = {version_tuple}
-'''
 
 [tool.hatch.build.targets.zipped-directory.hooks.custom]
 path = "../../hooks/hatch-calibre-bundle/src/hatch_calibre_bundle/plugin.py"
@@ -58,3 +32,16 @@ sources = ["src/hardcover"]
 
 [tool.hatch.envs.default]
 installer = "uv"
+
+[tool.commitizen]
+name = "cz_customize"
+version_provider = "pep621"
+tag_format = "hardcover-$version"
+update_changelog_on_bump = true
+version_files = ["pyproject.toml:version"]
+
+[tool.commitizen.customize]
+changelog_pattern = "^(feat|fix)\\((hardcover|common)\\)(!)?:"
+
+[tool.hatch.build.hooks.version]
+path = "src/hardcover/__version__.py"

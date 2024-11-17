@@ -1,14 +1,18 @@
 # pyright: reportIncompatibleMethodOverride=false
 from queue import Empty, Queue
 from calibre.ebooks.metadata.sources.base import Option, Source
-from .__version__ import __version_tuple__
+from .__version__ import __version__
+
+
+def parse_version(version: str) -> tuple[int, ...]:
+    return tuple([int(s) for s in version.split(".")])
 
 
 class Hardcover(Source):
     name = "Hardcover"
     description = "Downloads metadata and covers from Hardcover.app"
     author = "Rob Brazier"
-    version = __version_tuple__
+    version = parse_version(__version__)
     minimum_calibre_version = (7, 7, 0)
 
     ID_NAME = "hardcover"

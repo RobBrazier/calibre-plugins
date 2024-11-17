@@ -48,7 +48,7 @@ wheels = [
 
 [[package]]
 name = "calibre-plugins"
-version = "0.1.0"
+version = "0.0.0"
 source = { virtual = "." }
 dependencies = [
     { name = "pyqt5" },
@@ -446,7 +446,7 @@ wheels = [
 
 [[package]]
 name = "hardcover"
-version = "0.1.0.dev9+g661c644.dirty"
+version = "0.0.3"
 source = { editable = "plugins/hardcover" }
 dependencies = [
     { name = "common" },

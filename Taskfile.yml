@@ -55,6 +55,9 @@ tasks:
       - "{{ .ROOT_DIR }}/src/**/*.py"
     generates:
       - "{{ .ROOT_DIR }}/dist/{{ .PLUGIN }}*.zip"
+    preconditions:
+      - sh: '[ "{{ .PLUGINS | splitList "\n" | has .PLUGIN }}" == "true" ]'
+        msg: "Invalid plugin name {{ .PLUGIN }} provided"
 
   install:*:
     desc: Install a single plugin (e.g. install:hardcover)
@@ -66,6 +69,9 @@ tasks:
     cmds:
       - for: { var: PLUGINS }
         cmd: find "{{ .ROOT_DIR }}/dist" -name '{{ .ITEM }}*.zip' | xargs calibre-customize --add-plugin
+    preconditions:
+      - sh: '[ "{{ .PLUGINS | splitList "\n" | has .PLUGIN }}" == "true" ]'
+        msg: "Invalid plugin name {{ .PLUGIN }} provided"
 
   run:*:
     desc: Run a single plugin (e.g. run:hardcover)
@@ -75,6 +81,9 @@ tasks:
     deps:
       - "install:{{.PLUGIN}}"
     cmd: calibre-debug -r {{ .PLUGIN_NAME }} -- {{.CLI_ARGS}}
+    preconditions:
+      - sh: '[ "{{ .PLUGINS | splitList "\n" | has .PLUGIN }}" == "true" ]'
+        msg: "Invalid plugin name {{ .PLUGIN }} provided"
 
   calibre:setup:
     desc: Setup Calibre for first use
@@ -96,3 +105,12 @@ tasks:
   calibre:run:
     desc: Start Calibre in Debug Mode
     cmd: calibre-debug -g -- {{.CLI_ARGS}}
+
+  version:*:
+    desc: Bump version for a plugin
+    vars:
+      PLUGIN: "{{ index .MATCH 0 }}"
+    cmd: uv run --directory "{{ .ROOT_DIR }}/plugins/{{ .PLUGIN }}" cz bump {{ .CLI_ARGS }}
+    preconditions:
+      - sh: '[ "{{ .PLUGINS | splitList "\n" | has .PLUGIN }}" == "true" ]'
+        msg: "Invalid plugin {name {{ .PLUGIN }} provided"
