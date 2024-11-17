@@ -50,6 +50,8 @@ dev = [
     { name = "hatch" },
     { name = "pytest" },
     { name = "pytest-cov" },
+    { name = "pytest-datafiles" },
+    { name = "pytest-mock" },
 ]
 
 [package.metadata]
@@ -60,6 +62,8 @@ dev = [
     { name = "hatch", specifier = ">=1.13.0" },
     { name = "pytest", specifier = ">=8.3.3" },
     { name = "pytest-cov", specifier = ">=6.0.0" },
+    { name = "pytest-datafiles", specifier = ">=3.0.0" },
+    { name = "pytest-mock", specifier = ">=3.14.0" },
 ]
 
 [[package]]
@@ -305,7 +309,7 @@ wheels = [
 
 [[package]]
 name = "hardcover"
-version = "0.0.1"
+version = "0.1.0.dev9+g661c644.dirty"
 source = { editable = "plugins/hardcover" }
 dependencies = [
     { name = "common" },
@@ -690,6 +694,30 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/be/45/9b538de8cef30e17c7b45ef42f538a94889ed6a16f2387a6c89e73220651/pytest-cov-6.0.0.tar.gz", hash = "sha256:fde0b595ca248bb8e2d76f020b465f3b107c9632e6a1d1705f17834c89dcadc0", size = 66945 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/36/3b/48e79f2cd6a61dbbd4807b4ed46cb564b4fd50a76166b1c4ea5c1d9e2371/pytest_cov-6.0.0-py3-none-any.whl", hash = "sha256:eee6f1b9e61008bd34975a4d5bab25801eb31898b032dd55addc93e96fcaaa35", size = 22949 },
+]
+
+[[package]]
+name = "pytest-datafiles"
+version = "3.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pytest" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e7/1d/723fa4be3dec5384eb332888c1a22b4eeff848f9121efdded6859420902a/pytest-datafiles-3.0.0.tar.gz", hash = "sha256:a70c4c66a36d1cdcfc095607f04eee66eaef3fa64cbb62d60c47ce169901d1d4", size = 8357 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0b/d7/a29d8b79a8cf3125a4ed9af80cd93ef0374a8e8f6ea40268ed5cc2a6ce1d/pytest_datafiles-3.0.0-py2.py3-none-any.whl", hash = "sha256:2176e10d3f6e76f358925a897e21e2bcc5a0170b92fac4e66ed055eaa2ca6a22", size = 7416 },
+]
+
+[[package]]
+name = "pytest-mock"
+version = "3.14.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pytest" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c6/90/a955c3ab35ccd41ad4de556596fa86685bf4fc5ffcc62d22d856cfd4e29a/pytest-mock-3.14.0.tar.gz", hash = "sha256:2719255a1efeceadbc056d6bf3df3d1c5015530fb40cf347c0f9afac88410bd0", size = 32814 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f2/3b/b26f90f74e2986a82df6e7ac7e319b8ea7ccece1caec9f8ab6104dc70603/pytest_mock-3.14.0-py3-none-any.whl", hash = "sha256:0b72c38033392a5f4621342fe11e9219ac11ec9d375f8e2a0c164539e0d70f6f", size = 9863 },
 ]
 
 [[package]]
