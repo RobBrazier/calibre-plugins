@@ -8,4 +8,4 @@ VERSION="$(echo "$SOURCE_TAG" | awk -F'-' '{ print $2 }')"
 
 echo "Creating release for $PLUGIN_NAME v$VERSION"
 
-echo gh release create -d "$SOURCE_TAG" -t "$PLUGIN_NAME v$VERSION" --generate-notes --notes-start-tag "$PREVIOUS_TAG" "./$SOURCE_TAG"*.zip
+gh release create -d "$SOURCE_TAG" -t "$PLUGIN_NAME v$VERSION" --generate-notes --notes-start-tag "$PREVIOUS_TAG" "./$SOURCE_TAG"*.zip
