@@ -34,7 +34,6 @@ installer = "uv"
 source = "regex_commit"
 path = "src/hardcover/__version__.py"
 tag_name = "hardcover-{new_version}"
-commit = false
 tag_sign = false
 
 # [tool.versioningit]
