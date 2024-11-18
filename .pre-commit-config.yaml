@@ -1,17 +1,18 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
-    - repo: https://github.com/astral-sh/ruff-pre-commit
-      # Ruff version.
-      rev: v0.7.4
-      hooks:
-          # Run the linter.
-          - id: ruff
-          # Run the formatter.
-          - id: ruff-format
-    - repo: https://github.com/commitizen-tools/commitizen
-      rev: v3.31.0
-      hooks:
-          - id: commitizen
-          - id: commitizen-branch
-            stages: [pre-push]
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.7.4
+    hooks:
+      # Run the linter.
+      - id: ruff
+      # Run the formatter.
+      - id: ruff-format
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v3.31.0
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]
+      - id: commitizen-branch
+        stages: [pre-push]
