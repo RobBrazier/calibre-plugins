@@ -16,7 +16,7 @@ tasks:
     desc: Install dependencies
     cmds:
       - uv sync --all-packages {{ .CLI_ARGS }}
-      - cmd: '[ -f "{{ .ROOT_DIR }}/.git/hooks/pre-commit" ] || uv run pre-commit install -t pre-commit -t commit-msg -t pre-push'
+      - cmd: '[ -f "{{ .ROOT_DIR }}/.git/hooks/pre-commit" ] || uv run pre-commit install -t pre-commit -t commit-msg'
         silent: true
 
   test:
