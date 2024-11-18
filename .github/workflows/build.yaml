@@ -96,10 +96,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          SOURCE_TAG="${GITHUB_REF#refs/tags/}"
-          PLUGIN_NAME="$(echo "$SOURCE_TAG" | awk -F'-' '{ print $1 }')"
-          VERSION="$(echo "$SOURCE_TAG" | awk -F'-' '{ print $2 }')"
-
-          echo "Creating release for $PLUGIN_NAME v$VERSION"
-
-          gh release create -d "$SOURCE_TAG" -t "$PLUGIN_NAME v$VERSION" "./$SOURCE_TAG"*.zip -F "plugins/$PLUGIN_NAME/CHANGELOG.md"
+          bash .github/release.sh "$GITHUB_REF"
