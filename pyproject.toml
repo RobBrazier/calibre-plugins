@@ -7,6 +7,9 @@ authors = [{ name = "Rob Brazier", email = "git+github@brzr.co" }]
 requires-python = ">=3.9"
 dependencies = ["pyqt5>=5.15.11"]
 
+[tool.uv]
+cache-keys = [{ git = { commit = true, tags = true } }]
+
 [tool.uv.workspace]
 members = ["plugins/*", "hooks/*", "libs/*"]
 
