@@ -13,6 +13,7 @@ members = ["plugins/*", "hooks/*", "libs/*"]
 [dependency-groups]
 dev = [
     "commitizen>=3.31.0",
+    "gitlint>=0.19.1",
     "hatch>=1.13.0",
     "pre-commit>=4.0.1",
     "pytest-cov>=6.0.0",

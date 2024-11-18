@@ -9,10 +9,7 @@ repos:
       - id: ruff
       # Run the formatter.
       - id: ruff-format
-  - repo: https://github.com/commitizen-tools/commitizen
-    rev: v3.31.0
+  - repo: https://github.com/jorisroovers/gitlint
+    rev: v0.19.1
     hooks:
-      - id: commitizen
-        stages: [commit-msg]
-      - id: commitizen-branch
-        stages: [pre-push]
+      - id: gitlint
