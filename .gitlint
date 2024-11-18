@@ -137,4 +137,4 @@ contrib=contrib-title-conventional-commits
 # under [general] section above.
 [contrib-title-conventional-commits]
 # Specify allowed commit types. For details see: https://www.conventionalcommits.org/
-types = feat,fix,chore
+types = feat,fix,chore,bump

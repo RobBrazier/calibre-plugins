@@ -35,26 +35,7 @@ source = "regex_commit"
 path = "src/hardcover/__version__.py"
 tag_name = "hardcover-{new_version}"
 tag_sign = false
-
-# [tool.versioningit]
-# default-version = "0.0.0+unknown"
-# [tool.versioningit.vcs]
-# method = "git"
-# match = ["hardcover-*"]
-#
-# [tool.versioningit.tag2version]
-# rmprefix = "hardcover-"
-#
-# [tool.versioningit.write]
-# file = "src/hardcover/__version__.py"
-# template = """
-# __version__ = {version_tuple}
-# """
-#
-# [tool.versioningit.format]
-# distance = "{next_version}.dev{distance}+{vcs}{rev}"
-# dirty = "{version}+dirty"
-# distance-dirty = "{next_version}.dev{distance}+{vcs}{rev}.dirty"
+commit_message = "bump(hardcover): {current_version} -> {new_version}"
 
 [tool.hatch.build]
 artifacts = ["src/hardcover/__version__.py"]
