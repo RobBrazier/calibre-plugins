@@ -14,4 +14,3 @@ dist/
 *.egg-info/
 .task/
 .coverage
-**/__version__.py

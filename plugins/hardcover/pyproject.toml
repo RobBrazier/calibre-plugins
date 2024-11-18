@@ -1,11 +1,11 @@
 [build-system]
-requires = ["hatchling", "hatch-zipped-directory", "versioningit"]
+requires = ["hatchling", "hatch-zipped-directory", "hatch-regex-commit"]
 build-backend = "hatchling.build"
 
 [project]
 name = "hardcover"
 dynamic = ["version"]
-description = "Add your description here"
+description = "Hardcover Metadata Source Plugin for Calibre"
 readme = "README.md"
 authors = [{ name = "Rob Brazier", email = "git+github@brzr.co" }]
 requires-python = ">=3.9"
@@ -31,22 +31,30 @@ sources = ["src/hardcover"]
 installer = "uv"
 
 [tool.hatch.version]
-source = "versioningit"
+source = "regex_commit"
+path = "src/hardcover/__version__.py"
+tag_name = "hardcover-{new_version}"
+commit = false
 
-[tool.versioningit]
-default-version = "0.0.0+unknown"
-[tool.versioningit.vcs]
-method = "git"
-match = ["hardcover-*"]
-
-[tool.versioningit.tag2version]
-rmprefix = "hardcover-"
-
-[tool.versioningit.write]
-file = "src/hardcover/__version__.py"
-template = """
-__version__ = {version_tuple}
-"""
+# [tool.versioningit]
+# default-version = "0.0.0+unknown"
+# [tool.versioningit.vcs]
+# method = "git"
+# match = ["hardcover-*"]
+#
+# [tool.versioningit.tag2version]
+# rmprefix = "hardcover-"
+#
+# [tool.versioningit.write]
+# file = "src/hardcover/__version__.py"
+# template = """
+# __version__ = {version_tuple}
+# """
+#
+# [tool.versioningit.format]
+# distance = "{next_version}.dev{distance}+{vcs}{rev}"
+# dirty = "{version}+dirty"
+# distance-dirty = "{next_version}.dev{distance}+{vcs}{rev}.dirty"
 
 [tool.hatch.build]
 artifacts = ["src/hardcover/__version__.py"]

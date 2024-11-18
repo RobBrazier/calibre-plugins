@@ -9,7 +9,7 @@
 #
 [general]
 # Ignore certain rules, this example uses both full name and id
-ignore=title-trailing-punctuation, body-min-length, body-is-missing
+ignore=title-trailing-punctuation, body-min-length, body-is-missing, T1
 
 # verbosity should be a value between 1 and 3, the commandline -v flags take precedence over this
 # verbosity = 2
