@@ -114,3 +114,13 @@ tasks:
     preconditions:
       - sh: '[ "{{ .PLUGINS | splitList "\n" | has .PLUGIN }}" == "true" ]'
         msg: "Invalid plugin {name {{ .PLUGIN }} provided"
+
+  changelog:*:
+    desc: Generate changelog for a plugin
+    vars:
+      PLUGIN: "{{ index .MATCH 0 }}"
+    dir: "{{ .ROOT_DIR }}"
+    cmd: git cliff --include-path 'plugins/{{ .PLUGIN }}/**/*' --include-path 'libs/common/**/*' --tag-pattern '{{ .PLUGIN }}-*' -o 'plugins/{{ .PLUGIN }}/CHANGELOG.md'
+    preconditions:
+      - sh: '[ "{{ .PLUGINS | splitList "\n" | has .PLUGIN }}" == "true" ]'
+        msg: "Invalid plugin {name {{ .PLUGIN }} provided"

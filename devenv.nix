@@ -21,6 +21,7 @@
     pkgs.calibre
     # Utilities
     pkgs.go-task
+    pkgs.git-cliff
   ];
 
   languages.python = {
