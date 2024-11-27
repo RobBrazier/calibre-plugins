@@ -113,7 +113,7 @@ tasks:
     desc: Download Calibre source for IDE completion
     dir: "{{ .CALIBRE_HOME }}/lib"
     cmds:
-      - wget -O - "https://github.com/kovidgoyal/calibre/archive/refs/tags/v{{ .CALIBRE_VERSION }}.tar.gz" | tar xz --strip-components=2 --wildcards '*/src/*'
+      - wget -qO - "https://github.com/kovidgoyal/calibre/archive/refs/tags/v{{ .CALIBRE_VERSION }}.tar.gz" | tar xz --strip-components=2 --wildcards '*/src/*'
     status:
       - test -d "{{ .CALIBRE_HOME }}/lib"
 
