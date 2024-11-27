@@ -17,15 +17,12 @@ isolates your main calibre library from development
 
 You can see all available scripts with `task list`
 
-You can absolutely run without devenv or nix though - this just makes the
-calibre environment portable and isolated from your main one
-
 ### Required tools:
 
 #### Installed via Mise
-1. [uv](https://docs.astral.sh/uv/)
-2. [task](https://taskfile.dev/) (mentioned above)
-3. [pre-commit](https://pre-commit.com/)
+1. [uv](https://docs.astral.sh/uv/) - Python Package Manager
+2. [task](https://taskfile.dev/) - Task Runner
+3. [pre-commit](https://pre-commit.com/) - Commit Checker (ensures that release notes get updated properly)
 4. Python (uv can install this for you with `uv python install`)
 
 #### Install externally
