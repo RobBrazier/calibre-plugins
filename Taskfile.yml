@@ -3,6 +3,8 @@ version: "3"
 vars:
   PLUGINS:
     sh: "ls plugins"
+  CALIBRE_HOME: "{{ .ROOT_DIR }}/.calibre"
+  CALIBRE_VERSION: "7.21.0"
 
 tasks:
   list:
@@ -18,6 +20,7 @@ tasks:
       - uv sync --all-packages {{ .CLI_ARGS }}
       - cmd: '[ -f "{{ .ROOT_DIR }}/.git/hooks/pre-commit" ] || uv run pre-commit install -t pre-commit -t commit-msg'
         silent: true
+      - task: calibre:source
 
   test:
     aliases: [t]
@@ -89,9 +92,8 @@ tasks:
     desc: Setup Calibre for first use
     requires:
       vars:
-        - CALIBRE_TEMP_DIR
         - CALIBRE_LIBRARY
-    dir: "{{ .CALIBRE_TEMP_DIR }}"
+    dir: "{{ .CALIBRE_HOME }}/temp"
     vars:
       BOOKS:
         - "1513.epub" # Romeo and Juliet
@@ -106,6 +108,14 @@ tasks:
   calibre:run:
     desc: Start Calibre in Debug Mode
     cmd: calibre-debug -g -- {{.CLI_ARGS}}
+
+  calibre:source:
+    desc: Download Calibre source for IDE completion
+    dir: "{{ .CALIBRE_HOME }}/lib"
+    cmds:
+      - wget -O - "https://github.com/kovidgoyal/calibre/archive/refs/tags/v{{ .CALIBRE_VERSION }}.tar.gz" | tar xz --strip-components=2 --wildcards '*/src/*'
+    status:
+      - test -d "{{ .CALIBRE_HOME }}/lib"
 
   version:*:
     desc: Bump version for a plugin
