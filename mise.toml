@@ -1,0 +1,11 @@
+[tools]
+python = "3.11"
+task = "latest"
+uv = "latest"
+pre-commit = "latest"
+
+[env]
+CALIBRE_HOME = "{{config_root}}/.calibre"
+CALIBRE_CONFIG_DIRECTORY = "{{env.CALIBRE_HOME}}/config"
+CALIBRE_LIBRARY = "{{env.CALIBRE_HOME}}/library"
+PYTHONPATH = "{{env.CALIBRE_HOME}}/lib"

@@ -11,20 +11,23 @@
 
 ## Local Setup
 
-Local setup is automated via [devenv.sh](https://devenv.sh) and [Nix](https://nixos.org)
-
-[`task`](https://taskfile.dev) is pre-installed in the environment and used for
-task running
+Local setup is automated via [mise-en-place](https://mise.jdx.dev/).
+NOTE: You don't have to use this, just makes things more reproducible and
+isolates your main calibre library from development
 
 You can see all available scripts with `task list`
 
 You can absolutely run without devenv or nix though - this just makes the
 calibre environment portable and isolated from your main one
 
-Tools required:
+### Required tools:
 
+#### Installed via Mise
 1. [uv](https://docs.astral.sh/uv/)
-2. task (mentioned above)
-3. Python (uv can install this for you with `uv python install`)
-4. Calibre (you'll want to add the calibre library to your PYTHONPATH for
-   a good IDE/editor experience)
+2. [task](https://taskfile.dev/) (mentioned above)
+3. [pre-commit](https://pre-commit.com/)
+4. Python (uv can install this for you with `uv python install`)
+
+#### Install externally
+1. Calibre - to install/run the plugins - Calibre source is downloaded in
+   `task calibre:source` (called in `task install`)

@@ -3,6 +3,8 @@ version: "3"
 vars:
   PLUGINS:
     sh: "ls plugins"
+  CALIBRE_HOME: "{{ .ROOT_DIR }}/.calibre"
+  CALIBRE_VERSION: "7.21.0"
 
 tasks:
   list:
@@ -18,6 +20,7 @@ tasks:
       - uv sync --all-packages {{ .CLI_ARGS }}
       - cmd: '[ -f "{{ .ROOT_DIR }}/.git/hooks/pre-commit" ] || uv run pre-commit install -t pre-commit -t commit-msg'
         silent: true
+      - task: calibre:source
 
   test:
     aliases: [t]
@@ -89,22 +92,30 @@ tasks:
     desc: Setup Calibre for first use
     requires:
       vars:
-        - CALIBRE_TEMP_DIR
         - CALIBRE_LIBRARY
+    dir: "{{ .CALIBRE_HOME }}/temp"
     vars:
       BOOKS:
-        - "1513.epub.noimages" # Romeo and Juliet
-        - "345.epub.noimages" # Dracula
+        - "1513.epub" # Romeo and Juliet
+        - "345.epub" # Dracula
     cmds:
       - for: { var: BOOKS }
-        cmd: wget -P "{{ .CALIBRE_TEMP_DIR }}" --content-disposition "https://www.gutenberg.org/ebooks/{{ .ITEM }}"
-      - defer: find "{{ .CALIBRE_TEMP_DIR }}" -name "*.epub" | xargs -r rm
-      - cmd: find "{{ .CALIBRE_TEMP_DIR }}" -type f -name "*.epub" | xargs calibredb add --with-library {{ .CALIBRE_LIBRARY }}
+        cmd: wget "https://www.gutenberg.org/ebooks/{{ .ITEM }}.noimages" -O "{{ .ITEM }}"
+      - defer: find "." -name "*.epub" | xargs -r rm
+      - cmd: find "." -type f -name "*.epub" | xargs calibredb add --with-library {{ .CALIBRE_LIBRARY }}
       - cmd: calibre --with-library {{ .CALIBRE_LIBRARY }}
 
   calibre:run:
     desc: Start Calibre in Debug Mode
     cmd: calibre-debug -g -- {{.CLI_ARGS}}
+
+  calibre:source:
+    desc: Download Calibre source for IDE completion
+    dir: "{{ .CALIBRE_HOME }}/lib"
+    cmds:
+      - wget -qO - "https://github.com/kovidgoyal/calibre/archive/refs/tags/v{{ .CALIBRE_VERSION }}.tar.gz" | tar xz --strip-components=2 --wildcards '*/src/*'
+    status:
+      - test -d "{{ .CALIBRE_HOME }}/lib"
 
   version:*:
     desc: Bump version for a plugin

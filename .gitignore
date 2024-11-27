@@ -5,6 +5,10 @@ devenv.local.nix
 # direnv
 .direnv
 
+# Calibre
+.calibre/
+
+# Python
 **/__pycache__/*
 .venv/
 dist/
@@ -12,5 +16,7 @@ dist/
 .ruff-cache/
 .pytest-cache/
 *.egg-info/
-.task/
 .coverage
+
+# Task
+.task/
