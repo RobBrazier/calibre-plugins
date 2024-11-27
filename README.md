@@ -29,5 +29,5 @@ calibre environment portable and isolated from your main one
 4. Python (uv can install this for you with `uv python install`)
 
 #### Install externally
-1. Calibre (you'll want to add the calibre library to your PYTHONPATH for
-   a good IDE/editor experience)
+1. Calibre - to install/run the plugins - Calibre source is downloaded in
+   `task calibre:source` (called in `task install`)
