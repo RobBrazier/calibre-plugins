@@ -91,15 +91,16 @@ tasks:
       vars:
         - CALIBRE_TEMP_DIR
         - CALIBRE_LIBRARY
+    dir: "{{ .CALIBRE_TEMP_DIR }}"
     vars:
       BOOKS:
-        - "1513.epub.noimages" # Romeo and Juliet
-        - "345.epub.noimages" # Dracula
+        - "1513.epub" # Romeo and Juliet
+        - "345.epub" # Dracula
     cmds:
       - for: { var: BOOKS }
-        cmd: wget -P "{{ .CALIBRE_TEMP_DIR }}" --content-disposition "https://www.gutenberg.org/ebooks/{{ .ITEM }}"
-      - defer: find "{{ .CALIBRE_TEMP_DIR }}" -name "*.epub" | xargs -r rm
-      - cmd: find "{{ .CALIBRE_TEMP_DIR }}" -type f -name "*.epub" | xargs calibredb add --with-library {{ .CALIBRE_LIBRARY }}
+        cmd: wget "https://www.gutenberg.org/ebooks/{{ .ITEM }}.noimages" -O "{{ .ITEM }}"
+      - defer: find "." -name "*.epub" | xargs -r rm
+      - cmd: find "." -type f -name "*.epub" | xargs calibredb add --with-library {{ .CALIBRE_LIBRARY }}
       - cmd: calibre --with-library {{ .CALIBRE_LIBRARY }}
 
   calibre:run:
