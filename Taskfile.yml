@@ -24,7 +24,7 @@ tasks:
   hooks:install:
     internal: true
     silent: true
-    cmd: lefthook install
+    cmd: uv run lefthook install
     status:
       - test -e .git/hooks/pre-commit
       - test -e .git/hooks/commit-msg
