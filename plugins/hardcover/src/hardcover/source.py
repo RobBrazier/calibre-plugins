@@ -37,8 +37,8 @@ class Hardcover(Source):
             name="api_key",
             type_="string",
             default="",
-            label=_("API Key"),  # noqa: F821
-            desc=_("Hardcover API Key"),  # noqa: F821
+            label=_("API Key"),
+            desc=_("Hardcover API Key"),
         ),
     )
 

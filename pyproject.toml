@@ -29,3 +29,6 @@ source = ["hooks", "libs", "plugins"]
 
 [tool.pytest.ini_options]
 addopts = "--cov -v"
+
+[tool.ruff]
+builtins = ["_"]
