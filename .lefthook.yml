@@ -5,11 +5,9 @@ pre-commit:
     ruff-lint:
       glob: "*.py"
       run: uv run ruff check {staged_files}
-      stage_fixed: true
     ruff-format:
       glob: "*.py"
       run: uv run ruff format {staged_files}
-      stage_fixed: true
 
 commit-msg:
   commands:
