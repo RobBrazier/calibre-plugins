@@ -13,7 +13,7 @@ common = { workspace = true }
 [tool.bumpver]
 current_version = "0.1.0"
 version_pattern = "MAJOR.MINOR.PATCH"
-commit_message = "bump(hardcover): {version} -> {new_version}"
+commit_message = "bump(hardcover): -> {new_version}"
 pre_commit_hook = "../../scripts/bump-precommit.sh"
 post_commit_hook = "../../scripts/bump-postcommit.sh"
 commit = true
