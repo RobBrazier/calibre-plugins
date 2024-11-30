@@ -17,6 +17,7 @@ dist/
 .pytest-cache/
 *.egg-info/
 .coverage
+build/
 
 # Task
 .task/

@@ -126,10 +126,32 @@ tasks:
       - test -d "{{ .CALIBRE_HOME }}/lib"
 
   version:*:
-    desc: Bump version for a plugin
+    desc: Get the version for a plugin
     vars:
       PLUGIN: "{{ index .MATCH 0 }}"
-    cmd: uv run --directory "{{ .ROOT_DIR }}/plugins/{{ .PLUGIN }}" hatch version {{ .CLI_ARGS }}
+    cmd: uvx  --directory "{{ .ROOT_DIR }}/plugins/{{ .PLUGIN }}" bumpver show
     preconditions:
       - sh: '[ "{{ .PLUGINS | splitList "\n" | has .PLUGIN }}" == "true" ]'
         msg: "Invalid plugin {name {{ .PLUGIN }} provided"
+
+  bump:*:*:
+    desc: Bump version for a plugin
+    vars:
+      PLUGIN: "{{ index .MATCH 0 }}"
+      BUMP: "{{ index .MATCH 1 }}"
+    cmds:
+      - uvx  --directory "{{ .ROOT_DIR }}/plugins/{{ .PLUGIN }}" bumpver update --{{.BUMP}}
+      - uv lock --upgrade-package {{ .PLUGIN }}
+    preconditions:
+      - sh: '[ "{{ .PLUGINS | splitList "\n" | has .PLUGIN }}" == "true" ]'
+        msg: "Invalid plugin {name {{ .PLUGIN }} provided"
+
+  bundle:*:
+    desc: Bundle a plugin
+    vars:
+      PLUGIN: "{{ index .MATCH 0 }}"
+    preconditions:
+      - sh: '[ "{{ .PLUGINS | splitList "\n" | has .PLUGIN }}" == "true" ]'
+        msg: "Invalid plugin {name {{ .PLUGIN }} provided"
+    dir: "{{ .ROOT_DIR }}"
+    cmd: bash scripts/bundle.sh {{ .PLUGIN }}

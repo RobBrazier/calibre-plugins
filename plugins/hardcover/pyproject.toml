@@ -1,10 +1,6 @@
-[build-system]
-requires = ["hatchling", "hatch-zipped-directory", "hatch-regex-commit"]
-build-backend = "hatchling.build"
-
 [project]
 name = "hardcover"
-dynamic = ["version"]
+version = "0.1.0"
 description = "Hardcover Metadata Source Plugin for Calibre"
 readme = "README.md"
 authors = [{ name = "Rob Brazier", email = "git+github@brzr.co" }]
@@ -14,28 +10,13 @@ dependencies = ["common"]
 [tool.uv.sources]
 common = { workspace = true }
 
-[tool.hatch.build.targets.zipped-directory.hooks.custom]
-path = "../../hooks/hatch-calibre-bundle/src/hatch_calibre_bundle/plugin.py"
-base-path = "../../"
-local-libs = ["libs/common/src"]
-root-path = "src/hardcover"
+[tool.bumpver]
+current_version = "0.1.0"
+version_pattern = "MAJOR.MINOR.PATCH"
 
-[tool.hatch.build.targets.wheel]
-packages = ["src"]
-
-[tool.hatch.build.targets.zipped-directory]
-install-name = ""
-sources = ["src/hardcover"]
-
-[tool.hatch.envs.default]
-installer = "uv"
-
-[tool.hatch.version]
-source = "regex_commit"
-path = "src/hardcover/__version__.py"
-tag_name = "hardcover-{new_version}"
-tag_sign = false
-commit_message = "bump(hardcover): {current_version} -> {new_version}"
-
-[tool.hatch.build]
-artifacts = ["src/hardcover/__version__.py"]
+[tool.bumpver.file_patterns]
+"pyproject.toml" = [
+	'^version = "{version}"$',
+	'^current_version = "{version}"$',
+]
+"src/hardcover/__version__.py" = ['^__version__ = "{version}"$']
