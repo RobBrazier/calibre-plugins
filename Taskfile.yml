@@ -141,10 +141,11 @@ tasks:
       BUMP: "{{ index .MATCH 1 }}"
     cmds:
       - uvx  --directory "{{ .ROOT_DIR }}/plugins/{{ .PLUGIN }}" bumpver update --{{.BUMP}}
-      - uv lock --upgrade-package {{ .PLUGIN }}
     preconditions:
       - sh: '[ "{{ .PLUGINS | splitList "\n" | has .PLUGIN }}" == "true" ]'
         msg: "Invalid plugin {name {{ .PLUGIN }} provided"
+      - sh: "git diff-files --quiet"
+        msg: "Git repo is dirty, please re-run with no uncommitted changes"
 
   bundle:*:
     desc: Bundle a plugin
