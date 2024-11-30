@@ -18,9 +18,16 @@ tasks:
     desc: Install dependencies
     cmds:
       - uv sync --all-packages {{ .CLI_ARGS }}
-      - cmd: '[ -f "{{ .ROOT_DIR }}/.git/hooks/pre-commit" ] || uv run pre-commit install -t pre-commit -t commit-msg'
-        silent: true
+      - task: hooks:install
       - task: calibre:source
+
+  hooks:install:
+    internal: true
+    silent: true
+    cmd: lefthook install
+    status:
+      - test -e .git/hooks/pre-commit
+      - test -e .git/hooks/commit-msg
 
   test:
     aliases: [t]
@@ -112,6 +119,7 @@ tasks:
   calibre:source:
     desc: Download Calibre source for IDE completion
     dir: "{{ .CALIBRE_HOME }}/lib"
+    silent: true
     cmds:
       - wget -qO - "https://github.com/kovidgoyal/calibre/archive/refs/tags/v{{ .CALIBRE_VERSION }}.tar.gz" | tar xz --strip-components=2 --wildcards '*/src/*'
     status:

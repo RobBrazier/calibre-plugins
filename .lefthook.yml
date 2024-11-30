@@ -1,0 +1,20 @@
+# https://github.com/evilmartians/lefthook/blob/master/docs/configuration.md
+pre-commit:
+  parallel: true
+  commands:
+    ruff-lint:
+      glob: "*.py"
+      run: uv run ruff check {staged_files}
+    ruff-format:
+      glob: "*.py"
+      run: uv run ruff format {staged_files}
+
+commit-msg:
+  commands:
+    gitlint:
+      run: "uv run gitlint --staged --msg-filename {1}"
+
+skip_output:
+  - meta
+  - success
+  - summary
