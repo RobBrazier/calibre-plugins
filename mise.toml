@@ -10,7 +10,5 @@ CALIBRE_LIBRARY = "{{env.CALIBRE_HOME}}/library"
 PYTHONPATH = "{{env.CALIBRE_HOME}}/lib"
 _.python.venv = ".venv"
 
-[settings]
-experimental = true
 [settings.python]
 uv_venv_auto = true
