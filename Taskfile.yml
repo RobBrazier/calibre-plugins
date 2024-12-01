@@ -4,7 +4,7 @@ vars:
   PLUGINS:
     sh: "ls plugins"
   CALIBRE_HOME: "{{ .ROOT_DIR }}/.calibre"
-  CALIBRE_VERSION: "7.21.0"
+  CALIBRE_VERSION: "7.22.0"
 
 tasks:
   list:
@@ -28,6 +28,8 @@ tasks:
     status:
       - test -e .git/hooks/pre-commit
       - test -e .git/hooks/commit-msg
+      - grep -q lefthook .git/hooks/pre-commit
+      - grep -q lefthook .git/hooks/commit-msg
 
   test:
     aliases: [t]
