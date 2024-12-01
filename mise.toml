@@ -2,7 +2,6 @@
 python = "3.11"
 task = "latest"
 uv = "latest"
-pre-commit = "latest"
 yq = "latest"
 git-cliff = "latest"
 

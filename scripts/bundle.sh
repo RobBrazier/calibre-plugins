@@ -37,7 +37,7 @@ fi
 
 # Get name and version from pyproject.toml
 NAME="$(yq -r '.project.name' "$PLUGIN_DIR/pyproject.toml")"
-VERSION="$(yq -r '.project.version' "$PLUGIN_DIR/pyproject.toml")"
+VERSION="$(grep -F "__version__ = " "$PLUGIN_DIR/src/$PLUGIN_NAME/_version.py" | cut -d'"' -f2)"
 
 # Create dist directory if it doesn't exist
 mkdir -p dist
@@ -66,21 +66,16 @@ rm -r "$TARGET_DIR"/*-info "$TARGET_DIR/.lock"
 # Copy local dependencies
 find "$TARGET_DIR" -name '_*.pth' -type f -print0 | 
     while IFS= read -r -d '' name; do 
-        file="$(basename "$name")"
-        module="${file#_}"
-        module="${module%.*}"
-        target="$(cat "$name" | tr -d '[:space:]')"
-        cp -r "$target/$module" "$TARGET_DIR/$module"
+        loc="$(cat $name | tr -d '[:space:]')"
+        cp -r "$loc/"* "$TARGET_DIR"
         rm "$name"
     done
 
 # Clean pycache
-find "$TARGET_DIR" -name '__pycache__' -type d | xargs -r rm -r
+find "$TARGET_DIR" -name '__pycache__' -o -name '*.*-info' -type d | xargs -r rm -r
 
 # Create plugin-import-name-$NAME.txt
 touch "$TARGET_DIR/plugin-import-name-$NAME.txt"
-
-ls -la "$TARGET_DIR"
 
 # Create zip file from temp directory to dist
 DIST_OUTPUT="$(pwd)/dist/$NAME-$VERSION.zip"
