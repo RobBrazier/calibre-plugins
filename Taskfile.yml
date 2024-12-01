@@ -30,6 +30,8 @@ tasks:
     status:
       - test -e .git/hooks/pre-commit
       - test -e .git/hooks/commit-msg
+      - grep -q lefthook .git/hooks/pre-commit
+      - grep -q lefthook .git/hooks/commit-msg
 
   test:
     aliases: [t]

@@ -17,7 +17,6 @@ commit-msg:
     gitlint:
       run: "uv run gitlint --staged --msg-filename {1}"
 
-skip_output:
-  - meta
-  - success
-  - summary
+output:
+  - failure
+  - execution
