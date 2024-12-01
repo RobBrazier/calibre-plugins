@@ -119,6 +119,8 @@ tasks:
       - echo "Bumping {{.PLUGIN}} to {{.VERSION}}"
       - SETUPTOOLS_SCM_PRETEND_VERSION_FOR_{{.PLUGIN | upper}}={{.VERSION}} uv lock --upgrade-package {{.PLUGIN}}
       - cmd: 'git commit -am "bump({{.PLUGIN}}): Update lock for {{.VERSION}}"'
+      - cmd: "git tag -f {{.PLUGIN}}-{{.VERSION}}"
+      - echo "Run `git push && git push --tags` to Release"
     preconditions:
       - sh: '[ "{{ .PLUGINS | splitList "\n" | has .PLUGIN }}" == "true" ]'
         msg: "Invalid plugin {name {{ .PLUGIN }} provided"
