@@ -100,37 +100,23 @@ tasks:
     requires:
       vars:
         - PLUGIN
-    cmd: git cliff --include-path 'plugins/{{.PLUGIN}}/**/*' --include-path 'libs/common/**/*' --tag-pattern '{{.PLUGIN}}-*' {{.CLI_ARGS}}
+    cmd: git cliff --include-path 'plugins/{{.PLUGIN}}/**/*' --include-path 'libs/**/*' --tag-pattern '{{.PLUGIN}}-*' {{.CLI_ARGS}}
 
   bump:
     desc: Bump version for a plugin
     requires:
       vars:
         - PLUGIN
+    vars:
+      NEW_VERSION_SH:
+        sh: "task cliff PLUGIN={{.PLUGIN}} -- --bumped-version"
+      PREFIX: "{{.PLUGIN}}-"
+      VERSION: "{{ .NEW_VERSION_SH | trimPrefix .PREFIX }}"
+    prompt: "Version for {{.PLUGIN}} will be bumped to {{.VERSION}}"
     cmds:
-      - cmd: |
-          new_version="$(task cliff PLUGIN={{.PLUGIN}} -- --bumped-version | awk -F'-' '{ print $2 }')"
-          echo "Bumping {{.PLUGIN}} to ${new_version}"
-          SETUPTOOLS_SCM_PRETEND_VERSION_FOR_{{.PLUGIN | upper}}=${new_version} uv lock --upgrade-package {{.PLUGIN}}
-          echo "Updating changelog"
-          task changelog "PLUGIN={{.PLUGIN}}" VERSION=${new_version}
+      - echo "Bumping {{.PLUGIN}} to {{.VERSION}}"
+      - SETUPTOOLS_SCM_PRETEND_VERSION_FOR_{{.PLUGIN | upper}}={{.VERSION}} uv lock --upgrade-package {{.PLUGIN}}
+      - cmd: 'git commit -am "bump({{.PLUGIN}}): Update lock for {{.VERSION}}"'
     preconditions:
       - sh: '[ "{{ .PLUGINS | splitList "\n" | has .PLUGIN }}" == "true" ]'
         msg: "Invalid plugin {name {{ .PLUGIN }} provided"
-
-  changelog:
-    desc: Generate changelog for a plugin
-    requires:
-      vars:
-        - PLUGIN
-    vars:
-      VERSION: '{{default "" .VERSION}}'
-    dir: "{{ .ROOT_DIR }}"
-    preconditions:
-      - sh: '[ "{{ .PLUGINS | splitList "\n" | has .PLUGIN }}" == "true" ]'
-        msg: "Invalid plugin name {{ .PLUGIN }} provided"
-    cmds:
-      - task: cliff
-        vars:
-          PLUGIN: "{{ .PLUGIN }}"
-          CLI_ARGS: -o 'plugins/{{ .PLUGIN }}/CHANGELOG.md'{{if .VERSION}} --tag {{.PLUGIN}}-{{.VERSION}}{{end}}

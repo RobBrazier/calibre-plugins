@@ -76,8 +76,32 @@ jobs:
         with:
           name: built-plugins
 
-      - name: Release
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Split tag name
+        id: release-info
         run: |
-          bash .github/release.sh "$GITHUB_REF"
+          # Remove 'refs/tags/' if present in GITHUB_REF
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          # Split on hyphen and set plugin name
+          PLUGIN=${TAG_NAME%%-*}
+          # Get everything after the first hyphen for version
+          VERSION=${TAG_NAME#*-}
+
+          # Set outputs
+          echo "plugin=${PLUGIN}" >> $GITHUB_OUTPUT
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Generate a changelog
+        uses: orhun/git-cliff-action@v4.4.1
+        id: git-cliff
+        with:
+          config: cliff.toml
+          args: -vv --latest --strip all --include-path 'plugins/${{ steps.release-info.outputs.plugin }}/**/*' --include-path 'libs/**/*' --tag-pattern '${{ steps.release-info.outputs.plugin }}-*'
+
+      - name: Upload the binary releases
+        uses: svenstaro/upload-release-action@v2.9.0
+        with:
+          file_glob: true
+          file: ${{ steps.release-info.outputs.plugin}}-*.zip
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref }}
+          body: ${{ steps.git-cliff.outputs.content }}
