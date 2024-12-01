@@ -2,6 +2,8 @@
 python = "3.11"
 task = "latest"
 uv = "latest"
+yq = "latest"
+git-cliff = "latest"
 
 [env]
 CALIBRE_HOME = "{{config_root}}/.calibre"

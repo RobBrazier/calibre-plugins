@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "common"
 version = "0.1.0"
@@ -6,7 +10,3 @@ readme = "README.md"
 authors = [{ name = "Rob Brazier", email = "git+github@brzr.co" }]
 requires-python = ">=3.9"
 dependencies = []
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"

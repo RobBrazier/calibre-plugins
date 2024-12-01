@@ -1,6 +1,6 @@
 [build-system]
-requires = ["hatchling", "hatch-zipped-directory", "hatch-regex-commit"]
-build-backend = "hatchling.build"
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "hardcover"
@@ -14,28 +14,12 @@ dependencies = ["common"]
 [tool.uv.sources]
 common = { workspace = true }
 
-[tool.hatch.build.targets.zipped-directory.hooks.custom]
-path = "../../hooks/hatch-calibre-bundle/src/hatch_calibre_bundle/plugin.py"
-base-path = "../../"
-local-libs = ["libs/common/src"]
-root-path = "src/hardcover"
-
-[tool.hatch.build.targets.wheel]
-packages = ["src"]
-
-[tool.hatch.build.targets.zipped-directory]
-install-name = ""
-sources = ["src/hardcover"]
-
-[tool.hatch.envs.default]
-installer = "uv"
-
-[tool.hatch.version]
-source = "regex_commit"
-path = "src/hardcover/__version__.py"
-tag_name = "hardcover-{new_version}"
-tag_sign = false
-commit_message = "bump(hardcover): {current_version} -> {new_version}"
-
-[tool.hatch.build]
-artifacts = ["src/hardcover/__version__.py"]
+[tool.setuptools_scm]
+fallback_version = "0.0.0+unknown"
+version_file = "src/hardcover/_version.py"
+root = "../../"
+tag_regex = '^hardcover-(?P<version>\d+(?:\.\d+){0,2})$'
+version_file_template = '''
+__version__ = "{version}"
+__version_tuple__ = {version_tuple}
+'''
