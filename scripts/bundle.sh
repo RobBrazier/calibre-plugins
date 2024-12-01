@@ -21,6 +21,7 @@ if [ "$#" -ne 1 ]; then
 fi
 
 PLUGIN_NAME="$1"
+PLUGIN_PACKAGE="${PLUGIN_NAME/-/_}"
 PLUGIN_DIR="$(pwd)/plugins/$PLUGIN_NAME"
 
 # Check if plugin directory exists
@@ -37,7 +38,7 @@ fi
 
 # Get name and version from pyproject.toml
 NAME="$(yq -r '.project.name' "$PLUGIN_DIR/pyproject.toml")"
-VERSION="$(grep -F "__version__ = " "$PLUGIN_DIR/src/$PLUGIN_NAME/_version.py" | cut -d'"' -f2)"
+VERSION="$(grep -F "__version__ = " "$PLUGIN_DIR/src/$PLUGIN_PACKAGE/_version.py" | cut -d'"' -f2)"
 
 # Create dist directory if it doesn't exist
 mkdir -p dist
@@ -58,8 +59,8 @@ if ! uv --directory "$PLUGIN_DIR" pip install . --target "$TARGET_DIR" --link-mo
 fi
 
 # Move plugin source into root and clean up src
-mv "$TARGET_DIR/$NAME/"* "$TARGET_DIR"
-rm -r "$TARGET_DIR/$NAME"
+mv "$TARGET_DIR/$PLUGIN_PACKAGE/"* "$TARGET_DIR"
+rm -r "$TARGET_DIR/$PLUGIN_PACKAGE"
 
 # Clean extra files
 rm -r "$TARGET_DIR"/*-info "$TARGET_DIR/.lock"
@@ -76,7 +77,7 @@ find "$TARGET_DIR" -name '_*.pth' -type f -print0 |
 find "$TARGET_DIR" -name '__pycache__' -o -name '*.*-info' -type d | xargs -r rm -r
 
 # Create plugin-import-name-$NAME.txt
-touch "$TARGET_DIR/plugin-import-name-$NAME.txt"
+touch "$TARGET_DIR/plugin-import-name-$PLUGIN_PACKAGE.txt"
 
 # Create zip file from temp directory to dist
 DIST_OUTPUT="$(pwd)/dist/$NAME-$VERSION.zip"

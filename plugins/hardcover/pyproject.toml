@@ -9,10 +9,11 @@ description = "Hardcover Metadata Source Plugin for Calibre"
 readme = "README.md"
 authors = [{ name = "Rob Brazier", email = "git+github@brzr.co" }]
 requires-python = ">=3.9"
-dependencies = ["common"]
+dependencies = ["common", "graphql"]
 
 [tool.uv.sources]
 common = { workspace = true }
+graphql = { workspace = true }
 
 [tool.setuptools_scm]
 fallback_version = "0.0.0+unknown"
