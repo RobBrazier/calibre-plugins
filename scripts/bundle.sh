@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -uex  # Exit on any error
+set -ue  # Exit on any error
 
 # Function to show usage
 usage() {
@@ -41,6 +41,7 @@ VERSION="$(grep -F "__version__ = " "$PLUGIN_DIR/src/$PLUGIN_NAME/_version.py" |
 
 # Create dist directory if it doesn't exist
 mkdir -p dist
+find dist -name "$PLUGIN_NAME*.zip" -delete
 
 # Create temporary directory
 TEMP_DIR=$(mktemp -d)

@@ -1,0 +1,39 @@
+version: "3"
+
+vars:
+  CALIBRE_HOME: "{{ .TASKFILE_DIR }}"
+  CALIBRE_LIBRARY: "{{ .CALIBRE_HOME }}/library"
+  CALIBRE_TEMP: "{{ .CALIBRE_HOME }}/temp"
+  CALIBRE_LIB: "{{ .CALIBRE_HOME }}/lib"
+  CALIBRE_VERSION: "7.21.0"
+
+tasks:
+  test:
+    cmd: echo "{{ .CALIBRE_HOME }}"
+  setup:
+    desc: Setup Calibre for first use
+    dir: "{{ .CALIBRE_TEMP }}"
+    vars:
+      BOOKS:
+        - "1513.epub" # Romeo and Juliet
+        - "345.epub" # Dracula
+    cmds:
+      - for: { var: BOOKS }
+        cmd: wget "https://www.gutenberg.org/ebooks/{{ .ITEM }}.noimages" -O "{{ .ITEM }}"
+      - defer: find "." -name "*.epub" | xargs -r rm
+      - cmd: find "." -type f -name "*.epub" | xargs calibredb add --with-library {{ .CALIBRE_LIBRARY }}
+      - cmd: calibre --with-library {{ .CALIBRE_LIBRARY }}
+
+  run:
+    aliases: [calibre]
+    desc: Start Calibre in Debug Mode
+    cmd: calibre-debug -g -- {{.CLI_ARGS}}
+
+  source:
+    desc: Download Calibre source for IDE completion
+    silent: true
+    dir: "{{ .CALIBRE_LIB }}"
+    cmds:
+      - wget -qO - "https://github.com/kovidgoyal/calibre/archive/refs/tags/v{{ .CALIBRE_VERSION }}.tar.gz" | tar xz --strip-components=2 --wildcards '*/src/*'
+    status:
+      - test -d "{{ .CALIBRE_LIB }}"

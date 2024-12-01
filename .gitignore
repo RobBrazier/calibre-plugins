@@ -5,9 +5,6 @@ devenv.local.nix
 # direnv
 .direnv
 
-# Calibre
-.calibre/
-
 # Python
 **/__pycache__/*
 .venv/
