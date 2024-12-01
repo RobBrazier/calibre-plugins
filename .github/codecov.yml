@@ -7,11 +7,15 @@ component_management:
       name: hardcover
       paths:
         - plugins/hardcover/**
-    - component_id: hook_hatch_calibre_bundle
-      name: hatch-calibre-bundle
+    - component_id: plugin_anilist
+      name: anilist
       paths:
-        - hooks/hatch-calibre-bundle/**
+        - plugins/anilist/**
     - component_id: lib_common
       name: common
       paths:
         - libs/common/**
+    - component_id: lib_graphql
+      name: graphql
+      paths:
+        - libs/graphql/**
