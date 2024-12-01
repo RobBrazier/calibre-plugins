@@ -95,7 +95,7 @@ jobs:
         id: git-cliff
         with:
           config: cliff.toml
-          args: -vv --latest --strip all \
+          args: -vv --current --strip all \
             --include-path 'plugins/${{ steps.release-info.outputs.plugin }}/**/*' --include-path 'libs/**/*' \
             --tag-pattern '${{ steps.release-info.outputs.plugin }}-*' \
             --tag '${{ steps.release-info.outputs.plugin}}-${{steps.release-info.outputs.version}}' \

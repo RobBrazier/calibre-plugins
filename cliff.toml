@@ -2,14 +2,6 @@
 # https://git-cliff.org/docs/configuration
 
 [changelog]
-# template for the changelog header
-header = """
-# Changelog\n
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).\n
-"""
 # template for the changelog body
 # https://keats.github.io/tera/docs/#introduction
 body = """
@@ -17,11 +9,16 @@ body = """
   https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}
 {%- endmacro -%}
 
-{% if version -%}
-    ## [{{ version | trim_start_matches(pat="v") }}] - {{ timestamp | date(format="%Y-%m-%d") }}
-{% else -%}
+{% if version -%}\
+    {% if previous.version %}\
+        ## [{{ version | trim_start_matches(pat="v") }}]\
+          ({{ self::remote_url() }}/compare/{{ previous.version }}..{{ version }}) - {{ timestamp | date(format="%Y-%m-%d") }}
+    {% else %}\
+        ## [{{ version | trim_start_matches(pat="v") }}] - {{ timestamp | date(format="%Y-%m-%d") }}
+    {% endif %}\
+{% else -%}\
     ## [Unreleased]
-{% endif -%}
+{% endif -%}\
 
 {% for group, commits in commits | group_by(attribute="group") %}
     ### {{ group | upper_first }}
@@ -73,23 +70,23 @@ conventional_commits = true
 filter_unconventional = false
 # regex for preprocessing the commit messages
 commit_preprocessors = [
-	# remove issue numbers from commits
-	{ pattern = '\((\w+\s)?#([0-9]+)\)', replace = "" },
+    # remove issue numbers from commits
+    { pattern = '\((\w+\s)?#([0-9]+)\)', replace = "" },
 ]
 # regex for parsing and grouping commits
 commit_parsers = [
-	{ message = "^chore", skip = true },
-	{ message = "^[a|A]dd", group = "Added" },
-	{ message = "^[s|S]upport", group = "Added" },
-	{ message = "^[r|R]emove", group = "Removed" },
-	{ message = "^.*: add", group = "Added" },
-	{ message = "^.*: support", group = "Added" },
-	{ message = "^.*: remove", group = "Removed" },
-	{ message = "^.*: delete", group = "Removed" },
-	{ message = "^test", group = "Fixed" },
-	{ message = "^fix", group = "Fixed" },
-	{ message = "^.*: fix", group = "Fixed" },
-	{ message = "^.*", group = "Changed" },
+    { message = "^chore", skip = true },
+    { message = "^[a|A]dd", group = "Added" },
+    { message = "^[s|S]upport", group = "Added" },
+    { message = "^[r|R]emove", group = "Removed" },
+    { message = "^.*: add", group = "Added" },
+    { message = "^.*: support", group = "Added" },
+    { message = "^.*: remove", group = "Removed" },
+    { message = "^.*: delete", group = "Removed" },
+    { message = "^test", group = "Fixed" },
+    { message = "^fix", group = "Fixed" },
+    { message = "^.*: fix", group = "Fixed" },
+    { message = "^.*", group = "Changed" },
 ]
 # filter out the commits that are not matched by commit parsers
 filter_commits = false
