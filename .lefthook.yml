@@ -9,9 +9,8 @@ pre-commit:
       glob: "*.py"
       run: uv run ruff format {staged_files}
     uv-lock:
-      glob: "uv.lock"
+      glob: "pyproject.toml"
       run: uv lock
-      stage_fixed: true
 
 commit-msg:
   commands:
