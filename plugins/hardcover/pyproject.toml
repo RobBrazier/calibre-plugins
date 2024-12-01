@@ -1,6 +1,10 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "hardcover"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Hardcover Metadata Source Plugin for Calibre"
 readme = "README.md"
 authors = [{ name = "Rob Brazier", email = "git+github@brzr.co" }]
@@ -10,17 +14,11 @@ dependencies = ["common"]
 [tool.uv.sources]
 common = { workspace = true }
 
-[tool.bumpver]
-current_version = "0.1.0"
-version_pattern = "MAJOR.MINOR.PATCH"
-commit_message = "bump(hardcover): -> {new_version}"
-pre_commit_hook = "../../scripts/bump-precommit.sh"
-post_commit_hook = "../../scripts/bump-postcommit.sh"
-commit = true
-
-[tool.bumpver.file_patterns]
-"pyproject.toml" = [
-	'^version = "{version}"$',
-	'^current_version = "{version}"$',
-]
-"src/hardcover/__version__.py" = ['^__version__ = "{version}"$']
+[tool.setuptools_scm]
+version_file = "src/hardcover/_version.py"
+root = "../../"
+tag_regex = '^hardcover-(?P<version>\d+(?:\.\d+){0,2})$'
+version_file_template = '''
+__version__ = "{version}"
+__version_tuple__ = {version_tuple}
+'''

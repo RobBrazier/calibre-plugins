@@ -198,7 +198,7 @@ trusted-deps = [
 [[package]]
 name = "hardcover"
 version = "0.1.0"
-source = { virtual = "plugins/hardcover" }
+source = { editable = "plugins/hardcover" }
 dependencies = [
     { name = "common" },
 ]

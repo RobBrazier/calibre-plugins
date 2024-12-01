@@ -4,6 +4,7 @@ task = "latest"
 uv = "latest"
 pre-commit = "latest"
 yq = "latest"
+git-cliff = "latest"
 
 [env]
 CALIBRE_HOME = "{{config_root}}/.calibre"

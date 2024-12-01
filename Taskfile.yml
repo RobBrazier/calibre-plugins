@@ -134,18 +134,15 @@ tasks:
       - sh: '[ "{{ .PLUGINS | splitList "\n" | has .PLUGIN }}" == "true" ]'
         msg: "Invalid plugin {name {{ .PLUGIN }} provided"
 
-  bump:*:*:
+  bump:*:
     desc: Bump version for a plugin
     vars:
       PLUGIN: "{{ index .MATCH 0 }}"
-      BUMP: "{{ index .MATCH 1 }}"
     cmds:
-      - uvx  --directory "{{ .ROOT_DIR }}/plugins/{{ .PLUGIN }}" bumpver update --{{.BUMP}}
+      - SETUPTOOLS_SCM_PRETEND_VERSION_FOR_{{.PLUGIN | upper}}=0.1.0 uv lock --upgrade-package {{.PLUGIN}}
     preconditions:
       - sh: '[ "{{ .PLUGINS | splitList "\n" | has .PLUGIN }}" == "true" ]'
         msg: "Invalid plugin {name {{ .PLUGIN }} provided"
-      - sh: "git diff-files --quiet"
-        msg: "Git repo is dirty, please re-run with no uncommitted changes"
 
   bundle:*:
     desc: Bundle a plugin
