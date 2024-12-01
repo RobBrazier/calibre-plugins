@@ -15,6 +15,7 @@ dependencies = ["common"]
 common = { workspace = true }
 
 [tool.setuptools_scm]
+fallback_version = "0.0.0+unknown"
 version_file = "src/hardcover/_version.py"
 root = "../../"
 tag_regex = '^hardcover-(?P<version>\d+(?:\.\d+){0,2})$'
