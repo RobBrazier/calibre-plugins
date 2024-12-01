@@ -18,7 +18,7 @@ class HardcoverIdentifier:
 
     def __init__(self, log, identifier: str, api_key: str, timeout=30) -> None:
         # type: (Union[Log, Logger], str, str, int) -> None
-        from common.graphql import GraphQLClient
+        from graphql import GraphQLClient
 
         self.log = log
         self.client = GraphQLClient(self.API_URL)

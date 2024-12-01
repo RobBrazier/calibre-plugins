@@ -1,10 +1,7 @@
 import sys
-import os
 import pytest
 from unittest.mock import MagicMock
-from common.graphql import GraphQLClient
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "../src"))
+from graphql import GraphQLClient
 
 
 def pytest_configure(config):

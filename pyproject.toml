@@ -15,7 +15,6 @@ dev = [
     "gitlint>=0.19.1",
     "lefthook>=1.8.4",
     "pytest-cov>=6.0.0",
-    "pytest-datafiles>=3.0.0",
     "pytest-mock>=3.14.0",
     "pytest>=8.3.3",
     "ruff>=0.8.1",
@@ -27,7 +26,7 @@ omit = ["*test*"]
 source = ["libs", "plugins"]
 
 [tool.pytest.ini_options]
-addopts = "--cov -v"
+addopts = "--cov -v --import-mode=importlib"
 
 [tool.ruff]
 builtins = ["_"]

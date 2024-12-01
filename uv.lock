@@ -5,6 +5,7 @@ requires-python = ">=3.9"
 members = [
     "calibre-plugins",
     "common",
+    "graphql",
     "hardcover",
 ]
 
@@ -34,7 +35,6 @@ dev = [
     { name = "lefthook" },
     { name = "pytest" },
     { name = "pytest-cov" },
-    { name = "pytest-datafiles" },
     { name = "pytest-mock" },
     { name = "ruff" },
 ]
@@ -48,7 +48,6 @@ dev = [
     { name = "lefthook", specifier = ">=1.8.4" },
     { name = "pytest", specifier = ">=8.3.3" },
     { name = "pytest-cov", specifier = ">=6.0.0" },
-    { name = "pytest-datafiles", specifier = ">=3.0.0" },
     { name = "pytest-mock", specifier = ">=3.14.0" },
     { name = "ruff", specifier = ">=0.8.1" },
 ]
@@ -196,15 +195,24 @@ trusted-deps = [
 ]
 
 [[package]]
+name = "graphql"
+version = "0.1.0"
+source = { editable = "libs/graphql" }
+
+[[package]]
 name = "hardcover"
-version = "0.2.0"
+version = "0.1.1.dev52+g49fb38e.d20241201"
 source = { editable = "plugins/hardcover" }
 dependencies = [
     { name = "common" },
+    { name = "graphql" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "common", editable = "libs/common" }]
+requires-dist = [
+    { name = "common", editable = "libs/common" },
+    { name = "graphql", editable = "libs/graphql" },
+]
 
 [[package]]
 name = "iniconfig"
@@ -321,18 +329,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/be/45/9b538de8cef30e17c7b45ef42f538a94889ed6a16f2387a6c89e73220651/pytest-cov-6.0.0.tar.gz", hash = "sha256:fde0b595ca248bb8e2d76f020b465f3b107c9632e6a1d1705f17834c89dcadc0", size = 66945 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/36/3b/48e79f2cd6a61dbbd4807b4ed46cb564b4fd50a76166b1c4ea5c1d9e2371/pytest_cov-6.0.0-py3-none-any.whl", hash = "sha256:eee6f1b9e61008bd34975a4d5bab25801eb31898b032dd55addc93e96fcaaa35", size = 22949 },
-]
-
-[[package]]
-name = "pytest-datafiles"
-version = "3.0.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "pytest" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/e7/1d/723fa4be3dec5384eb332888c1a22b4eeff848f9121efdded6859420902a/pytest-datafiles-3.0.0.tar.gz", hash = "sha256:a70c4c66a36d1cdcfc095607f04eee66eaef3fa64cbb62d60c47ce169901d1d4", size = 8357 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/0b/d7/a29d8b79a8cf3125a4ed9af80cd93ef0374a8e8f6ea40268ed5cc2a6ce1d/pytest_datafiles-3.0.0-py2.py3-none-any.whl", hash = "sha256:2176e10d3f6e76f358925a897e21e2bcc5a0170b92fac4e66ed055eaa2ca6a22", size = 7416 },
 ]
 
 [[package]]

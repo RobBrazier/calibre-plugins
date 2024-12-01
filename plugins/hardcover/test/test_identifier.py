@@ -1,6 +1,6 @@
 from unittest.mock import call
 from pathlib import Path
-from common.graphql import json
+import json
 import pytest
 
 from hardcover import queries
