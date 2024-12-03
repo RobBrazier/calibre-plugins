@@ -21,8 +21,7 @@ ASIN = "0007458428"
 
 @pytest.fixture
 def identifier(mock_gql_client, monkeypatch):
-    identifier = HardcoverIdentifier(logger, "hardcover", "api_key")
-    monkeypatch.setattr(identifier, "client", mock_gql_client)
+    identifier = HardcoverIdentifier(mock_gql_client, logger, "hardcover", "api_key")
     return identifier
 
 
