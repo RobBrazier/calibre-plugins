@@ -4,7 +4,6 @@
 		"config:recommended",
 		":semanticCommits"
 	],
-	"dependencyDashboard": false,
 	"packageRules": [
 		{
 			"matchDatasources": [
@@ -30,7 +29,6 @@
 				"minor",
 				"patch"
 			],
-			"automerge": true,
 			"labels": [
 				"dependencies",
 				"github-actions"
