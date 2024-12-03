@@ -13,10 +13,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Install tools from mise
-        uses: jdx/mise-action@v2.1.7
+        uses: jdx/mise-action@63a673876c7072c1d6ecb2049c0d572976c83b22 # v2.1.7
 
       - name: Install the project
         run: task install
@@ -25,13 +25,13 @@ jobs:
         run: task test -- --cov-report xml --junitxml=junit.xml -o junit_family=legacy
 
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v5.0.7
+        uses: codecov/codecov-action@015f24e6818733317a2da2edd6290ab26238649a # v5.0.7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
-        uses: codecov/test-results-action@v1.0.1
+        uses: codecov/test-results-action@9739113ad922ea0a9abb4b2c0f8bf6a4aa8ef820 # v1.0.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
@@ -40,12 +40,12 @@ jobs:
     needs:
       - test
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
 
       - name: Install tools from mise
-        uses: jdx/mise-action@v2.1.7
+        uses: jdx/mise-action@63a673876c7072c1d6ecb2049c0d572976c83b22 # v2.1.7
 
       - name: Install the project
         run: task install
@@ -54,7 +54,7 @@ jobs:
         run: task package
 
       - name: Upload Plugin Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
         with:
           name: built-plugins
           path: |
@@ -68,11 +68,11 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
         with:
           name: built-plugins
 
@@ -91,7 +91,7 @@ jobs:
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
       - name: Generate a changelog
-        uses: orhun/git-cliff-action@v4.4.1
+        uses: orhun/git-cliff-action@e364f07989916ffb9f50d7ef6c0a8c48082c2792 # v4.4.1
         id: git-cliff
         with:
           config: cliff.toml
@@ -103,7 +103,7 @@ jobs:
             --github-token ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload the binary releases
-        uses: svenstaro/upload-release-action@2.9.0
+        uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd # 2.9.0
         with:
           file_glob: true
           file: ${{ steps.release-info.outputs.plugin}}-*.zip
