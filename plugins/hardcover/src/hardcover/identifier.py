@@ -1,9 +1,14 @@
-from typing import Callable, Optional
+from logging import Logger  # noqa: F401
+from typing import (
+    Callable,
+    Optional,
+    Union,  # noqa: F401
+)
+
+from graphql.client import GraphQLClient
 
 from . import queries
 from .models import Book, Edition
-from typing import Union  # noqa: F401
-from logging import Logger  # noqa: F401
 
 try:
     from calibre.utils.logging import Log  # noqa: F401
@@ -14,14 +19,16 @@ except AttributeError:
 
 
 class HardcoverIdentifier:
-    API_URL = "https://api.hardcover.app/v1/graphql"
-
-    def __init__(self, log, identifier: str, api_key: str, timeout=30) -> None:
-        # type: (Union[Log, Logger], str, str, int) -> None
-        from graphql import GraphQLClient
-
+    def __init__(
+        self,
+        client: GraphQLClient,
+        log,  # type: (Union[Log, Logger])
+        identifier: str,
+        api_key: str,
+        timeout=30,
+    ) -> None:
         self.log = log
-        self.client = GraphQLClient(self.API_URL)
+        self.client = client
         self.client.set_token(api_key)
         self.identifier = identifier
         self.timeout = timeout

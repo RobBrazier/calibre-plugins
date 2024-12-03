@@ -58,12 +58,10 @@ if ! uv --directory "$PLUGIN_DIR" pip install . --target "$TARGET_DIR" --link-mo
     exit 1
 fi
 
-# Move plugin source into root and clean up src
-mv "$TARGET_DIR/$PLUGIN_PACKAGE/"* "$TARGET_DIR"
-rm -r "$TARGET_DIR/$PLUGIN_PACKAGE"
-
-# Clean extra files
-rm -r "$TARGET_DIR"/*-info "$TARGET_DIR/.lock"
+# Clean up cached source if it's come from uv cache
+test -d "$TARGET_DIR/$PLUGIN_PACKAGE" && rm -r "$TARGET_DIR/$PLUGIN_PACKAGE"
+# Move plugin source into root
+cp -r "$PLUGIN_DIR/src/$PLUGIN_PACKAGE/"* "$TARGET_DIR"
 
 # Copy local dependencies
 find "$TARGET_DIR" -name '_*.pth' -type f -print0 | 
@@ -73,8 +71,8 @@ find "$TARGET_DIR" -name '_*.pth' -type f -print0 |
         rm "$name"
     done
 
-# Clean pycache
-find "$TARGET_DIR" -name '__pycache__' -o -name '*.*-info' -type d | xargs -r rm -r
+# Clean extra files
+find "$TARGET_DIR" \( -name '__pycache__' -o -name '*.*-info' -type d \) -o \( -name '.lock' -type f \) | xargs -r rm -r
 
 # Create plugin-import-name-$NAME.txt
 touch "$TARGET_DIR/plugin-import-name-$PLUGIN_PACKAGE.txt"

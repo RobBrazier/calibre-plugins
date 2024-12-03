@@ -5,25 +5,27 @@ from queue import Queue
 from typing import Optional
 
 try:
-    from calibre.utils.logging import Log  # noqa: F401
     from calibre.ebooks.metadata.book.base import Metadata  # noqa: F401
+    from calibre.utils.logging import Log  # noqa: F401
 except ImportError:
     pass
 except AttributeError:
     pass
 
-from .models import Book, Edition
+from graphql.client import GraphQLClient
+
 from .identifier import HardcoverIdentifier
+from .models import Book, Edition
 
 
 class HardcoverProvider:
     ID_NAME = "hardcover"
-
-    identifier: Optional[HardcoverIdentifier]
+    API_URL = "https://api.hardcover.app/v1/graphql"
 
     def __init__(self, source):
         self.source = source
         self.prefs = source.prefs
+        self.client = GraphQLClient(self.API_URL)
 
     def get_book_url(self, identifiers):
         hardcover_id = identifiers.get(self.ID_NAME, None)
@@ -46,7 +48,7 @@ class HardcoverProvider:
         timeout=30,
     ):
         identifier = HardcoverIdentifier(
-            log, self.ID_NAME, self.prefs.get("api_key"), timeout
+            self.client, log, self.ID_NAME, self.prefs.get("api_key"), timeout
         )
         books = identifier.identify(title, authors, identifiers)
 

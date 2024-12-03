@@ -1,7 +1,7 @@
 import json
 import pytest
 from unittest.mock import patch
-from graphql import GraphQLClient
+from graphql.client import GraphQLClient
 
 ENDPOINT = "https://test.endpoint/graphql"
 

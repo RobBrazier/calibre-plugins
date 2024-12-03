@@ -1,5 +1,5 @@
-# pyright: reportIncompatibleMethodOverride=false
 from queue import Empty, Queue
+
 from calibre.ebooks.metadata.sources.base import Option, Source
 
 from ._version import __version_tuple__

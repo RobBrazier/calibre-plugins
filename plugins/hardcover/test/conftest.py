@@ -1,7 +1,7 @@
 import sys
 import pytest
 from unittest.mock import MagicMock
-from graphql import GraphQLClient
+from graphql.client import GraphQLClient
 
 
 def pytest_configure(config):

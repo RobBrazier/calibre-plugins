@@ -8,8 +8,6 @@ vars:
   CALIBRE_VERSION: "7.21.0"
 
 tasks:
-  test:
-    cmd: echo "{{ .CALIBRE_HOME }}"
   setup:
     desc: Setup Calibre for first use
     dir: "{{ .CALIBRE_TEMP }}"
@@ -25,7 +23,6 @@ tasks:
       - cmd: calibre --with-library {{ .CALIBRE_LIBRARY }}
 
   run:
-    aliases: [calibre]
     desc: Start Calibre in Debug Mode
     cmd: calibre-debug -g -- {{.CLI_ARGS}}
 
