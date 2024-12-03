@@ -1,7 +1,7 @@
 {
 	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
 	"extends": [
-		"config:base",
+		"config:recommended",
 		":semanticCommits"
 	],
 	"dependencyDashboard": false,
@@ -10,7 +10,7 @@
 			"matchDatasources": [
 				"pypi"
 			],
-			"matchFiles": [
+			"matchFileNames": [
 				"**/pyproject.toml"
 			],
 			"enabled": true,
