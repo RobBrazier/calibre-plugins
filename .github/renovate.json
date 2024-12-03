@@ -1,0 +1,46 @@
+{
+	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"extends": [
+		"config:base",
+		":semanticCommits"
+	],
+	"dependencyDashboard": false,
+	"packageRules": [
+		{
+			"matchDatasources": [
+				"pypi"
+			],
+			"matchFiles": [
+				"**/pyproject.toml"
+			],
+			"enabled": true,
+			"postUpdateOptions": [
+				"uvGenerate"
+			],
+			"labels": [
+				"dependencies",
+				"python"
+			]
+		},
+		{
+			"matchManagers": [
+				"github-actions"
+			],
+			"matchUpdateTypes": [
+				"minor",
+				"patch"
+			],
+			"automerge": true,
+			"labels": [
+				"dependencies",
+				"github-actions"
+			]
+		}
+	],
+	"prConcurrentLimit": 10,
+	"prHourlyLimit": 2,
+	"schedule": [
+		"every weekend"
+	],
+	"timezone": "UTC"
+}
