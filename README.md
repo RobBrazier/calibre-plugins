@@ -22,7 +22,6 @@ You can see all available scripts with `task list`
 #### Installed via Mise
 1. [uv](https://docs.astral.sh/uv/) - Python Package Manager
 2. [task](https://taskfile.dev/) - Task Runner
-3. [pre-commit](https://pre-commit.com/) - Commit Checker (ensures that release notes get updated properly)
 4. Python (uv can install this for you with `uv python install`)
 
 #### Install externally
