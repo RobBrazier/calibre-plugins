@@ -9,7 +9,8 @@ git-cliff = "latest"
 CALIBRE_HOME = "{{config_root}}/.calibre"
 CALIBRE_CONFIG_DIRECTORY = "{{env.CALIBRE_HOME}}/config"
 CALIBRE_LIBRARY = "{{env.CALIBRE_HOME}}/library"
-PYTHONPATH = "{{env.CALIBRE_HOME}}/lib"
+CALIBRE_DEVELOP_FROM = "{{env.CALIBRE_HOME}}/source/src"
+PYTHONPATH = "{{env.CALIBRE_DEVELOP_FROM}}"
 _.python.venv = ".venv"
 
 [settings.python]

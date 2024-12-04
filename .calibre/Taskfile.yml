@@ -1,11 +1,11 @@
 version: "3"
 
 vars:
-  CALIBRE_HOME: "{{ .TASKFILE_DIR }}"
-  CALIBRE_LIBRARY: "{{ .CALIBRE_HOME }}/library"
-  CALIBRE_TEMP: "{{ .CALIBRE_HOME }}/temp"
-  CALIBRE_LIB: "{{ .CALIBRE_HOME }}/lib"
-  CALIBRE_VERSION: "7.21.0"
+  CALIBRE_HOME: "{{.TASKFILE_DIR}}"
+  CALIBRE_LIBRARY: "library"
+  CALIBRE_TEMP: "temp"
+  CALIBRE_SOURCE: "source"
+  CALIBRE_VERSION: "7.22.0"
 
 tasks:
   setup:
@@ -15,12 +15,14 @@ tasks:
       BOOKS:
         - "1513.epub" # Romeo and Juliet
         - "345.epub" # Dracula
+      CALIBRE_LIB: "{{ joinPath .CALIBRE_HOME .CALIBRE_LIBRARY }}"
     cmds:
       - for: { var: BOOKS }
-        cmd: wget "https://www.gutenberg.org/ebooks/{{ .ITEM }}.noimages" -O "{{ .ITEM }}"
-      - defer: find "." -name "*.epub" | xargs -r rm
-      - cmd: find "." -type f -name "*.epub" | xargs calibredb add --with-library {{ .CALIBRE_LIBRARY }}
-      - cmd: calibre --with-library {{ .CALIBRE_LIBRARY }}
+        cmd: |
+          wget "https://www.gutenberg.org/ebooks/{{ .ITEM }}.noimages" -O "{{ .ITEM }}"
+          calibredb add --with-library {{ .CALIBRE_LIB }} {{ .ITEM }}
+          rm -v {{ .ITEM }}
+      - cmd: calibre --with-library {{ .CALIBRE_LIB }}
 
   run:
     desc: Start Calibre in Debug Mode
@@ -28,9 +30,9 @@ tasks:
 
   source:
     desc: Download Calibre source for IDE completion
-    silent: true
-    dir: "{{ .CALIBRE_LIB }}"
+    dir: "{{ .CALIBRE_SOURCE }}"
     cmds:
-      - wget -qO - "https://github.com/kovidgoyal/calibre/archive/refs/tags/v{{ .CALIBRE_VERSION }}.tar.gz" | tar xz --strip-components=2 --wildcards '*/src/*'
+      - echo "Downloading calibre v{{.CALIBRE_VERSION}} to $PWD"
+      - wget -qO - "https://github.com/kovidgoyal/calibre/archive/refs/tags/v{{ .CALIBRE_VERSION }}.tar.gz" | tar xz --strip-components=1 --wildcards 'calibre-*/src/*' --wildcards 'calibre-*/resources/*'
     status:
-      - test -d "{{ .CALIBRE_LIB }}"
+      - test -d "{{ joinPath .CALIBRE_HOME .CALIBRE_SOURCE }}"
