@@ -11,7 +11,8 @@
         "helpers:pinGitHubActionDigestsToSemver",
         "schedule:weekends",
         ":prConcurrentLimit10",
-        ":prHourlyLimit2"
+        ":prHourlyLimit2",
+        "group:allNonMajor"
     ],
     "labels": [
         "dependencies"
