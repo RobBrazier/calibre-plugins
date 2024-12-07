@@ -25,7 +25,7 @@ jobs:
         run: task test -- --cov-report xml --junitxml=junit.xml -o junit_family=legacy
 
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@015f24e6818733317a2da2edd6290ab26238649a # v5
+        uses: codecov/codecov-action@015f24e6818733317a2da2edd6290ab26238649a # v5.0.7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
