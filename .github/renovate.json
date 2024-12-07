@@ -1,43 +1,60 @@
 {
-	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
-	"extends": [
-		"config:recommended",
-		":approveMajorUpdates",
-		":semanticCommits",
-		":rebaseStalePrs",
-		":maintainLockFilesWeekly",
-		":automergePatch",
-		":automergeRequireAllStatusChecks",
-		"helpers:pinGitHubActionDigests",
-		"schedule:weekends",
-		":prConcurrentLimit10",
-		":prHourlyLimit2"
-	],
-	"packageRules": [
-		{
-			"matchDatasources": [
-				"pypi"
-			],
-			"matchFileNames": [
-				"**/pyproject.toml"
-			],
-			"labels": [
-				"dependencies",
-				"python"
-			]
-		},
-		{
-			"matchManagers": [
-				"github-actions"
-			],
-			"matchUpdateTypes": [
-				"minor",
-				"patch"
-			],
-			"labels": [
-				"dependencies",
-				"github-actions"
-			]
-		}
-	]
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        "config:recommended",
+        ":approveMajorUpdates",
+        ":semanticCommits",
+        ":rebaseStalePrs",
+        ":maintainLockFilesWeekly",
+        ":automergePatch",
+        ":automergeRequireAllStatusChecks",
+        "helpers:pinGitHubActionDigests",
+        "schedule:weekends",
+        ":prConcurrentLimit10",
+        ":prHourlyLimit2"
+    ],
+    "labels": [
+        "dependencies"
+    ],
+    "packageRules": [
+        {
+            "matchDatasources": [
+                "pypi"
+            ],
+            "matchFileNames": [
+                "**/pyproject.toml"
+            ],
+            "addLabels": [
+                "python"
+            ]
+        },
+        {
+            "matchManagers": [
+                "github-actions"
+            ],
+            "matchUpdateTypes": [
+                "minor",
+                "patch"
+            ],
+            "addLabels": [
+                "github-actions"
+            ]
+        },
+        {
+            "matchManagers": [
+                "dockerfile"
+            ],
+            "addLabels": [
+                "dockerfile"
+            ]
+        },
+        {
+            "matchManagers": [
+                "mise"
+            ],
+            "addLabels": [
+                "mise"
+            ]
+        }
+    ]
 }
