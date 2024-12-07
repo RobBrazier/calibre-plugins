@@ -8,7 +8,7 @@
         ":maintainLockFilesWeekly",
         ":automergePatch",
         ":automergeRequireAllStatusChecks",
-        "helpers:pinGitHubActionDigests",
+        "helpers:pinGitHubActionDigestsToSemver",
         "schedule:weekends",
         ":prConcurrentLimit10",
         ":prHourlyLimit2"
