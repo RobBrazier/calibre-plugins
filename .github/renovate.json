@@ -11,8 +11,7 @@
         "helpers:pinGitHubActionDigestsToSemver",
         "schedule:weekends",
         ":prConcurrentLimit10",
-        ":prHourlyLimit2",
-        "group:allNonMajor"
+        ":prHourlyLimit2"
     ],
     "labels": [
         "dependencies"
@@ -30,6 +29,7 @@
             ]
         },
         {
+            "groupName": "Github Actions",
             "matchManagers": [
                 "github-actions"
             ],
