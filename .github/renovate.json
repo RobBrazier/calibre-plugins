@@ -32,10 +32,6 @@
             "matchManagers": [
                 "github-actions"
             ],
-            "matchUpdateTypes": [
-                "minor",
-                "patch"
-            ],
             "addLabels": [
                 "github-actions"
             ]
