@@ -87,9 +87,9 @@ class Edition:
             title=safe_default(data, "title", ""),
             contributions=[
                 Contribution.from_dict(c)
-                for c in safe_default(data, "contributions", [])
+                for c in safe_default(data, "cached_contributors", [])
             ],
-            image=Image.from_dict(safe_default(data, "image", {})),
+            image=Image.from_dict(safe_default(data, "cached_image", {})),
             language=Language.from_dict(safe_default(data, "language", {})),
             publisher=Publisher.from_dict(safe_default(data, "publisher", {})),
             release_date=safe_default(data, "release_date", ""),

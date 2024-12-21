@@ -97,7 +97,7 @@ class HardcoverIdentifier:
         edition = self.find_matching_edition(book.editions)
         if not edition:
             return None
-        authors = [author.author.name for author in edition.contributions]
+        authors = [author.author.name for author in edition.cached_contributors]
         # Join authors and remove spaces
         return ",".join(sorted(authors))
 

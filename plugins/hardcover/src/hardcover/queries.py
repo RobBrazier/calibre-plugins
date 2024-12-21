@@ -33,14 +33,8 @@ query FindBookBySlug($slug: String) {
       id
       isbn_13
       title
-      contributions {
-        author {
-          name
-        }
-      }
-      image {
-        url
-      }
+      cached_contributors
+      cached_image
       language {
         code3
       }
@@ -81,14 +75,8 @@ query FindBookByIsbnOrAsin($isbn: String, $asin: String) {
       id
       isbn_13
       title
-      contributions {
-        author {
-          name
-        }
-      }
-      image {
-        url
-      }
+      cached_contributors
+      cached_image
       language {
         code3
       }
@@ -129,14 +117,8 @@ query FindBookByEdition($edition: Int) {
       id
       isbn_13
       title
-      contributions {
-        author {
-          name
-        }
-      }
-      image {
-        url
-      }
+      cached_contributors
+      cached_image
       language {
         code3
       }
@@ -178,14 +160,8 @@ query FindBooksByIds($ids: [Int!]) {
       id
       isbn_13
       title
-      contributions {
-        author {
-          name
-        }
-      }
-      image {
-        url
-      }
+      cached_contributors
+      cached_image
       language {
         code3
       }
