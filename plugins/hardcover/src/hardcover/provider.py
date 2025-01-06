@@ -47,7 +47,12 @@ class HardcoverProvider:
         timeout=30,
     ):
         identifier = HardcoverIdentifier(
-            self.client, log, self.ID_NAME, self.prefs.get("api_key"), timeout
+            self.client,
+            log,
+            self.ID_NAME,
+            self.prefs.get("api_key"),
+            self.prefs.get("match_sensitivity"),
+            timeout,
         )
         books = identifier.identify(title, authors, identifiers)
 

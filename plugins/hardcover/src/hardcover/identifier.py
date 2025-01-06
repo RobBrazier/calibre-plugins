@@ -22,12 +22,14 @@ class HardcoverIdentifier:
         log,  # type: (Union[Log, Logger])
         identifier: str,
         api_key: str,
+        match_sensitivity: float,
         timeout=30,
     ) -> None:
         self.log = log
         self.client = client
         self.client.set_token(api_key)
         self.identifier = identifier
+        self.match_sensitivity = match_sensitivity
         self.timeout = timeout
 
     def identify(
@@ -115,9 +117,11 @@ class HardcoverIdentifier:
             sanitized_query = self._sanitize(query)
             sanitized_book_comparison = self._sanitize(book_comparison)
             self.log.info(f"Comparing {sanitized_query} to {sanitized_book_comparison}")
-            similarity = distance.get_jaro_distance(sanitized_query, sanitized_book_comparison)
+            similarity = distance.get_jaro_distance(
+                sanitized_query, sanitized_book_comparison
+            )
             print(similarity)
-            if similarity < 0.5:
+            if similarity < self.match_sensitivity:
                 self.log.info(f"Dropping {book_comparison} as it's too distant")
                 continue
             candidates.append((similarity, book))

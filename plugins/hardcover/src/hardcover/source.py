@@ -37,6 +37,15 @@ class Hardcover(Source):
             label=_("API Key"),
             desc=_("Hardcover API Key"),
         ),
+        Option(
+            name="match_sensitivity",
+            type_="number",
+            default=0.7,
+            label=_("Match Sensitivity"),
+            desc=_(
+                "The lower the number, the less relevant the matches. > 1.0 will return 0 matches"
+            ),
+        ),
     )
 
     def __init__(self, *args, **kwargs):
