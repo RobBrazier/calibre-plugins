@@ -115,9 +115,9 @@ tasks:
       NEW_VERSION_SH:
         sh: "task cliff PLUGIN={{.PLUGIN}} -- --bumped-version"
       PREFIX: "{{.PLUGIN}}-"
-      VERSION: "{{ .NEW_VERSION_SH | trimPrefix .PREFIX }}"
+      VERSION: "{{ default (.NEW_VERSION_SH | trimPrefix .PREFIX) .VERSION }}"
       PRETEND: "{{ default 0 .PRETEND }}"
-    prompt: 'Version for {{.PLUGIN}} will be bumped to {{.VERSION}} {{ if eq .PRETEND "0" }}and tag {{.NEW_VERSION_SH}} will be created{{ else }}(PRETEND) - no tags will be created{{end}}'
+    prompt: 'Version for {{.PLUGIN}} will be bumped to {{.VERSION}} {{ if eq .PRETEND "0" }}and tag {{.PREFIX}}{{.VERSION}} will be created{{ else }}(PRETEND) - no tags will be created{{end}}'
     cmds:
       - cmd: echo "Bumping {{.PLUGIN}} to {{.VERSION}}"
         silent: true
