@@ -83,7 +83,7 @@ class HardcoverIdentifier:
         # currently `the-hobbit` disappears if queried with
         #   > title: The Hobbit, author: J. R. R. Tolkien
         # as that one also has an author of Christopher Tolkien
-        if authors and candidate_books and False:
+        if authors and candidate_books:
             # Join authors and remove spaces
             search_authors = ",".join(sorted(authors))
 
@@ -99,8 +99,11 @@ class HardcoverIdentifier:
         edition = self.find_matching_edition(book.editions)
         if not edition:
             return None
+        authors = [
+            item.strip() for sublist in edition.authors for item in sublist.split(",")
+        ]
         # Join authors and remove spaces
-        return ",".join(sorted(book.authors))
+        return ",".join(sorted(authors))
 
     def _order_by_similarity(
         self,
@@ -114,18 +117,15 @@ class HardcoverIdentifier:
             book_comparison = search_fn(book)
             if not book_comparison:
                 continue
-            sanitized_query = self._sanitize(query)
-            sanitized_book_comparison = self._sanitize(book_comparison)
-            self.log.info(f"Comparing {sanitized_query} to {sanitized_book_comparison}")
-            similarity = distance.get_jaro_distance(
-                sanitized_query, sanitized_book_comparison
-            )
-            print(similarity)
+            self.log.info(f"Comparing {query} to {book_comparison}")
+            similarity = distance.get_jaro_distance(query, book_comparison)
             if similarity < self.match_sensitivity:
-                self.log.info(f"Dropping {book_comparison} as it's too distant")
+                self.log.info(
+                    f"Dropping {book_comparison} ({book.slug}) as it's too distant"
+                )
                 continue
             candidates.append((similarity, book))
-        candidates = sorted(candidates, key=lambda x: x[0])
+        candidates = sorted(candidates, key=lambda x: x[0], reverse=True)
         if len(candidates) > top_n and top_n > 0:
             candidates = candidates[:top_n]
         return [book[1] for book in candidates]

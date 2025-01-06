@@ -27,13 +27,15 @@ def create_edition(
         "id": id,
         "title": title,
         "isbn_13": isbn,
-        "contributions": [{"author": {"name": name}} for name in authors],
+        "asin": None,
+        "cached_contibutors": [{"author": {"name": name}} for name in authors],
         "language": {"code3": language},
         "release_date": release_date,
+        "description": None,
     }
 
     if image_url:
-        edition.update({"image": {"url": image_url}})
+        edition.update({"cached_image": {"url": image_url}})
     if publisher:
         edition.update({"publisher": {"name": publisher}})
     return edition
@@ -50,12 +52,14 @@ def create_book_response(
     unwrapped=False,
 ):
     book: dict[str, Any] = {
+        "id": 0,
         "title": title,
         "slug": slug,
         "description": description,
         "editions": editions,
+        "rating": 5.0,
         "book_series": {},
-        "taggings": [{"tag": {"tag": tag}} for tag in tags],
+        "cached_tags": {"Tags": [{"tag": {"tag": tag}} for tag in tags]},
     }
     if series_name or series_position:
         book.update(

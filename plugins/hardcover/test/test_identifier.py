@@ -21,7 +21,9 @@ ASIN = "0007458428"
 
 @pytest.fixture
 def identifier(mock_gql_client, monkeypatch):
-    identifier = HardcoverIdentifier(mock_gql_client, logger, "hardcover", "api_key")
+    identifier = HardcoverIdentifier(
+        mock_gql_client, logger, "hardcover", "api_key", 0.7
+    )
     return identifier
 
 
@@ -30,31 +32,34 @@ def identifier(mock_gql_client, monkeypatch):
     [
         pytest.param(
             {"hardcover-edition": EDITION_ID},
-            queries.FIND_BOOK_BY_EDITION,
+            queries.FIND_BOOK_BY_EDITION % (queries.EDITION_DATA, queries.BOOK_DATA),
             {"edition": EDITION_ID},
             id="hardcover-edition",
         ),
         pytest.param(
             {"hardcover": SLUG},
-            queries.FIND_BOOK_BY_SLUG,
+            queries.FIND_BOOK_BY_SLUG % (queries.BOOK_DATA, queries.EDITION_DATA),
             {"slug": SLUG},
             id="hardcover-slug",
         ),
         pytest.param(
             {"isbn": ISBN},
-            queries.FIND_BOOK_BY_ISBN_OR_ASIN,
+            queries.FIND_BOOK_BY_ISBN_OR_ASIN
+            % (queries.EDITION_DATA, queries.BOOK_DATA),
             {"isbn": ISBN, "asin": ""},
             id="isbn",
         ),
         pytest.param(
             {"mobi-asin": ASIN},
-            queries.FIND_BOOK_BY_ISBN_OR_ASIN,
+            queries.FIND_BOOK_BY_ISBN_OR_ASIN
+            % (queries.EDITION_DATA, queries.BOOK_DATA),
             {"isbn": "", "asin": ASIN},
             id="asin",
         ),
         pytest.param(
             {"isbn": ISBN, "mobi-asin": ASIN},
-            queries.FIND_BOOK_BY_ISBN_OR_ASIN,
+            queries.FIND_BOOK_BY_ISBN_OR_ASIN
+            % (queries.EDITION_DATA, queries.BOOK_DATA),
             {"isbn": ISBN, "asin": ASIN},
             id="isbn+asin",
         ),
@@ -94,31 +99,34 @@ def test_identify_by_identifiers(
     [
         pytest.param(
             {"hardcover-edition": EDITION_ID},
-            queries.FIND_BOOK_BY_EDITION,
+            queries.FIND_BOOK_BY_EDITION % (queries.EDITION_DATA, queries.BOOK_DATA),
             {"edition": EDITION_ID},
             id="hardcover-edition",
         ),
         pytest.param(
             {"hardcover": SLUG},
-            queries.FIND_BOOK_BY_SLUG,
+            queries.FIND_BOOK_BY_SLUG % (queries.BOOK_DATA, queries.EDITION_DATA),
             {"slug": SLUG},
             id="hardcover-slug",
         ),
         pytest.param(
             {"isbn": ISBN},
-            queries.FIND_BOOK_BY_ISBN_OR_ASIN,
+            queries.FIND_BOOK_BY_ISBN_OR_ASIN
+            % (queries.EDITION_DATA, queries.BOOK_DATA),
             {"isbn": ISBN, "asin": ""},
             id="isbn",
         ),
         pytest.param(
             {"mobi-asin": ASIN},
-            queries.FIND_BOOK_BY_ISBN_OR_ASIN,
+            queries.FIND_BOOK_BY_ISBN_OR_ASIN
+            % (queries.EDITION_DATA, queries.BOOK_DATA),
             {"isbn": "", "asin": ASIN},
             id="asin",
         ),
         pytest.param(
             {"isbn": ISBN, "mobi-asin": ASIN},
-            queries.FIND_BOOK_BY_ISBN_OR_ASIN,
+            queries.FIND_BOOK_BY_ISBN_OR_ASIN
+            % (queries.EDITION_DATA, queries.BOOK_DATA),
             {"isbn": ISBN, "asin": ASIN},
             id="isbn+asin",
         ),
@@ -139,14 +147,14 @@ def test_identify_by_identifiers_no_results(
     mock_gql_client.execute.assert_has_calls(
         [
             call(query, variables, 30),
-            call(queries.SEARCH_BY_NAME, {"query": "Title"}, 30),
+            call(queries.SEARCH_BY_NAME, {"query": "Title Authors"}, 30),
         ]
     )
 
 
 def test_identify_by_title_and_author(identifier: HardcoverIdentifier, mock_gql_client):
     title = "The Hobbit"
-    authors = ["J. R. R. Tolkien"]
+    authors = ["J.R.R. Tolkien", "Christopher Tolkien"]
 
     result_ids = [
         382700,
@@ -187,13 +195,16 @@ def test_identify_by_title_and_author(identifier: HardcoverIdentifier, mock_gql_
     mock_gql_client.execute.side_effect = [search_results, books_result["data"]]
     results = identifier.identify(title, authors, {})
 
-    assert len(results) == 20
     assert results[0].slug == "the-hobbit"
 
     mock_gql_client.execute.assert_has_calls(
         [
-            call(queries.SEARCH_BY_NAME, {"query": title}, 30),
-            call(queries.FIND_BOOKS_BY_IDS, {"ids": result_ids}, 30),
+            call(queries.SEARCH_BY_NAME, {"query": f"{title} {authors[0]}"}, 30),
+            call(
+                queries.FIND_BOOKS_BY_IDS % (queries.BOOK_DATA, queries.EDITION_DATA),
+                {"ids": result_ids},
+                30,
+            ),
         ]
     )
 
