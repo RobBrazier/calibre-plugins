@@ -206,12 +206,14 @@ source = { editable = "plugins/hardcover" }
 dependencies = [
     { name = "common" },
     { name = "graphql" },
+    { name = "pyjarowinkler" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "common", editable = "libs/common" },
     { name = "graphql", editable = "libs/graphql" },
+    { name = "pyjarowinkler", specifier = ">=1.8" },
 ]
 
 [[package]]
@@ -248,6 +250,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/96/2d/02d4312c973c6050a18b314a5ad0b3210edb65a906f868e31c111dede4a6/pluggy-1.5.0.tar.gz", hash = "sha256:2cffa88e94fdc978c4c574f15f9e59b7f4201d439195c3715ca9e2486f1d0cf1", size = 67955 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/88/5f/e351af9a41f866ac3f1fac4ca0613908d9a41741cfcf2228f4ad853b697d/pluggy-1.5.0-py3-none-any.whl", hash = "sha256:44e1ad92c8ca002de6377e165f3e0f1be63266ab4d554740532335b9d75ea669", size = 20556 },
+]
+
+[[package]]
+name = "pyjarowinkler"
+version = "1.8"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/04/c2/d560c1eebd87b668394daee4ac07959bc1a00db56364b86863470a8c23e4/pyjarowinkler-1.8.tar.gz", hash = "sha256:49828834eddae6a078ee1329dca572541192a3f49e407608f4063c692c1ef1df", size = 4589 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b9/58/b89073047b447e02b08d4f64fbb984e5a4dfef4134477350b256c625c779/pyjarowinkler-1.8-py2.py3-none-any.whl", hash = "sha256:dc80f4e606a6384729a577d0a0dff5aceadb9efbe19bd0fc04e79d55ffd1e0aa", size = 5904 },
 ]
 
 [[package]]

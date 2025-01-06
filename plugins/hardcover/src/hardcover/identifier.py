@@ -1,5 +1,6 @@
 from logging import Logger  # noqa: F401
 from typing import Callable, List, Optional
+from pyjarowinkler import distance
 
 from graphql.client import GraphQLClient
 
@@ -96,9 +97,8 @@ class HardcoverIdentifier:
         edition = self.find_matching_edition(book.editions)
         if not edition:
             return None
-        authors = edition.authors
         # Join authors and remove spaces
-        return ",".join(sorted(authors))
+        return ",".join(sorted(book.authors))
 
     def _order_by_similarity(
         self,
@@ -115,9 +115,11 @@ class HardcoverIdentifier:
             sanitized_query = self._sanitize(query)
             sanitized_book_comparison = self._sanitize(book_comparison)
             self.log.info(f"Comparing {sanitized_query} to {sanitized_book_comparison}")
-            similarity = self.levenshtein_distance(
-                sanitized_query, sanitized_book_comparison
-            )
+            similarity = distance.get_jaro_distance(sanitized_query, sanitized_book_comparison)
+            print(similarity)
+            if similarity < 0.5:
+                self.log.info(f"Dropping {book_comparison} as it's too distant")
+                continue
             candidates.append((similarity, book))
         candidates = sorted(candidates, key=lambda x: x[0])
         if len(candidates) > top_n and top_n > 0:
@@ -133,24 +135,6 @@ class HardcoverIdentifier:
         # remove non-alphanumeric characters
         result = "".join(c for c in result if c.isalnum())
         return result
-
-    @staticmethod
-    def levenshtein_distance(s1, s2):
-        if len(s1) > len(s2):
-            s1, s2 = s2, s1
-
-        distances = range(len(s1) + 1)
-        for i2, c2 in enumerate(s2):
-            distances_ = [i2 + 1]
-            for i1, c1 in enumerate(s1):
-                if c1 == c2:
-                    distances_.append(distances[i1])
-                else:
-                    distances_.append(
-                        1 + min((distances[i1], distances[i1 + 1], distances_[-1]))
-                    )
-            distances = distances_
-        return distances[-1]
 
     def find_matching_edition(self, editions: list[Edition]):
         # TODO: do some actual matching here ...
@@ -200,7 +184,10 @@ class HardcoverIdentifier:
 
     def get_book_by_isbn_asin(self, isbn: str, asin: str) -> list[Book]:
         self.log.info("Finding by ISBN / ASIN")
-        query = queries.FIND_BOOK_BY_ISBN_OR_ASIN % (queries.EDITION_DATA, queries.BOOK_DATA)
+        query = queries.FIND_BOOK_BY_ISBN_OR_ASIN % (
+            queries.EDITION_DATA,
+            queries.BOOK_DATA,
+        )
         variables = {"isbn": isbn, "asin": asin}
         return self._execute(query, variables)
 
