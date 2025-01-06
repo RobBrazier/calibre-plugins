@@ -8,6 +8,11 @@ vars:
   CALIBRE_VERSION: "7.22.0"
 
 tasks:
+  clean:
+    desc: Clean all (LOCAL) calibre data in the .calibre folder
+    cmds:
+      - "find {{.CALIBRE_HOME}} -maxdepth 1 -mindepth 1 -type d | xargs -r rm -rv"
+
   setup:
     desc: Setup Calibre for first use
     dir: "{{ .CALIBRE_TEMP }}"
@@ -21,7 +26,7 @@ tasks:
         cmd: |
           wget "https://www.gutenberg.org/ebooks/{{ .ITEM }}.noimages" -O "{{ .ITEM }}"
           calibredb add --with-library {{ .CALIBRE_LIB }} {{ .ITEM }}
-          rm -v {{ .ITEM }}
+          rm {{ joinPath .CALIBRE_HOME .CALIBRE_TEMP .ITEM }}
       - cmd: calibre --with-library {{ .CALIBRE_LIB }}
 
   run:
@@ -32,7 +37,13 @@ tasks:
     desc: Download Calibre source for IDE completion
     dir: "{{ .CALIBRE_SOURCE }}"
     cmds:
-      - echo "Downloading calibre v{{.CALIBRE_VERSION}} to $PWD"
+      - cmd: echo "Downloading calibre v{{.CALIBRE_VERSION}} to $PWD"
+        silent: true
+      - cmd: find "{{ joinPath .CALIBRE_HOME .CALIBRE_SOURCE }}" -mindepth 1 -maxdepth 1 -type d | xargs -r rm -r
+        silent: true
       - wget -qO - "https://github.com/kovidgoyal/calibre/archive/refs/tags/v{{ .CALIBRE_VERSION }}.tar.gz" | tar xz --strip-components=1 --wildcards 'calibre-*/src/*' --wildcards 'calibre-*/resources/*'
+      - echo "{{ .CALIBRE_VERSION }}" > .version
     status:
+      # Only run if the source directory doesn't exist, or the version in .version has changed
       - test -d "{{ joinPath .CALIBRE_HOME .CALIBRE_SOURCE }}"
+      - test "$(cat {{ joinPath .CALIBRE_HOME .CALIBRE_SOURCE }}/.version)" = "{{ .CALIBRE_VERSION }}"

@@ -55,7 +55,7 @@ tasks:
       TARGET_PLUGINS: '{{if .PLUGIN}}{{.PLUGIN}}{{else}}{{.PLUGINS | join " "}}{{end}}'
     preconditions:
       - sh: '{{if .PLUGIN}}[ "{{ .PLUGINS | splitList "\n" | has .PLUGIN }}" == "true" ]{{else}}true{{end}}'
-        msg: "Invalid plugin name {{ .PLUGIN }} provided"
+        msg: "Invalid plugin name '{{ .PLUGIN }}' provided"
     dir: "{{ .ROOT_DIR }}"
     sources:
       - "{{ .ROOT_DIR }}/{plugins,lib}/**/*.py"
@@ -73,7 +73,7 @@ tasks:
       TARGET_PLUGINS: "{{if .PLUGIN}}[{{.PLUGIN}}]{{else}}{{.PLUGINS}}{{end}}"
     preconditions:
       - sh: '{{if .PLUGIN}}[ "{{ .PLUGINS | splitList "\n" | has .PLUGIN }}" == "true" ]{{else}}true{{end}}'
-        msg: "Invalid plugin name {{ .PLUGIN }} provided"
+        msg: "Invalid plugin name '{{ .PLUGIN }}' provided"
     cmds:
       - for: { var: TARGET_PLUGINS }
         task: package
@@ -100,10 +100,11 @@ tasks:
   cliff:
     # internal: true
     silent: true
-    requires:
-      vars:
-        - PLUGIN
-    cmd: git cliff --include-path 'plugins/{{.PLUGIN}}/**/*' --include-path 'libs/**/*' --tag-pattern '{{.PLUGIN}}-*' {{.CLI_ARGS}}
+    cmds:
+      - git cliff --include-path 'plugins/{{.PLUGIN}}/**/*' --include-path 'libs/**/*' --tag-pattern '{{.PLUGIN}}-*' {{.CLI_ARGS}}
+    preconditions:
+      - sh: '[ "{{ .PLUGINS | splitList "\n" | has .PLUGIN }}" == "true" ]'
+        msg: "Invalid plugin name '{{ .PLUGIN }}' provided"
 
   bump:
     desc: Bump version for a plugin
@@ -115,13 +116,16 @@ tasks:
         sh: "task cliff PLUGIN={{.PLUGIN}} -- --bumped-version"
       PREFIX: "{{.PLUGIN}}-"
       VERSION: "{{ .NEW_VERSION_SH | trimPrefix .PREFIX }}"
-    prompt: "Version for {{.PLUGIN}} will be bumped to {{.VERSION}}"
+      PRETEND: "{{ default 0 .PRETEND }}"
+    prompt: 'Version for {{.PLUGIN}} will be bumped to {{.VERSION}} {{ if eq .PRETEND "0" }}and tag {{.NEW_VERSION_SH}} will be created{{ else }}(PRETEND) - no tags will be created{{end}}'
     cmds:
-      - echo "Bumping {{.PLUGIN}} to {{.VERSION}}"
-      - SETUPTOOLS_SCM_PRETEND_VERSION_FOR_{{.PLUGIN | upper}}={{.VERSION}} uv lock --upgrade-package {{.PLUGIN}}
-      - cmd: 'git commit -am "bump({{.PLUGIN}}): Update lock for {{.VERSION}}" || true'
-      - cmd: "git tag -f {{.PLUGIN}}-{{.VERSION}}"
-      - echo 'Run `git push && git push --tags` to Release'
+      - cmd: echo "Bumping {{.PLUGIN}} to {{.VERSION}}"
+        silent: true
+      - SETUPTOOLS_SCM_PRETEND_VERSION_FOR_{{.PLUGIN | replace "-" "_" | upper}}={{.VERSION}} uv lock --upgrade-package {{.PLUGIN}}
+      - cmd: '{{ if eq .PRETEND "1" }}echo {{ end }}git commit -am "bump({{.PLUGIN}}): Update lock for {{.VERSION}}" || true'
+      - cmd: '{{ if eq .PRETEND "1" }}echo {{ end }}git tag -f {{.PLUGIN}}-{{.VERSION}}'
+      - cmd: "echo Run 'git push && git push --tags' to Release"
+        silent: true
     preconditions:
       - sh: '[ "{{ .PLUGINS | splitList "\n" | has .PLUGIN }}" == "true" ]'
-        msg: "Invalid plugin {name {{ .PLUGIN }} provided"
+        msg: "Invalid plugin name '{{ .PLUGIN }}' provided"

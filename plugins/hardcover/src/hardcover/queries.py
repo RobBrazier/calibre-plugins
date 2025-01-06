@@ -6,146 +6,76 @@ query Search($query: String!) {
 }
 """
 
+EDITION_DATA = """
+title
+id
+isbn_13
+asin
+cached_contributors
+cached_image
+reading_format_id
+language {
+  code3
+}
+publisher {
+  name
+}
+release_date
+description
+"""
+BOOK_DATA = """
+id
+title
+slug
+rating
+description
+book_series(where: {featured: {_eq: true}}) {
+  series {
+    name
+  }
+  position
+}
+cached_tags
+rating
+"""
+
 FIND_BOOK_BY_SLUG = """
 query FindBookBySlug($slug: String) {
   books(
     where: {slug: {_eq: $slug}}
-    order_by: {users_read_count: desc_nulls_last}
   ) {
-    title
-    slug
-    book_series {
-      series {
-        name
-      }
-      position
-    }
-    rating
-    taggings(where: {spoiler: {_eq: false}}, limit: 10, distinct_on: tag_id) {
-      tag {
-        tag
-      }
-    }
+    %s
     editions(
-      where: {_or: [{edition_format: {_neq: "Audiobook"}}, {edition_format: {_is_null: true}}]}
-      order_by: {users_count: desc_nulls_last}
+      where: {reading_format_id: {_in: [1, 4]}}
+      order_by: {users_count: desc_nulls_last, language_id: desc_nulls_last}
     ) {
-      id
-      isbn_13
-      title
-      contributions {
-        author {
-          name
-        }
-      }
-      image {
-        url
-      }
-      language {
-        code3
-      }
-      publisher {
-        name
-      }
-      release_date
+      %s
     }
-    description
   }
 }
 """
 
 FIND_BOOK_BY_ISBN_OR_ASIN = """
 query FindBookByIsbnOrAsin($isbn: String, $asin: String) {
-  books(
-    where: {editions: {_and: [{_or: [{isbn_13: {_eq: $isbn}}, {isbn_10: {_eq: $isbn}}, {asin: {_eq: $isbn}}, {asin: {_eq: $asin}}]}, {_or: [{edition_format: {_neq: "Audiobook"}}, {edition_format: {_is_null: true}}]}]}}
-    order_by: {users_read_count: desc_nulls_last}
+  editions(
+    where: {_and: [{_or: [{isbn_13: {_eq: $isbn}}, {isbn_10: {_eq: $isbn}}, {asin: {_eq: $asin}}]}, {reading_format_id: {_in: [1, 4]}}]}
+    order_by: {users_count: desc_nulls_last}
   ) {
-    title
-    slug
-    book_series {
-      series {
-        name
-      }
-      position
+    %s
+    book {
+      %s
     }
-    rating
-    taggings(where: {spoiler: {_eq: false}}, limit: 10, distinct_on: tag_id) {
-      tag {
-        tag
-      }
-    }
-    editions(
-      where: {_and: [{_or: [{isbn_13: {_eq: $isbn}}, {isbn_10: {_eq: $isbn}}, {asin: {_eq: $isbn}}, {asin: {_eq: $asin}}]}, {_or: [{edition_format: {_neq: "Audiobook"}}, {edition_format: {_is_null: true}}]}]}
-      order_by: {users_count: desc_nulls_last}
-    ) {
-      id
-      isbn_13
-      title
-      contributions {
-        author {
-          name
-        }
-      }
-      image {
-        url
-      }
-      language {
-        code3
-      }
-      publisher {
-        name
-      }
-      release_date
-    }
-    description
   }
 }
 """
 
 FIND_BOOK_BY_EDITION = """
-query FindBookByEdition($edition: Int) {
-  books(
-    where: {editions: {id: {_eq: $edition}}}
-    order_by: {users_read_count: desc_nulls_last}
-  ) {
-    title
-    slug
-    book_series {
-      series {
-        name
-      }
-      position
+query FindBookByEdition($edition: Int!) {
+  editions_by_pk(id: $edition) {
+    %s
+    book {
+      %s
     }
-    rating
-    taggings(where: {spoiler: {_eq: false}}, limit: 10, distinct_on: tag_id) {
-      tag {
-        tag
-      }
-    }
-    editions(
-      where: {_or: [{edition_format: {_neq: "Audiobook"}}, {edition_format: {_is_null: true}}]}
-      order_by: {users_count: desc_nulls_last}
-    ) {
-      id
-      isbn_13
-      title
-      contributions {
-        author {
-          name
-        }
-      }
-      image {
-        url
-      }
-      language {
-        code3
-      }
-      publisher {
-        name
-      }
-      release_date
-    }
-    description
   }
 }
 """
@@ -157,44 +87,13 @@ query FindBooksByIds($ids: [Int!]) {
     where: {id: {_in: $ids}}
     order_by: {users_read_count: desc_nulls_last}
   ) {
-    title
-    slug
-    book_series {
-      series {
-        name
-      }
-      position
-    }
-    rating
-    taggings(where: {spoiler: {_eq: false}}, limit: 10, distinct_on: tag_id) {
-      tag {
-        tag
-      }
-    }
+    %s
     editions(
-      where: {_or: [{edition_format: {_neq: "Audiobook"}}, {edition_format: {_is_null: true}}]}
-      order_by: {users_count: desc_nulls_last}
+      where: {reading_format_id: {_in: [1, 4]}}
+      order_by: {users_count: desc_nulls_last, language_id: desc_nulls_last}
     ) {
-      id
-      isbn_13
-      title
-      contributions {
-        author {
-          name
-        }
-      }
-      image {
-        url
-      }
-      language {
-        code3
-      }
-      publisher {
-        name
-      }
-      release_date
+      %s
     }
-    description
   }
 }
 """

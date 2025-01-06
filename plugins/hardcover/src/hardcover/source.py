@@ -43,16 +43,16 @@ class Hardcover(Source):
         super().__init__(*args, **kwargs)
         with self:
             from .provider import HardcoverProvider
+            from common.cli import MetadataCliHelper
 
             self.provider = HardcoverProvider(self)
+            self.cli_helper = MetadataCliHelper(self, self.name, self.ID_NAME)
 
     def is_configured(self):
         return bool(self.prefs["api_key"])
 
     def cli_main(self, args):
-        from common.cli import MetadataCliHelper
-
-        MetadataCliHelper(self, self.name, self.ID_NAME).run(args)
+        self.cli_helper.run(args)
 
     def get_cached_cover_url(self, identifiers):
         url = None

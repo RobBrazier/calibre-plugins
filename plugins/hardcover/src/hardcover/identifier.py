@@ -1,14 +1,10 @@
 from logging import Logger  # noqa: F401
-from typing import (
-    Callable,
-    Optional,
-    Union,  # noqa: F401
-)
+from typing import Callable, List, Optional
 
 from graphql.client import GraphQLClient
 
 from . import queries
-from .models import Book, Edition
+from .models import Book, Edition, map_from_book_query, map_from_edition_query
 
 try:
     from calibre.utils.logging import Log  # noqa: F401
@@ -66,7 +62,10 @@ class HardcoverIdentifier:
 
         # Fuzzy Search by Title
         if title:
-            book_ids = self.search_book(title)
+            author = None
+            if authors:
+                author = authors[0]
+            book_ids = self.search_book(title, author)
             if len(book_ids) == 0:
                 return []
             books = self.get_books_by_ids(book_ids)
@@ -97,7 +96,7 @@ class HardcoverIdentifier:
         edition = self.find_matching_edition(book.editions)
         if not edition:
             return None
-        authors = [author.author.name for author in edition.contributions]
+        authors = edition.authors
         # Join authors and remove spaces
         return ",".join(sorted(authors))
 
@@ -162,20 +161,26 @@ class HardcoverIdentifier:
         result = self.client.execute(query, variables, self.timeout)
         return result
 
-    def _execute(self, query: str, variables: Optional[dict] = None) -> list[Book]:
-        books = self._execute_internal(query, variables)
-        result: list[Book] = []
-        if "books" not in books:
-            raise ValueError("Invalid response, no books")
-        for entry in books.get("books", []):
-            result.append(Book.from_dict(entry))
+    def _execute(self, query: str, variables: Optional[dict] = None) -> List[Book]:
+        res = self._execute_internal(query, variables)
+        result: List[Book] = []
+        key = list(res.keys())[0]
+
+        entries = res.get(key) if isinstance(res.get(key), list) else [res.get(key)]
+        for entry in entries:
+            if key == "books":
+                result.append(map_from_book_query(entry))
+            elif key in ["editions", "editions_by_pk"]:
+                result.append(map_from_edition_query(entry))
         return result
 
-    def search_book(self, name: str) -> list[int]:
+    def search_book(self, name: str, author: str) -> list[int]:
         self.log.info("Searching for ids by Name")
-        query = queries.SEARCH_BY_NAME
-        variables = {"query": name}
-        search = self._execute_internal(query, variables)
+        query = name
+        if author:
+            query += f" {author}"
+        variables = {"query": query}
+        search = self._execute_internal(queries.SEARCH_BY_NAME, variables)
         hits = search.get("search", {}).get("results", {}).get("hits", [])
         results = []
         for hit in hits:
@@ -189,24 +194,24 @@ class HardcoverIdentifier:
 
     def get_books_by_ids(self, book_ids: list[int]) -> list[Book]:
         self.log.info("Finding by book id")
-        query = queries.FIND_BOOKS_BY_IDS
+        query = queries.FIND_BOOKS_BY_IDS % (queries.BOOK_DATA, queries.EDITION_DATA)
         variables = {"ids": book_ids}
         return self._execute(query, variables)
 
     def get_book_by_isbn_asin(self, isbn: str, asin: str) -> list[Book]:
         self.log.info("Finding by ISBN / ASIN")
-        query = queries.FIND_BOOK_BY_ISBN_OR_ASIN
+        query = queries.FIND_BOOK_BY_ISBN_OR_ASIN % (queries.EDITION_DATA, queries.BOOK_DATA)
         variables = {"isbn": isbn, "asin": asin}
         return self._execute(query, variables)
 
     def get_book_by_slug(self, slug: str) -> list[Book]:
         self.log.info("Finding by Slug")
-        query = queries.FIND_BOOK_BY_SLUG
+        query = queries.FIND_BOOK_BY_SLUG % (queries.BOOK_DATA, queries.EDITION_DATA)
         variables = {"slug": slug}
         return self._execute(query, variables)
 
     def get_book_by_edition(self, edition: str) -> list[Book]:
         self.log.info("Finding by Edition ID")
-        query = queries.FIND_BOOK_BY_EDITION
+        query = queries.FIND_BOOK_BY_EDITION % (queries.EDITION_DATA, queries.BOOK_DATA)
         variables = {"edition": edition}
         return self._execute(query, variables)

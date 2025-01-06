@@ -1,9 +1,0 @@
-services:
-  calibre:
-    build:
-      context: .
-    volumes:
-      - .calibre/library:/books
-    entrypoint: /bin/bash
-    ports:
-      - 8080:8080

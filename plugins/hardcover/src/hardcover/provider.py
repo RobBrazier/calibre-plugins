@@ -1,6 +1,5 @@
 import queue
 import threading
-from datetime import datetime
 from queue import Queue
 from typing import Optional
 
@@ -74,12 +73,11 @@ class HardcoverProvider:
             return None
         edition = editions[0]
         title = edition.title
-        authors = [c.author.name for c in edition.contributions]
+        authors = edition.authors
         meta = self.init_metadata(title, authors)
-        book_series = book.book_series
-        if len(book_series) > 0:
-            series = book_series[0]
-            meta.series = series.series.name
+        series = book.series
+        if series:
+            meta.series = series.name
             if series.position:
                 meta.series_index = series.position  # pyright: ignore
         meta.set_identifier("hardcover", book.slug)
@@ -89,26 +87,22 @@ class HardcoverProvider:
             self.source.cache_isbn_to_identifier(isbn, book.slug)
         if book.description:
             meta.comments = book.description
-        if edition.image.url:
+        if edition.image:
             meta.has_cover = True
-            self.source.cache_identifier_to_cover_url(book.slug, edition.image.url)
+            self.source.cache_identifier_to_cover_url(book.slug, edition.image)
         else:
             meta.has_cover = False
         if edition.publisher:
-            meta.publisher = edition.publisher.name
-        if language := edition.language.code3:
+            meta.publisher = edition.publisher
+        if language := edition.language:
             meta.languages = [language]
         if book.rating:
             # hardcover rating is out of 5, calibre is out of 10
             meta.rating = book.rating * 2
         if edition.release_date:
-            try:
-                meta.pubdate = datetime.strptime(edition.release_date, "%Y-%m-%d")
-            except ValueError:
-                log.warn("Unable to parse release date")
-        if book.taggings:
-            # you think this contains some tags?
-            meta.tags = [tag.tag.tag for tag in book.taggings if tag.tag.tag]
+            meta.pubdate = edition.release_date
+        if book.tags:
+            meta.tags = book.tags.tag
         return meta
 
     def enqueue(self, log, result_queue: Queue, shutdown: threading.Event, book: Book):
