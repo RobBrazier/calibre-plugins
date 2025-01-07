@@ -205,7 +205,7 @@ source = { editable = "libs/graphql" }
 
 [[package]]
 name = "hardcover"
-version = "0.2.2.dev2+g2b8aa47.d20250107"
+version = "0.2.2"
 source = { editable = "plugins/hardcover" }
 dependencies = [
     { name = "common" },
