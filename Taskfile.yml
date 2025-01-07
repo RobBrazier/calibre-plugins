@@ -23,6 +23,17 @@ tasks:
       - uv sync --all-packages {{ .CLI_ARGS }}
       - task: hooks:install
       - task: calibre:source
+      - task: setenv
+
+  setenv:
+    desc: Write to .env with your calibre configuration
+    dir: "{{ .ROOT_DIR }}"
+    env:
+      LD_LIBRARY_PATH: ""
+    cmds:
+      - if which calibre-debug &>/dev/null; then calibre-debug {{ .ROOT_DIR }}/scripts/build_env.py; fi
+    status:
+      - test -f .env
 
   hooks:install:
     internal: true
@@ -37,6 +48,8 @@ tasks:
   test:
     aliases: [t]
     desc: Run tests
+    env:
+      LD_LIBRARY_PATH: "{{ .CALIBRE_LIBRARY_PATH }}"
     cmd: uv run pytest {{ .CLI_ARGS }}
 
   clean:
@@ -64,7 +77,7 @@ tasks:
       - "{{ .ROOT_DIR }}/dist/{{ .PLUGIN }}*.zip"
     cmds:
       - for: { var: TARGET_PLUGINS }
-        cmd: bash scripts/bundle.sh {{ .ITEM }}
+        cmd: uv run python scripts/bundle.py {{ .ITEM }}
 
   install-plugin:
     desc: Install a single plugin (e.g. install:hardcover)
