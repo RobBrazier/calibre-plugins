@@ -19,3 +19,5 @@ _version.py
 
 # Task
 .task/
+
+.env

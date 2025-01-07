@@ -13,5 +13,8 @@ CALIBRE_DEVELOP_FROM = "{{env.CALIBRE_HOME}}/source/src"
 PYTHONPATH = "{{env.CALIBRE_DEVELOP_FROM}}"
 _.python.venv = ".venv"
 
+[settings]
+env_file = ".env"
+
 [settings.python]
 uv_venv_auto = true

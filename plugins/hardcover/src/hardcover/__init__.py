@@ -1,21 +1,6 @@
 from queue import Empty, Queue
-import sys
 
-if hasattr(sys, "_called_from_test"):
-
-    class Source:
-        def __init__(self, *args, **kwargs):
-            pass
-
-    class Option:
-        def __init__(self, *args, **kwargs):
-            pass
-
-    def _(*args, **kwargs):
-        pass
-else:
-    from calibre.ebooks.metadata.sources.base import Option, Source
-
+from calibre.ebooks.metadata.sources.base import Option, Source
 
 from ._version import __version_tuple__
 
@@ -66,8 +51,9 @@ class Hardcover(Source):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         with self:
-            from .provider import HardcoverProvider
             from common.cli import MetadataCliHelper
+
+            from .provider import HardcoverProvider
 
             self.provider = HardcoverProvider(self)
             self.cli_helper = MetadataCliHelper(self, self.name, self.ID_NAME)

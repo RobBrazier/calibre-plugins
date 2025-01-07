@@ -18,6 +18,8 @@ dev = [
     "pytest-mock>=3.14.0",
     "pytest>=8.3.3",
     "ruff>=0.8.1",
+    "pytest-dotenv>=0.5.2",
+    "msgpack>=1.1.0",
 ]
 
 [tool.coverage.run]

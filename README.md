@@ -27,3 +27,13 @@ You can see all available scripts with `task list`
 #### Install externally
 1. Calibre - to install/run the plugins - Calibre source is downloaded in
    `task calibre:source` (called in `task install`)
+
+
+### Running Tests Locally
+
+Tests are run with unstubbed calibre libraries - most of the required config is
+setup by `task setenv` (part of `task install`), however if you are running
+tests outside of `task test`, one manual tweak is needed:
+
+* Linux / Mac (maybe): you'll need to set `LD_LIBRARY_PATH` to the value of
+  `CALIBRE_LIBRARY_PATH` environment variable (in .env file)

@@ -18,6 +18,12 @@ jobs:
       - name: Install tools from mise
         uses: jdx/mise-action@5083fe46898c414b2475087cc79da59e7da859e8 # v2.1.11
 
+      - name: Install calibre dependencies
+        run: sudo apt-get install -y libegl1 libopengl0 libxcb-cursor0
+
+      - name: Install calibre
+        run: sudo -v && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin
+
       - name: Install the project
         run: task install
 
