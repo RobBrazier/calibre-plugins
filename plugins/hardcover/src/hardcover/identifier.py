@@ -1,4 +1,3 @@
-from logging import Logger  # noqa: F401
 from typing import Callable, List, Optional
 from pyjarowinkler import distance
 
@@ -74,10 +73,6 @@ class HardcoverIdentifier:
             )
 
         # Filter by Authors
-        # TODO: make this code better - need to prioritise exact author matches
-        # currently `the-hobbit` disappears if queried with
-        #   > title: The Hobbit, author: J. R. R. Tolkien
-        # as that one also has an author of Christopher Tolkien
         if authors and candidate_books:
             # Join authors and remove spaces
             search_authors = ",".join(sorted(authors))
