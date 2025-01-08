@@ -9,7 +9,7 @@ envs = {
 
 if sysname() in ["Linux", "Darwin"]:
     envs["CALIBRE_LIBRARY_PATH"] = ":".join(
-        set(os.getenv("LD_LIBRARY_PATH").split(":"))
+        [p for p in set(os.getenv("LD_LIBRARY_PATH").split(":")) if p]
     )
 
 

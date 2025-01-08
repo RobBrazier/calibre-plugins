@@ -7,19 +7,14 @@ from graphql.client import GraphQLClient
 from . import queries
 from .models import Book, Edition, map_from_book_query, map_from_edition_query
 
-try:
-    from calibre.utils.logging import Log  # noqa: F401
-except ImportError:
-    pass
-except AttributeError:
-    pass
+from calibre.utils.logging import Log
 
 
 class HardcoverIdentifier:
     def __init__(
         self,
         client: GraphQLClient,
-        log,  # type: (Union[Log, Logger])
+        log: Log,
         identifier: str,
         api_key: str,
         match_sensitivity: float,

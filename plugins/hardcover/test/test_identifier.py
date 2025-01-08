@@ -6,10 +6,7 @@ import pytest
 from hardcover import queries
 from hardcover.identifier import HardcoverIdentifier
 from .utils import create_book_response, create_edition
-import logging
-
-logging.basicConfig()
-logger = logging.getLogger(__name__)
+from calibre.utils import logging as calibre_logging
 
 FIXTURE_DIR = Path(__file__).parent.resolve() / "data"
 
@@ -21,9 +18,8 @@ ASIN = "0007458428"
 
 @pytest.fixture
 def identifier(mock_gql_client, monkeypatch):
-    identifier = HardcoverIdentifier(
-        mock_gql_client, logger, "hardcover", "api_key", 0.7
-    )
+    log = calibre_logging.ThreadSafeLog()
+    identifier = HardcoverIdentifier(mock_gql_client, log, "hardcover", "api_key", 0.7)
     return identifier
 
 

@@ -3,13 +3,8 @@ import threading
 from queue import Queue
 from typing import Optional
 
-try:
-    from calibre.ebooks.metadata.book.base import Metadata  # noqa: F401
-    from calibre.utils.logging import Log  # noqa: F401
-except ImportError:
-    pass
-except AttributeError:
-    pass
+from calibre.ebooks.metadata.book.base import Metadata
+from calibre.utils.logging import Log
 
 from graphql.client import GraphQLClient
 
@@ -38,7 +33,7 @@ class HardcoverProvider:
 
     def identify(
         self,
-        log,  # type: Log
+        log: Log,
         result_queue: queue.Queue,
         abort: threading.Event,
         title: Optional[str] = None,
@@ -66,8 +61,6 @@ class HardcoverProvider:
             return editions[0]
 
     def init_metadata(self, title: str, authors: list[str]):
-        from calibre.ebooks.metadata.book.base import Metadata
-
         return Metadata(title, authors)
 
     def build_metadata(self, log, book: Book):
