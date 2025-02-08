@@ -1,5 +1,5 @@
 [tools]
-python = "3.11"
+python = "3.13.2"
 task = "latest"
 uv = "latest"
 yq = "latest"
