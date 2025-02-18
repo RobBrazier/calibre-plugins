@@ -83,7 +83,7 @@ tasks:
     desc: Install a single plugin (e.g. install:hardcover)
     vars:
       PLUGIN: '{{default "" .PLUGIN}}'
-      TARGET_PLUGINS: "{{if .PLUGIN}}[{{.PLUGIN}}]{{else}}{{.PLUGINS}}{{end}}"
+      TARGET_PLUGINS: "{{if .PLUGIN}}{{.PLUGIN}}{{else}}{{.PLUGINS}}{{end}}"
     preconditions:
       - sh: '{{if .PLUGIN}}[ "{{ .PLUGINS | splitList "\n" | has .PLUGIN }}" == "true" ]{{else}}true{{end}}'
         msg: "Invalid plugin name '{{ .PLUGIN }}' provided"
@@ -134,8 +134,6 @@ tasks:
     cmds:
       - cmd: echo "Bumping {{.PLUGIN}} to {{.VERSION}}"
         silent: true
-      - SETUPTOOLS_SCM_PRETEND_VERSION_FOR_{{.PLUGIN | replace "-" "_" | upper}}={{.VERSION}} uv lock --upgrade-package {{.PLUGIN}}
-      - cmd: '{{ if eq .PRETEND "1" }}echo {{ end }}git commit -am "bump({{.PLUGIN}}): Update lock for {{.VERSION}}" || true'
       - cmd: '{{ if eq .PRETEND "1" }}echo {{ end }}git tag -f {{.PLUGIN}}-{{.VERSION}}'
       - cmd: "echo Run 'git push && git push --tags' to Release"
         silent: true

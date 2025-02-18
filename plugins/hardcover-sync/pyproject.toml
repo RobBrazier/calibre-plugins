@@ -3,28 +3,28 @@ requires = ["setuptools", "versioningit"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "hardcover"
+name = "hardcover-sync"
 dynamic = ["version"]
-description = "Hardcover Metadata Source Plugin for Calibre"
+description = "Hardcover Sync Plugin for Calibre"
 readme = "README.md"
 authors = [{ name = "Rob Brazier", email = "git+github@brzr.co" }]
 requires-python = ">=3.9"
-dependencies = ["common", "graphql", "pyjarowinkler>=1.8"]
+dependencies = ["common", "graphql"]
 
 [tool.uv.sources]
 common = { workspace = true }
 graphql = { workspace = true }
 
 [tool.versioningit.vcs]
-default-tag = "hardcover-0.0.0"
-match = ["hardcover-*"]
+default-tag = "hardcover-sync-0.0.0"
+match = ["hardcover-sync-*"]
 
 [tool.versioningit.tag2version]
-rmprefix = "hardcover-"
+rmprefix = "hardcover-sync-"
 
 [tool.versioningit.write]
 template = '''
 __version__ = "{version}"
 __version_tuple__ = {version_tuple}
 ''' 
-file = "src/hardcover/_version.py"
+file = "src/hardcover_sync/_version.py"

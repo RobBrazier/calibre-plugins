@@ -127,7 +127,7 @@ def main(args: argparse.Namespace):
     output_file = os.path.join(output_dir, f"{plugin_name}-{version}.zip")
 
     temp_dir = tempfile.TemporaryDirectory()
-    dependencies = download_dependencies(plugin_name, plugin_dir, temp_dir)
+    dependencies = download_dependencies(plugin_package, plugin_dir, temp_dir)
 
     create_zip(plugin_package, package_path, output_file, dependencies)
 

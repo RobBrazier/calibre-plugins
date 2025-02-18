@@ -5,7 +5,7 @@ vars:
   CALIBRE_LIBRARY: "library"
   CALIBRE_TEMP: "temp"
   CALIBRE_SOURCE: "source"
-  CALIBRE_VERSION: "7.22.0"
+  CALIBRE_VERSION: "7.26.0"
 
 tasks:
   clean:
