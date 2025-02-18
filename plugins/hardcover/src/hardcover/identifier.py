@@ -108,7 +108,7 @@ class HardcoverIdentifier:
             if not book_comparison:
                 continue
             self.log.info(f"Comparing {query} to {book_comparison}")
-            similarity = distance.get_jaro_distance(query, book_comparison)
+            similarity = distance.get_jaro_winkler_similarity(query, book_comparison)
             if similarity < self.match_sensitivity:
                 self.log.info(
                     f"Dropping {book_comparison} ({book.slug}) as it's too distant"
