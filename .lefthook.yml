@@ -1,13 +1,15 @@
-# https://github.com/evilmartians/lefthook/blob/master/docs/configuration.md
+# https://lefthook.dev/configuration
 pre-commit:
   parallel: true
   commands:
     ruff-lint:
       glob: "*.py"
       run: uv run ruff check {staged_files}
+      stage_fixed: true
     ruff-format:
       glob: "*.py"
       run: uv run ruff format {staged_files}
+      stage_fixed: true
     uv-lock:
       run: uv lock
 
