@@ -10,8 +10,6 @@ pre-commit:
       glob: "*.py"
       run: uv run ruff format {staged_files}
       stage_fixed: true
-    uv-lock:
-      run: uv lock
 
 commit-msg:
   commands:
