@@ -1,20 +1,25 @@
 # https://lefthook.dev/configuration
+templates:
+  uv-run: uv run
+
 pre-commit:
   parallel: true
-  commands:
-    ruff-lint:
+  jobs:
+    - name: python
       glob: "*.py"
-      run: uv run ruff check {staged_files}
-      stage_fixed: true
-    ruff-format:
-      glob: "*.py"
-      run: uv run ruff format {staged_files}
-      stage_fixed: true
+      group:
+        jobs:
+          - name: ruff check
+            run: "{uv-run} ruff check --fix {staged_files}"
+            stage_fixed: true
+          - name: ruff format
+            run: "{uv-run} ruff format {staged_files}"
+            stage_fixed: true
 
 commit-msg:
   commands:
     gitlint:
-      run: "uv run gitlint --staged --msg-filename {1}"
+      run: "{uv-run} gitlint --staged --msg-filename {1}"
 
 output:
   - failure

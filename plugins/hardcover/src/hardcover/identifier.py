@@ -136,7 +136,8 @@ class HardcoverIdentifier:
             return editions[0]
 
     def _execute_internal(self, query: str, variables: Optional[dict] = None) -> dict:
-        result = self.client.execute(query, variables, self.timeout)
+        query_with_fragments = f"{queries.FRAGMENTS}{query}"
+        result = self.client.execute(query_with_fragments, variables, self.timeout)
         return result
 
     def _execute(self, query: str, variables: Optional[dict] = None) -> List[Book]:
@@ -172,27 +173,20 @@ class HardcoverIdentifier:
 
     def get_books_by_ids(self, book_ids: list[int]) -> list[Book]:
         self.log.info("Finding by book id")
-        query = queries.FIND_BOOKS_BY_IDS % (queries.BOOK_DATA, queries.EDITION_DATA)
         variables = {"ids": book_ids}
-        return self._execute(query, variables)
+        return self._execute(queries.FIND_BOOKS_BY_IDS, variables)
 
     def get_book_by_isbn_asin(self, isbn: str, asin: str) -> list[Book]:
         self.log.info("Finding by ISBN / ASIN")
-        query = queries.FIND_BOOK_BY_ISBN_OR_ASIN % (
-            queries.EDITION_DATA,
-            queries.BOOK_DATA,
-        )
         variables = {"isbn": isbn, "asin": asin}
-        return self._execute(query, variables)
+        return self._execute(queries.FIND_BOOK_BY_ISBN_OR_ASIN, variables)
 
     def get_book_by_slug(self, slug: str) -> list[Book]:
         self.log.info("Finding by Slug")
-        query = queries.FIND_BOOK_BY_SLUG % (queries.BOOK_DATA, queries.EDITION_DATA)
         variables = {"slug": slug}
-        return self._execute(query, variables)
+        return self._execute(queries.FIND_BOOK_BY_SLUG, variables)
 
     def get_book_by_edition(self, edition: str) -> list[Book]:
         self.log.info("Finding by Edition ID")
-        query = queries.FIND_BOOK_BY_EDITION % (queries.EDITION_DATA, queries.BOOK_DATA)
         variables = {"edition": edition}
-        return self._execute(query, variables)
+        return self._execute(queries.FIND_BOOK_BY_EDITION, variables)

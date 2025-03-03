@@ -21,3 +21,6 @@ _version.py
 .task/
 
 .env
+
+# Lefthook
+.lefthook-local.y*ml

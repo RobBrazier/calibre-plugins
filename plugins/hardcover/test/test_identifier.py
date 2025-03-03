@@ -23,39 +23,40 @@ def identifier(mock_gql_client, monkeypatch):
     return identifier
 
 
+def get_full_query(query: str) -> str:
+    return f"{queries.FRAGMENTS}{query}"
+
+
 @pytest.mark.parametrize(
     "identifiers, query, variables",
     [
         pytest.param(
             {"hardcover-edition": EDITION_ID},
-            queries.FIND_BOOK_BY_EDITION % (queries.EDITION_DATA, queries.BOOK_DATA),
+            get_full_query(queries.FIND_BOOK_BY_EDITION),
             {"edition": EDITION_ID},
             id="hardcover-edition",
         ),
         pytest.param(
             {"hardcover": SLUG},
-            queries.FIND_BOOK_BY_SLUG % (queries.BOOK_DATA, queries.EDITION_DATA),
+            get_full_query(queries.FIND_BOOK_BY_SLUG),
             {"slug": SLUG},
             id="hardcover-slug",
         ),
         pytest.param(
             {"isbn": ISBN},
-            queries.FIND_BOOK_BY_ISBN_OR_ASIN
-            % (queries.EDITION_DATA, queries.BOOK_DATA),
+            get_full_query(queries.FIND_BOOK_BY_ISBN_OR_ASIN),
             {"isbn": ISBN, "asin": ""},
             id="isbn",
         ),
         pytest.param(
             {"mobi-asin": ASIN},
-            queries.FIND_BOOK_BY_ISBN_OR_ASIN
-            % (queries.EDITION_DATA, queries.BOOK_DATA),
+            get_full_query(queries.FIND_BOOK_BY_ISBN_OR_ASIN),
             {"isbn": "", "asin": ASIN},
             id="asin",
         ),
         pytest.param(
             {"isbn": ISBN, "mobi-asin": ASIN},
-            queries.FIND_BOOK_BY_ISBN_OR_ASIN
-            % (queries.EDITION_DATA, queries.BOOK_DATA),
+            get_full_query(queries.FIND_BOOK_BY_ISBN_OR_ASIN),
             {"isbn": ISBN, "asin": ASIN},
             id="isbn+asin",
         ),
@@ -95,34 +96,31 @@ def test_identify_by_identifiers(
     [
         pytest.param(
             {"hardcover-edition": EDITION_ID},
-            queries.FIND_BOOK_BY_EDITION % (queries.EDITION_DATA, queries.BOOK_DATA),
+            get_full_query(queries.FIND_BOOK_BY_EDITION),
             {"edition": EDITION_ID},
             id="hardcover-edition",
         ),
         pytest.param(
             {"hardcover": SLUG},
-            queries.FIND_BOOK_BY_SLUG % (queries.BOOK_DATA, queries.EDITION_DATA),
+            get_full_query(queries.FIND_BOOK_BY_SLUG),
             {"slug": SLUG},
             id="hardcover-slug",
         ),
         pytest.param(
             {"isbn": ISBN},
-            queries.FIND_BOOK_BY_ISBN_OR_ASIN
-            % (queries.EDITION_DATA, queries.BOOK_DATA),
+            get_full_query(queries.FIND_BOOK_BY_ISBN_OR_ASIN),
             {"isbn": ISBN, "asin": ""},
             id="isbn",
         ),
         pytest.param(
             {"mobi-asin": ASIN},
-            queries.FIND_BOOK_BY_ISBN_OR_ASIN
-            % (queries.EDITION_DATA, queries.BOOK_DATA),
+            get_full_query(queries.FIND_BOOK_BY_ISBN_OR_ASIN),
             {"isbn": "", "asin": ASIN},
             id="asin",
         ),
         pytest.param(
             {"isbn": ISBN, "mobi-asin": ASIN},
-            queries.FIND_BOOK_BY_ISBN_OR_ASIN
-            % (queries.EDITION_DATA, queries.BOOK_DATA),
+            get_full_query(queries.FIND_BOOK_BY_ISBN_OR_ASIN),
             {"isbn": ISBN, "asin": ASIN},
             id="isbn+asin",
         ),
@@ -143,7 +141,9 @@ def test_identify_by_identifiers_no_results(
     mock_gql_client.execute.assert_has_calls(
         [
             call(query, variables, 30),
-            call(queries.SEARCH_BY_NAME, {"query": "Title Authors"}, 30),
+            call(
+                get_full_query(queries.SEARCH_BY_NAME), {"query": "Title Authors"}, 30
+            ),
         ]
     )
 
@@ -195,12 +195,12 @@ def test_identify_by_title_and_author(identifier: HardcoverIdentifier, mock_gql_
 
     mock_gql_client.execute.assert_has_calls(
         [
-            call(queries.SEARCH_BY_NAME, {"query": f"{title} {authors[0]}"}, 30),
             call(
-                queries.FIND_BOOKS_BY_IDS % (queries.BOOK_DATA, queries.EDITION_DATA),
-                {"ids": result_ids},
+                get_full_query(queries.SEARCH_BY_NAME),
+                {"query": f"{title} {authors[0]}"},
                 30,
             ),
+            call(get_full_query(queries.FIND_BOOKS_BY_IDS), {"ids": result_ids}, 30),
         ]
     )
 

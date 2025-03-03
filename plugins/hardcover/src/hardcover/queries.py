@@ -6,37 +6,40 @@ query Search($query: String!) {
 }
 """
 
-EDITION_DATA = """
-title
-id
-isbn_13
-asin
-cached_contributors
-cached_image
-reading_format_id
-language {
-  code3
-}
-publisher {
-  name
-}
-release_date
-description
-"""
-BOOK_DATA = """
-id
-title
-slug
-rating
-description
-book_series(where: {featured: {_eq: true}}) {
-  series {
+FRAGMENTS = """
+fragment EditionData on editions {
+  title
+  id
+  isbn_13
+  asin
+  cached_contributors
+  cached_image
+  reading_format_id
+  language {
+    code3
+  }
+  publisher {
     name
   }
-  position
+  release_date
+  description
 }
-cached_tags
-rating
+
+fragment BookData on books {
+  id
+  title
+  slug
+  rating
+  description
+  book_series(where: {featured: {_eq: true}}) {
+    series {
+      name
+    }
+    position
+  }
+  cached_tags
+  rating
+}
 """
 
 FIND_BOOK_BY_SLUG = """
@@ -44,12 +47,12 @@ query FindBookBySlug($slug: String) {
   books(
     where: {slug: {_eq: $slug}}
   ) {
-    %s
+    ...BookData
     editions(
       where: {reading_format_id: {_in: [1, 4]}}
       order_by: {users_count: desc_nulls_last, language_id: desc_nulls_last}
     ) {
-      %s
+      ...EditionData
     }
   }
 }
@@ -61,9 +64,9 @@ query FindBookByIsbnOrAsin($isbn: String, $asin: String) {
     where: {_and: [{_or: [{isbn_13: {_eq: $isbn}}, {isbn_10: {_eq: $isbn}}, {asin: {_eq: $asin}}]}, {reading_format_id: {_in: [1, 4]}}]}
     order_by: {users_count: desc_nulls_last}
   ) {
-    %s
+    ...EditionData
     book {
-      %s
+      ...BookData
     }
   }
 }
@@ -72,9 +75,9 @@ query FindBookByIsbnOrAsin($isbn: String, $asin: String) {
 FIND_BOOK_BY_EDITION = """
 query FindBookByEdition($edition: Int!) {
   editions_by_pk(id: $edition) {
-    %s
+    ...EditionData
     book {
-      %s
+      ...BookData
     }
   }
 }
@@ -87,12 +90,12 @@ query FindBooksByIds($ids: [Int!]) {
     where: {id: {_in: $ids}}
     order_by: {users_read_count: desc_nulls_last}
   ) {
-    %s
+    ...BookData
     editions(
       where: {reading_format_id: {_in: [1, 4]}}
       order_by: {users_count: desc_nulls_last, language_id: desc_nulls_last}
     ) {
-      %s
+      ...EditionData
     }
   }
 }
