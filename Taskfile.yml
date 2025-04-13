@@ -83,7 +83,7 @@ tasks:
     desc: Install a single plugin (e.g. install:hardcover)
     vars:
       PLUGIN: '{{default "" .PLUGIN}}'
-      TARGET_PLUGINS: "{{if .PLUGIN}}[{{.PLUGIN}}]{{else}}{{.PLUGINS}}{{end}}"
+      TARGET_PLUGINS: "{{if .PLUGIN}}{{.PLUGIN}}{{else}}{{.PLUGINS}}{{end}}"
     preconditions:
       - sh: '{{if .PLUGIN}}[ "{{ .PLUGINS | splitList "\n" | has .PLUGIN }}" == "true" ]{{else}}true{{end}}'
         msg: "Invalid plugin name '{{ .PLUGIN }}' provided"

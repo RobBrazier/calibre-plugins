@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools"]               #, "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "manga-toc"
+version = "0.0.0"
+# dynamic = ["version"]
+description = "Editor Plugin to generate Manga Table of Contents from an Image Contents page"
+readme = "README.md"
+authors = [{ name = "Rob Brazier", email = "git+github@brzr.co" }]
+requires-python = ">=3.9"
+dependencies = ["google-genai", "typing-extensions"]
+
+[tool.setuptools_scm]
+fallback_version = "0.0.0+unknown"
+version_file = "src/manga-toc/_version.py"
+root = "../../"
+tag_regex = '^manga-toc-(?P<version>\d+(?:\.\d+){0,2})$'
+version_file_template = '''
+__version__ = "{version}"
+__version_tuple__ = {version_tuple}
+'''

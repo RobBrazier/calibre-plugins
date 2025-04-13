@@ -78,6 +78,10 @@ def download_dependencies(
 
 
 def copy_to_zip(zf: zipfile.ZipFile, path: str, prefix=""):
+    if os.path.isfile(path):
+        zf.write(path, prefix)
+        return
+
     for root, _, files in os.walk(path):
         for file in files:
             source_path = os.path.join(root, file)
