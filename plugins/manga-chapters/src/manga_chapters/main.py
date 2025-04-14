@@ -1,5 +1,4 @@
 import os
-from io import BytesIO
 
 from calibre.customize import Plugin
 from calibre.ebooks.oeb.polish.toc import get_toc, commit_toc
@@ -7,6 +6,7 @@ from calibre.gui2 import error_dialog, question_dialog
 from calibre.gui2.toc.main import TOC
 from calibre.gui2.tweak_book.plugin import Tool
 from qt.core import QAction
+from .config import prefs
 
 
 class MangaTocTool(Tool):
@@ -16,6 +16,7 @@ class MangaTocTool(Tool):
 
     def __init__(self):
         self.plugin_path = os.path.dirname(os.path.abspath(__file__))
+        self.prefs = prefs
 
     def create_action(self, for_toolbar=True):
         action = QAction(get_icons("images/chapters.png"), _("Generate ToC"), self.gui)
@@ -29,18 +30,6 @@ class MangaTocTool(Tool):
 
     def __exit__(self, *args):
         Plugin.__exit__(self, *args)
-
-    def _get_client(self):
-        from .config import prefs
-
-        api_key = prefs["api_key"]
-        if not api_key:
-            raise Exception(
-                "A Gemini API Key is required - please configure in settings"
-            )
-        from google import genai
-
-        return genai.Client(api_key=api_key)
 
     @staticmethod
     def _normalise_path(base, path) -> str:
@@ -77,28 +66,17 @@ class MangaTocTool(Tool):
         ]
         return image, links, contents_index
 
-    def _get_image_contents(self, container, path):
-        from PIL import Image
+    def _get_image_contents(self, container, path) -> bytes:
+        return container.raw_data(path, decode=False)
 
-        data = container.raw_data(path, decode=False)
-        image = Image.open(BytesIO(data))
-        return image
+    def _read_chapters(self, image: bytes) -> list[str]:
+        from .llm import LLMReader
 
-    def _gemini_read_chapters(self, image) -> list[str]:
-        client = self._get_client()
-        result = client.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=[
-                image,
-                "\n\n",
-                "Please can you extract the chapter names from this attached image. Only return the chapter names, no page numbers or any other information that is present in the image. Just chapter names.\n",
-                "Convert the text to Title Case and ensure that the chapters are numerically numbered (converting other schemes into numbers).\n",
-                "e.g. CH102 -> Chapter 102, Chapter I -> Chapter 1, Chapter X -> Chapter 10.\n",
-                "In the case of additional chapters e.g. 'Extra Story', 'Origial Story', 'Bonus' etc., leave those as-is, but still performing the Title Case transformations",
-                "Do not format the response in any way, just do one chapter per line.",
-            ],
-        )
-        return result.text.splitlines()
+        url = self.prefs["llm_endpoint"]
+        model = self.prefs["llm_model"]
+        api_key = self.prefs["api_key"]
+        reader = LLMReader(url, model, api_key)
+        return reader.read_chapters(image)
 
     def _confirm_apply(self, changes):
         mappings_string = "\n".join(changes)
@@ -134,7 +112,7 @@ class MangaTocTool(Tool):
                 toc = get_toc(container)
                 image, links, contents_idx = self.parse_links(toc, container)
                 contents_image = self._get_image_contents(container, image)
-                chapters = self._gemini_read_chapters(contents_image)
+                chapters = self._read_chapters(contents_image)
                 entries = {}
                 if len(links) != len(chapters):
                     raise Exception(
