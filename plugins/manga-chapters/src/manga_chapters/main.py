@@ -69,14 +69,14 @@ class MangaTocTool(Tool):
     def _get_image_contents(self, container, path) -> bytes:
         return container.raw_data(path, decode=False)
 
-    def _read_chapters(self, image: bytes) -> list[str]:
+    def _read_chapters(self, links: list[str], image: bytes) -> dict[str, str]:
         from .llm import LLMReader
 
         url = self.prefs["llm_endpoint"]
         model = self.prefs["llm_model"]
         api_key = self.prefs["api_key"]
         reader = LLMReader(url, model, api_key)
-        return reader.read_chapters(image)
+        return reader.read_chapters(links, image)
 
     def _confirm_apply(self, changes):
         mappings_string = "\n".join(changes)
@@ -112,19 +112,13 @@ class MangaTocTool(Tool):
                 toc = get_toc(container)
                 image, links, contents_idx = self.parse_links(toc, container)
                 contents_image = self._get_image_contents(container, image)
-                chapters = self._read_chapters(contents_image)
-                entries = {}
-                if len(links) != len(chapters):
-                    raise Exception(
-                        f"Number of links [{len(links)}] ({links}) doesn't match Number of chapters [{len(chapters)}] ({chapters})"
-                    )
+                chapters = self._read_chapters(links, contents_image)
                 mappings = []
-                for link, chapter in zip(links, chapters):
-                    entries.update({link: chapter})
+                for link, chapter in chapters.items():
                     mappings.append(f"{chapter} => {link}")
                 apply = self._confirm_apply(mappings)
                 if apply:
-                    self._update_toc(toc, contents_idx + 1, entries)
+                    self._update_toc(toc, contents_idx + 1, chapters)
             except Exception:
                 import traceback
 
