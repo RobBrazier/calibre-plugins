@@ -9,11 +9,9 @@ however any OpenAI-compatible endpoint should work (Ollama included).
 I cannot guarantee the results for locally-run LLMs as I didn't get great
 image OCR - best was with Mistral Small 3.1.
 
-
 ## Usage
 This plugin requires a 'Contents' entry to be present in the book Table of
 Contents. This can be added manually using the Ebook Editor.
-
 
 ## Workflow
 If there are links present on the page, the plugin will use those to match
