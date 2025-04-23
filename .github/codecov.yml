@@ -7,10 +7,18 @@ component_management:
       name: hardcover
       paths:
         - plugins/hardcover/**
+    - component_id: plugin_hardcover_sync
+      name: hardcover-sync
+      paths:
+        - plugins/hardcover-sync/**
     - component_id: plugin_anilist
       name: anilist
       paths:
         - plugins/anilist/**
+    - component_id: plugin_manga_chapters
+      name: manga-chapters
+      paths:
+        - plugins/manga-chapters/**
     - component_id: lib_common
       name: common
       paths:
