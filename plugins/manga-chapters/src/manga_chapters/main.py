@@ -25,7 +25,7 @@ class MangaChapterExctractorTool(Tool):
             get_icons("images/chapters.png"), _("Extract Chapters"), self.gui
         )
         if not for_toolbar:
-            self.register_shortcut(action, self.name)
+            self.register_shortcut(action, "run")
         action.triggered.connect(self.extract_chapters)
         return action
 

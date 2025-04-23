@@ -8,6 +8,7 @@
 ## Current Plugins
 
 - [Hardcover](./plugins/hardcover/)
+- [Manga Chapter Extractor](./plugins/manga-chapters/)
 
 ## Local Setup
 
