@@ -11,16 +11,12 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 
 
-def get_version(file: str) -> tuple[str, tuple]:
+def get_version(file: str) -> str:
     with open(file, "r") as f:
         content = f.read()
 
     version_str = ast.literal_eval(content.split("__version__ = ")[1].split("\n")[0])
-    version_tuple = ast.literal_eval(
-        content.split("__version_tuple__ = ")[1].split("\n")[0]
-    )
-
-    return version_str, version_tuple
+    return version_str
 
 
 def download_dependencies(
@@ -41,7 +37,7 @@ def download_dependencies(
                 "copy",
             ]
         )
-    except:
+    except subprocess.SubprocessError:
         logger.exception("Failed to install dependencies")
         raise
 
@@ -127,7 +123,7 @@ def main(args: argparse.Namespace):
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
 
-    version, version_tuple = get_version(version_path)
+    version = get_version(version_path)
     output_file = os.path.join(output_dir, f"{plugin_name}-{version}.zip")
 
     temp_dir = tempfile.TemporaryDirectory()
