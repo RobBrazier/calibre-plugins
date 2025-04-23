@@ -15,6 +15,12 @@ pre-commit:
           - name: ruff format
             run: "{uv-run} ruff format {staged_files}"
             stage_fixed: true
+    - name: markdown
+      glob: "*.md"
+      group:
+        jobs:
+          - name: markdownlint
+            run: "uv tool run pymarkdownlnt fix {staged_files}"
 
 commit-msg:
   commands:

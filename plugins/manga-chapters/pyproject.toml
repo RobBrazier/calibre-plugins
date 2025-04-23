@@ -3,28 +3,24 @@ requires = ["setuptools", "versioningit"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "hardcover"
+name = "manga-chapters"
 dynamic = ["version"]
-description = "Hardcover Metadata Source Plugin for Calibre"
+description = "Editor Plugin to extract Manga Table of Contents from an Image Contents page"
 readme = "README.md"
 authors = [{ name = "Rob Brazier", email = "git+github@brzr.co" }]
-requires-python = ">=3.9"
-dependencies = ["common", "graphql", "pyjarowinkler>=1.8"]
-
-[tool.uv.sources]
-common = { workspace = true }
-graphql = { workspace = true }
+requires-python = ">=3.11"
+dependencies = ["openai>=1.74.0"]
 
 [tool.versioningit.vcs]
-default-tag = "hardcover-0.0.0"
-match = ["hardcover-*"]
+default-tag = "manga-chapters-0.0.0"
+match = ["manga-chapters-*"]
 
 [tool.versioningit.tag2version]
-rmprefix = "hardcover-"
+rmprefix = "manga-chapters-"
 
 [tool.versioningit.write]
 template = '''
 __version__ = "{version}"
 __version_tuple__ = {version_tuple}
 '''
-file = "src/hardcover/_version.py"
+file = "src/manga_chapters/_version.py"

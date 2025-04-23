@@ -58,7 +58,7 @@ tasks:
     cmds:
       - find "{{ .ROOT_DIR }}" \( ! -regex '.*/\..*' \) -name 'dist' -type d | xargs -r -- rm -r
       - find "{{ .ROOT_DIR }}" -maxdepth 1 -name '.*cache' -type d | xargs -r -- rm -r
-      - find "{{ .ROOT_DIR }}" -name '*pycache*' -type d | xargs -r -- rm -r
+      - find "{{ .ROOT_DIR }}" -name '*pycache*' -o -name '*.egg-info' -o -name 'build' -type d | xargs -r -- rm -r
 
   package:
     desc: Package a plugin
@@ -83,7 +83,7 @@ tasks:
     desc: Install a single plugin (e.g. install:hardcover)
     vars:
       PLUGIN: '{{default "" .PLUGIN}}'
-      TARGET_PLUGINS: "{{if .PLUGIN}}[{{.PLUGIN}}]{{else}}{{.PLUGINS}}{{end}}"
+      TARGET_PLUGINS: "{{if .PLUGIN}}{{.PLUGIN}}{{else}}{{.PLUGINS}}{{end}}"
     preconditions:
       - sh: '{{if .PLUGIN}}[ "{{ .PLUGINS | splitList "\n" | has .PLUGIN }}" == "true" ]{{else}}true{{end}}'
         msg: "Invalid plugin name '{{ .PLUGIN }}' provided"

@@ -31,4 +31,4 @@ source = ["libs", "plugins"]
 addopts = "--cov -v --import-mode=importlib"
 
 [tool.ruff]
-builtins = ["_"]
+builtins = ["_", "get_icons"]

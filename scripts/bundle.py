@@ -11,16 +11,12 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 
 
-def get_version(file: str) -> tuple[str, tuple]:
+def get_version(file: str) -> str:
     with open(file, "r") as f:
         content = f.read()
 
     version_str = ast.literal_eval(content.split("__version__ = ")[1].split("\n")[0])
-    version_tuple = ast.literal_eval(
-        content.split("__version_tuple__ = ")[1].split("\n")[0]
-    )
-
-    return version_str, version_tuple
+    return version_str
 
 
 def download_dependencies(
@@ -41,7 +37,7 @@ def download_dependencies(
                 "copy",
             ]
         )
-    except:
+    except subprocess.SubprocessError:
         logger.exception("Failed to install dependencies")
         raise
 
@@ -78,6 +74,10 @@ def download_dependencies(
 
 
 def copy_to_zip(zf: zipfile.ZipFile, path: str, prefix=""):
+    if os.path.isfile(path):
+        zf.write(path, prefix)
+        return
+
     for root, _, files in os.walk(path):
         for file in files:
             source_path = os.path.join(root, file)
@@ -123,11 +123,11 @@ def main(args: argparse.Namespace):
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
 
-    version, version_tuple = get_version(version_path)
+    version = get_version(version_path)
     output_file = os.path.join(output_dir, f"{plugin_name}-{version}.zip")
 
     temp_dir = tempfile.TemporaryDirectory()
-    dependencies = download_dependencies(plugin_name, plugin_dir, temp_dir)
+    dependencies = download_dependencies(plugin_package, plugin_dir, temp_dir)
 
     create_zip(plugin_package, package_path, output_file, dependencies)
 
