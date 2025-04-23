@@ -2,7 +2,7 @@ from qt.core import QWidget, QVBoxLayout, QLabel, QLineEdit
 from calibre.utils.config import JSONConfig
 
 # Create a configuration
-prefs = JSONConfig("plugins/manga_toc_generator")
+prefs = JSONConfig("plugins/manga_chapter_extractor")
 
 # Set defaults
 prefs.defaults["llm_endpoint"] = (

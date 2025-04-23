@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools", "setuptools-scm"]
+requires = ["setuptools", "versioningit"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -9,22 +9,22 @@ description = "Hardcover Metadata Source Plugin for Calibre"
 readme = "README.md"
 authors = [{ name = "Rob Brazier", email = "git+github@brzr.co" }]
 requires-python = ">=3.9"
-dependencies = [
-    "common",
-    "graphql",
-    "pyjarowinkler>=1.8",
-]
+dependencies = ["common", "graphql", "pyjarowinkler>=1.8"]
 
 [tool.uv.sources]
 common = { workspace = true }
 graphql = { workspace = true }
 
-[tool.setuptools_scm]
-fallback_version = "0.0.0+unknown"
-version_file = "src/hardcover/_version.py"
-root = "../../"
-tag_regex = '^hardcover-(?P<version>\d+(?:\.\d+){0,2})$'
-version_file_template = '''
+[tool.versioningit.vcs]
+default-tag = "hardcover-0.0.0"
+match = ["hardcover-*"]
+
+[tool.versioningit.tag2version]
+rmprefix = "hardcover-"
+
+[tool.versioningit.write]
+template = '''
 __version__ = "{version}"
 __version_tuple__ = {version_tuple}
 '''
+file = "src/hardcover/_version.py"

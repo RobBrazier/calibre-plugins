@@ -11,8 +11,8 @@ from qt.core import QAction
 from .config import prefs
 
 
-class MangaTocTool(Tool):
-    name = "manga-toc-tool"
+class MangaChapterExctractorTool(Tool):
+    name = "manga-chapter-extractor-tool"
     allowed_in_toolbar = True
     allowed_in_menu = True
 
@@ -21,10 +21,12 @@ class MangaTocTool(Tool):
         self.prefs = prefs
 
     def create_action(self, for_toolbar=True):
-        action = QAction(get_icons("images/chapters.png"), _("Generate ToC"), self.gui)
+        action = QAction(
+            get_icons("images/chapters.png"), _("Extract Chapters"), self.gui
+        )
         if not for_toolbar:
-            self.register_shortcut(action, "manga-toc-tool")
-        action.triggered.connect(self.generate_toc)
+            self.register_shortcut(action, self.name)
+        action.triggered.connect(self.extract_chapters)
         return action
 
     def __enter__(self, *args):
@@ -119,9 +121,9 @@ class MangaTocTool(Tool):
             disclaimer = "\nIMPORTANT: No links were found in the Contents page, so the Pages were estimated. Please validate these are correct."
         return question_dialog(
             self.gui,
-            _("Add Generated Chapters?"),
+            _("Add Extracted Chapters?"),
             _(
-                f"Chapter mappings have been successfully generated:\n\n{mappings_string}\n\nContinue with applying?{disclaimer}"
+                f"Chapter mappings have been successfully extracted:\n\n{mappings_string}\n\nContinue with applying?{disclaimer}"
             ),
         )
 
@@ -144,10 +146,10 @@ class MangaTocTool(Tool):
     def get_pages(self, container: Container) -> list[str]:
         return container.manifest_items_of_type("application/xhtml+xml")
 
-    def generate_toc(self):
+    def extract_chapters(self):
         with self:
             try:
-                self.boss.add_savepoint("Before: Generate ToC")
+                self.boss.add_savepoint("Before: Extract Chapters")
                 container = self.current_container
                 toc = get_toc(container)
                 image, links, contents_idx, contents_url = self.parse_links(
@@ -169,10 +171,8 @@ class MangaTocTool(Tool):
 
                 error_dialog(
                     self.gui,
-                    _("Failed to generate chapters"),
-                    _(
-                        "Failed to generate chapters. click 'Show details' for more info"
-                    ),
+                    _("Failed to extract chapters"),
+                    _("Failed to extract chapters. click 'Show details' for more info"),
                     det_msg=traceback.format_exc(),
                     show=True,
                 )

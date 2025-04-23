@@ -3,9 +3,9 @@ from calibre.customize import EditBookToolPlugin
 from ._version import __version_tuple__
 
 
-class MangaTocPlugin(EditBookToolPlugin):
-    name = "Manga ToC Plugin"
-    description = "An Editor Plugin (using Gemini GenAI) to extract Chapters from the Contents image in manga epubs"
+class MangaChapterExtractorPlugin(EditBookToolPlugin):
+    name = "Manga Chapter Extractor"
+    description = "An Editor Plugin (using OpenAI API) to extract Chapters from the Contents image in manga epubs"
     version = __version_tuple__
     author = "Rob Brazier"
     supported_platforms = ["windows", "osx", "linux"]

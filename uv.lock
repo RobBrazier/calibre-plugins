@@ -347,7 +347,6 @@ wheels = [
 
 [[package]]
 name = "manga-chapters"
-version = "0.0.0"
 source = { editable = "plugins/manga-chapters" }
 dependencies = [
     { name = "openai" },
