@@ -134,10 +134,8 @@ tasks:
     cmds:
       - cmd: echo "Bumping {{.PLUGIN}} to {{.VERSION}}"
         silent: true
-      - SETUPTOOLS_SCM_PRETEND_VERSION_FOR_{{.PLUGIN | replace "-" "_" | upper}}={{.VERSION}} uv lock --upgrade-package {{.PLUGIN}}
-      - cmd: '{{ if eq .PRETEND "1" }}echo {{ end }}git commit -am "bump({{.PLUGIN}}): Update lock for {{.VERSION}}" || true'
       - cmd: '{{ if eq .PRETEND "1" }}echo {{ end }}git tag -f {{.PLUGIN}}-{{.VERSION}}'
-      - cmd: "echo Run 'git push && git push --tags' to Release"
+      - cmd: "echo Run 'git push --tags' to Release"
         silent: true
     preconditions:
       - sh: '[ "{{ .PLUGINS | splitList "\n" | has .PLUGIN }}" == "true" ]'
