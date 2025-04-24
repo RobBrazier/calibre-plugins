@@ -20,7 +20,7 @@ pre-commit:
       group:
         jobs:
           - name: markdownlint
-            run: "uv tool run pymarkdownlnt fix {staged_files}"
+            run: "{uv-run} pymarkdownlnt fix {staged_files}"
 
 commit-msg:
   commands:
