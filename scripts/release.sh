@@ -20,6 +20,4 @@ else
 	opts="--latest"
 fi
 
-ls -al
-
-gh release create "$tag" $opts -n "$contents" -t "$tag" **/"$tag"*.zip
+gh release create "$tag" $opts -n "$contents" -t "$tag" "dist/$tag"*.zip
