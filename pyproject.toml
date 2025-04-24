@@ -18,9 +18,9 @@ dev = [
     "pytest-mock>=3.14.0",
     "pytest>=8.3.3",
     "ruff>=0.8.1",
-    "pytest-dotenv>=0.5.2",
     "msgpack>=1.1.0",
     "lxml-stubs>=0.5.1",
+    "pytest-env>=1.1.5",
 ]
 
 [tool.coverage.run]
@@ -30,6 +30,9 @@ source = ["libs", "plugins"]
 
 [tool.pytest.ini_options]
 addopts = "--cov -v --import-mode=importlib"
+
+[tool.pytest_env]
+LD_LIBRARY_PATH = { value = "{CALIBRE_LIBRARY_PATH}", transform = true }
 
 [tool.ruff]
 builtins = ["_", "get_icons"]

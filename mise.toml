@@ -7,6 +7,7 @@ git-cliff = "latest"
 [env]
 _.file = ".env"
 _.python.venv = ".venv"
+_.path = { path = "./shims", tools = true }
 CALIBRE_HOME = "{{config_root}}/.calibre"
 CALIBRE_CONFIG_DIRECTORY = "{{env.CALIBRE_HOME}}/config"
 CALIBRE_LIBRARY = "{{env.CALIBRE_HOME}}/library"
