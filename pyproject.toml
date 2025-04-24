@@ -33,3 +33,6 @@ addopts = "--cov -v --import-mode=importlib"
 
 [tool.ruff]
 builtins = ["_", "get_icons"]
+
+[tool.pyright]
+typeCheckingMode = "standard"

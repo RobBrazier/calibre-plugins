@@ -11,7 +11,7 @@ from qt.core import QAction
 from .config import prefs
 
 
-class MangaChapterExctractorTool(Tool):
+class MangaChapterExtractorTool(Tool):
     name = "manga-chapter-extractor-tool"
     allowed_in_toolbar = True
     allowed_in_menu = True
@@ -30,10 +30,10 @@ class MangaChapterExctractorTool(Tool):
         return action
 
     def __enter__(self, *args):
-        Plugin.__enter__(self, *args)
+        Plugin.__enter__(self, *args)  # pyright: ignore[reportArgumentType]
 
     def __exit__(self, *args):
-        Plugin.__exit__(self, *args)
+        Plugin.__exit__(self, *args)  # pyright: ignore[reportArgumentType]
 
     @staticmethod
     def _normalise_path(base, path) -> str:
@@ -43,7 +43,7 @@ class MangaChapterExctractorTool(Tool):
     @staticmethod
     def _find_image(contents: _Element) -> str | None:
         # Look for HTML img tags
-        img_tags = contents.xpath("//*[local-name() = 'img']")
+        img_tags = contents.find("//*[local-name() = 'img']")
         if img_tags:
             # Check for src attribute
             src = img_tags[0].get("src")
@@ -51,7 +51,7 @@ class MangaChapterExctractorTool(Tool):
                 return src
 
         # Look for SVG image tags
-        image_tags = contents.xpath("//*[local-name() = 'image']")
+        image_tags = contents.find("//*[local-name() = 'image']")
         if image_tags:
             # SVG images can use href or xlink:href
             href = image_tags[0].get("href")
@@ -66,7 +66,7 @@ class MangaChapterExctractorTool(Tool):
         return None
 
     # -> (image url, links, contents toc index, contents url)
-    def parse_links(self, toc, container) -> tuple[str, list[str], int, str]:
+    def parse_links(self, toc, container) -> tuple[str | None, list[str], int, str]:
         contents_url: str | None = None
         contents_index: int | None = None
         for i, item in enumerate(toc):
@@ -76,18 +76,18 @@ class MangaChapterExctractorTool(Tool):
                 contents_url = item.dest
                 contents_index = i
                 break
-        if not contents_url:
+        if not contents_url or not contents_index:
             raise Exception(
                 "Unable to find contents page. Please Update ToC to identify Contents page"
             )
 
-        contents = container.parsed(contents_url)
+        contents: _Element = container.parsed(contents_url)
         image = self._find_image(contents)
         if image:
             image = self._normalise_path(contents_url, image)
         links = [
             self._normalise_path(contents_url, a.get("href"))
-            for a in contents.xpath("//*[local-name() = 'a'][@href]")
+            for a in contents.findall("//*[local-name() = 'a'][@href]")
         ]
         return image, links, contents_index, contents_url
 
@@ -101,7 +101,7 @@ class MangaChapterExctractorTool(Tool):
         image: bytes,
         contents_url: str,
         pages: list[str],
-    ) -> (dict[str, str], bool):
+    ) -> tuple[dict[str, str], bool]:
         from .llm import LLMReader
 
         url = self.prefs["llm_endpoint"]
@@ -144,17 +144,19 @@ class MangaChapterExctractorTool(Tool):
             raise
 
     def get_pages(self, container: Container) -> list[str]:
-        return container.manifest_items_of_type("application/xhtml+xml")
+        return list(container.manifest_items_of_type("application/xhtml+xml"))
 
     def extract_chapters(self):
         with self:
             try:
                 self.boss.add_savepoint("Before: Extract Chapters")
-                container = self.current_container
+                container: Container = self.current_container  # type:ignore
                 toc = get_toc(container)
                 image, links, contents_idx, contents_url = self.parse_links(
                     toc, container
                 )
+                if not image:
+                    raise Exception("No image found on contents page")
                 pages = self.get_pages(container)
                 contents_image = self._get_image_contents(container, image)
                 chapters, estimated = self._read_chapters(

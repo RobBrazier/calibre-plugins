@@ -21,8 +21,8 @@ class HardcoverProvider:
         self.prefs = source.prefs
         self.client = GraphQLClient(self.API_URL)
 
-    def get_book_url(self, identifiers):
-        hardcover_id = identifiers.get(self.ID_NAME, None)
+    def get_book_url(self, identifiers) -> tuple[str, str, str] | None:
+        hardcover_id: str | None = identifiers.get(self.ID_NAME, None)
         if hardcover_id:
             return (
                 self.ID_NAME,
@@ -63,8 +63,7 @@ class HardcoverProvider:
     def init_metadata(self, title: str, authors: list[str]):
         return Metadata(title, authors)
 
-    def build_metadata(self, log, book: Book):
-        # type: (Log, Book) -> Optional[Metadata]
+    def build_metadata(self, log: Log, book: Book):
         editions = book.editions
         if len(editions) == 0:
             log.error("No matching edition")
@@ -103,8 +102,9 @@ class HardcoverProvider:
             meta.tags = book.tags.tag
         return meta
 
-    def enqueue(self, log, result_queue: Queue, shutdown: threading.Event, book: Book):
-        # type: (Log, Queue, threading.Event, Book) -> None
+    def enqueue(
+        self, log: Log, result_queue: Queue, shutdown: threading.Event, book: Book
+    ):
         if shutdown.is_set():
             raise threading.ThreadError
         metadata = self.build_metadata(log, book)

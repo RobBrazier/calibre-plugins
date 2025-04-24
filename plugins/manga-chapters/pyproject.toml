@@ -25,3 +25,9 @@ __version__ = "{version}"
 __version_tuple__ = {version_tuple}
 '''
 file = "src/manga_chapters/_version.py"
+
+[tool.ruff]
+builtins = ["_", "get_icons"]
+
+[tool.pyright]
+typeCheckingMode = "standard"

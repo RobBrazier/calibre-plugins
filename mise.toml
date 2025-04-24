@@ -2,19 +2,16 @@
 python = "3.11"
 task = "latest"
 uv = "latest"
-yq = "latest"
 git-cliff = "latest"
 
 [env]
+_.file = ".env"
+_.python.venv = ".venv"
 CALIBRE_HOME = "{{config_root}}/.calibre"
 CALIBRE_CONFIG_DIRECTORY = "{{env.CALIBRE_HOME}}/config"
 CALIBRE_LIBRARY = "{{env.CALIBRE_HOME}}/library"
 CALIBRE_DEVELOP_FROM = "{{env.CALIBRE_HOME}}/source/src"
 PYTHONPATH = "{{env.CALIBRE_DEVELOP_FROM}}"
-_.python.venv = ".venv"
-
-[settings]
-env_file = ".env"
 
 [settings.python]
 uv_venv_auto = true

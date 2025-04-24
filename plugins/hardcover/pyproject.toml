@@ -29,3 +29,9 @@ __version__ = "{version}"
 __version_tuple__ = {version_tuple}
 '''
 file = "src/hardcover/_version.py"
+
+[tool.ruff]
+builtins = ["_"]
+
+[tool.pyright]
+typeCheckingMode = "standard"

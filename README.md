@@ -6,8 +6,8 @@
 
 ## Current Plugins
 
-- [Hardcover](./plugins/hardcover/)
-- [Manga Chapter Extractor](./plugins/manga-chapters/)
+- [Hardcover](./plugins/hardcover/): Metadata Plugin for Hardcover.app
+- [Manga Chapter Extractor](./plugins/manga-chapters/) Editor Plugin for extracting Manga chapters from the Contents page
 
 ## Local Setup
 
