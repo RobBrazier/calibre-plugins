@@ -14,6 +14,7 @@ dependencies = ["openai>=1.74.0"]
 [tool.versioningit.vcs]
 default-tag = "manga-chapters-0.0.0"
 match = ["manga-chapters-*"]
+decribe-subst = "$Format:%(describe:match=manga-chapters-*)$"
 
 [tool.versioningit.tag2version]
 rmprefix = "manga-chapters-"

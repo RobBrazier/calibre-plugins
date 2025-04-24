@@ -18,6 +18,7 @@ graphql = { workspace = true }
 [tool.versioningit.vcs]
 default-tag = "hardcover-0.0.0"
 match = ["hardcover-*"]
+decribe-subst = "$Format:%(describe:match=hardcover-*)$"
 
 [tool.versioningit.tag2version]
 rmprefix = "hardcover-"
