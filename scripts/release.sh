@@ -12,6 +12,7 @@ git cliff --config cliff.toml \
 
 contents="$(cat $file)"
 rm "$file"
+echo -e "Release Notes for $tag:\n$contents"
 
 if [[ "$version" == *"pre"* ]]; then
 	opts="--prerelease"

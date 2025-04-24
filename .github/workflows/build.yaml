@@ -88,3 +88,5 @@ jobs:
       - name: Generate Changelog and Release
         run: |
           bash scripts/release.sh "${GITHUB_REF#refs/tags/}"
+        env:
+          GH_TOKEN: ${{ github.token }}
