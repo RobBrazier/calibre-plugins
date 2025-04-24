@@ -91,3 +91,5 @@ jobs:
           bash scripts/release.sh "${GITHUB_REF#refs/tags/}"
         env:
           GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPO: ${{ github.repository }}
