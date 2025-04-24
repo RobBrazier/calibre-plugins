@@ -5,11 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 authors = [{ name = "Rob Brazier", email = "git+github@brzr.co" }]
 requires-python = ">=3.9"
-dependencies = [
-    "lxml>=5.4.0",
-    "pymarkdownlnt>=0.9.29",
-    "pyqt5>=5.15.11",
-]
+dependencies = ["pymarkdownlnt>=0.9.29", "pyqt5>=5.15.11"]
 
 [tool.uv.workspace]
 members = ["plugins/*", "libs/*"]
@@ -24,6 +20,7 @@ dev = [
     "ruff>=0.8.1",
     "pytest-dotenv>=0.5.2",
     "msgpack>=1.1.0",
+    "lxml-stubs>=0.5.1",
 ]
 
 [tool.coverage.run]
