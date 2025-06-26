@@ -1,5 +1,4 @@
 from queue import Empty, Queue
-from typing_extensions import override
 
 from calibre.ebooks.metadata.sources.base import Option, Source
 
@@ -59,11 +58,9 @@ class Hardcover(Source):
             self.provider = HardcoverProvider(self)
             self.cli_helper = MetadataCliHelper(self, self.name, self.ID_NAME)
 
-    @override
     def is_configured(self) -> bool:  # pyright: ignore[reportIncompatibleMethodOverride]
         return bool(self.prefs["api_key"])
 
-    @override
     def cli_main(self, args):
         self.cli_helper.run(args)
 
@@ -78,11 +75,9 @@ class Hardcover(Source):
             url = self.cached_identifier_to_cover_url(hardcover_id)
         return url
 
-    @override
     def get_book_url(self, identifiers):  # pyright: ignore[reportIncompatibleMethodOverride]
         return self.provider.get_book_url(identifiers)
 
-    @override
     def identify(
         self,
         log,
@@ -97,7 +92,6 @@ class Hardcover(Source):
             log, result_queue, abort, title, authors, identifiers, timeout
         )
 
-    @override
     def download_cover(
         self,
         log,

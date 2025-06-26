@@ -20,7 +20,6 @@ class Edition:
     language: str
     publisher: Optional[str]
     release_date: Optional[datetime]
-    description: Optional[str]
 
 
 @dataclass
@@ -80,7 +79,6 @@ def map_edition_data(data: dict[str, Any]) -> Edition:
         release_date=datetime.strptime(data["release_date"], "%Y-%m-%d")
         if data["release_date"]
         else None,
-        description=data.get("description"),
     )
 
 

@@ -145,7 +145,7 @@ class HardcoverIdentifier:
         result: List[Book] = []
         key = list(res.keys())[0]
 
-        entries = res.get(key) if isinstance(res.get(key), list) else [res.get(key)]
+        entries = res.get(key, []) if isinstance(res.get(key), list) else [res.get(key)]
         for entry in entries:
             if key == "books":
                 result.append(map_from_book_query(entry))

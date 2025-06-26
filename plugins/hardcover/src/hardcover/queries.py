@@ -22,7 +22,6 @@ fragment EditionData on editions {
     name
   }
   release_date
-  description
 }
 
 fragment BookData on books {
