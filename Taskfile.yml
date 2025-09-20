@@ -31,7 +31,8 @@ tasks:
     env:
       LD_LIBRARY_PATH: ""
     cmds:
-      - if which calibre-debug &>/dev/null; then calibre-debug {{ .ROOT_DIR }}/scripts/build_env.py; fi
+      - cmd: calibre-debug {{ .ROOT_DIR }}/scripts/build_env.py
+        ignore_error: true
     status:
       - test -f .env
 

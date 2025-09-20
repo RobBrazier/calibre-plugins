@@ -19,7 +19,32 @@ jobs:
     steps:
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
-      - uses: ./.github/actions/install
+      - name: Install tools from mise
+        uses: jdx/mise-action@5ac50f778e26fac95da98d50503682459e86d566 # v3.2.0
+
+      - name: Install calibre dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libopengl0 libxcb-cursor0
+
+      - name: Download calibre sources
+        run: task calibre:source
+
+      - name: Get calibre version
+        id: calibre
+        run: echo "version=$(cat .calibre/source/.version)" >> $GITHUB_OUTPUT
+
+      - name: Install calibre
+        run: sudo -v && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin version=${{ steps.calibre.outputs.version }}
+
+      - name: Cache uv
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ hashFiles('uv.lock') }}
+
+      - name: Install the project
+        run: task install
 
       - name: Run Unit Tests
         run: task test -- --cov-report xml --junitxml=junit.xml -o junit_family=legacy
@@ -44,7 +69,17 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: ./.github/actions/install
+      - name: Install tools from mise
+        uses: jdx/mise-action@5ac50f778e26fac95da98d50503682459e86d566 # v3.2.0
+
+      - name: Cache uv
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ hashFiles('uv.lock') }}
+
+      - name: Install the project
+        run: task install
 
       - name: Build Plugins
         run: task package
