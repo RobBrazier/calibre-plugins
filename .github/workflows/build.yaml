@@ -20,9 +20,7 @@ jobs:
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
       - name: Install calibre dependencies
-        run: |
-          sudo apt update
-          sudo apt-get install -y libegl1 libopengl0 libxcb-cursor0 linux-libc-dev
+        run: sudo apt-get install -y libegl1 libopengl0 libxcb-cursor0
 
       - name: Install tools from mise
         uses: jdx/mise-action@5ac50f778e26fac95da98d50503682459e86d566 # v3.2.0
