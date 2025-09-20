@@ -1,8 +1,12 @@
 name: "Build"
 
 on:
-  pull_request:
   push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -10,19 +14,19 @@ concurrency:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.ACTION_RUNNER || 'ubuntu-latest' }}
 
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-
-      - name: Install tools from mise
-        uses: jdx/mise-action@13abe502c30c1559a5c37dff303831bab82c9402 # v2.2.3
 
       - name: Install calibre dependencies
         run: sudo apt-get install -y libegl1 libopengl0 libxcb-cursor0
 
       - name: Install calibre
         run: sudo -v && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin
+
+      - name: Install tools from mise
+        uses: jdx/mise-action@13abe502c30c1559a5c37dff303831bab82c9402 # v2.2.3
 
       - name: Install the project
         run: task install
@@ -42,7 +46,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.ACTION_RUNNER || 'ubuntu-latest' }}
     needs:
       - test
     steps:
@@ -67,7 +71,7 @@ jobs:
             dist/*.zip
 
   release:
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.ACTION_RUNNER || 'ubuntu-latest' }}
     needs:
       - build
     if: github.ref_type == 'tag'
