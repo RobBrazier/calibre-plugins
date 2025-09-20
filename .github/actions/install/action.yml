@@ -1,0 +1,19 @@
+name: Install Dependencies
+description: Install required dependencies to run the project
+runs:
+  using: "composite"
+  steps:
+    - name: Install tools from mise
+      uses: jdx/mise-action@13abe502c30c1559a5c37dff303831bab82c9402 # v2.2.3
+
+    - name: Install calibre dependencies
+      shell: bash
+      run: sudo apt-get install -y libegl1 libopengl0 libxcb-cursor0
+
+    - name: Install calibre
+      shell: bash
+      run: sudo -v && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin
+
+    - name: Install the project
+      shell: bash
+      run: task install
