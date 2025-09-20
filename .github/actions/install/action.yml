@@ -4,7 +4,7 @@ runs:
   using: "composite"
   steps:
     - name: Install tools from mise
-      uses: jdx/mise-action@13abe502c30c1559a5c37dff303831bab82c9402 # v2.2.3
+      uses: jdx/mise-action@c37c93293d6b742fc901e1406b8f764f6fb19dac # v2.4.4
 
     - name: Install calibre dependencies
       shell: bash
