@@ -10,9 +10,24 @@ runs:
       shell: bash
       run: sudo apt-get install -y libegl1 libopengl0 libxcb-cursor0
 
+    - name: Download calibre sources
+      shell: bash
+      run: task calibre:source
+
+    - name: Get calibre version
+      id: calibre
+      shell: bash
+      run: echo "version=$(cat .calibre/source/.version)" >> $GITHUB_OUTPUT
+
     - name: Install calibre
       shell: bash
-      run: sudo -v && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin
+      run: sudo -v && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin version=${{ steps.calibre.outputs.version }}
+
+    - name: Cache uv
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/uv
+        key: uv-${{ runner.os }}-${{ hashFiles('uv.lock') }}
 
     - name: Install the project
       shell: bash
