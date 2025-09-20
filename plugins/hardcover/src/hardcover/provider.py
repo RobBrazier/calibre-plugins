@@ -9,7 +9,7 @@ from calibre.utils.logging import Log
 from graphql.client import GraphQLClient
 
 from .identifier import HardcoverIdentifier
-from .models import Book, Edition
+from .models import Book
 
 
 class HardcoverProvider:
@@ -47,6 +47,7 @@ class HardcoverProvider:
             self.ID_NAME,
             self.prefs.get("api_key"),
             self.prefs.get("match_sensitivity"),
+            self.prefs.get("languages").split(","),
             timeout,
         )
         books = identifier.identify(title, authors, identifiers)
@@ -55,20 +56,14 @@ class HardcoverProvider:
             self.enqueue(log, result_queue, abort, book)
         return None
 
-    def find_matching_edition(self, editions: list[Edition]):
-        # TODO: do some actual matching here ...
-        if len(editions) > 0:
-            return editions[0]
-
     def init_metadata(self, title: str, authors: list[str]):
         return Metadata(title, authors)
 
     def build_metadata(self, log: Log, book: Book):
-        editions = book.editions
-        if len(editions) == 0:
+        edition = next(iter(book.editions), None)
+        if not edition:
             log.error("No matching edition")
             return None
-        edition = editions[0]
         title = edition.title
         authors = edition.authors
         meta = self.init_metadata(title, authors)
@@ -99,7 +94,8 @@ class HardcoverProvider:
         if edition.release_date:
             meta.pubdate = edition.release_date
         if book.tags:
-            meta.tags = book.tags.tag
+            # Combine Tags and Genre
+            meta.tags = book.tags.tag + book.tags.genre
         return meta
 
     def enqueue(

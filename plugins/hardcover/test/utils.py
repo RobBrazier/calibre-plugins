@@ -21,6 +21,7 @@ def create_edition(
     image_url: str = "",
     language: str = "eng",
     publisher: str = "",
+    users_count: int = 1,
     release_date: str = "",
 ):
     edition: dict[str, Any] = {
@@ -28,14 +29,14 @@ def create_edition(
         "title": title,
         "isbn_13": isbn,
         "asin": None,
-        "cached_contibutors": [{"author": {"name": name}} for name in authors],
+        "contributors": [{"author": {"name": name}} for name in authors],
         "language": {"code3": language},
+        "users_count": users_count,
         "release_date": release_date,
-        "description": None,
     }
 
     if image_url:
-        edition.update({"cached_image": {"url": image_url}})
+        edition.update({"image": {"url": image_url}})
     if publisher:
         edition.update({"publisher": {"name": publisher}})
     return edition
@@ -49,6 +50,7 @@ def create_book_response(
     tags: list[str] = [],
     editions: list[dict] = [],
     description: str = "",
+    canonical_id: int | None = None,
     unwrapped=False,
 ):
     book: dict[str, Any] = {
@@ -58,13 +60,14 @@ def create_book_response(
         "description": description,
         "editions": editions,
         "rating": 5.0,
-        "book_series": {},
-        "cached_tags": {"Tags": [{"tag": {"tag": tag}} for tag in tags]},
+        "series": {},
+        "tags": {"Tags": [{"tag": {"tag": tag}} for tag in tags]},
+        "canonical_id": canonical_id,
     }
     if series_name or series_position:
         book.update(
             {
-                "book_series": {
+                "series": {
                     "series": {"name": series_name},
                     "position": series_position,
                 }

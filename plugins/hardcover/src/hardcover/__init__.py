@@ -46,6 +46,13 @@ class Hardcover(Source):
                 "The lower the number, the less relevant the matches. > 1.0 will return 0 matches"
             ),
         ),
+        Option(
+            name="languages",
+            type_="string",
+            default="eng",
+            label=_("Language"),
+            desc=_("Languages to filter books by (comma-separated)"),
+        ),
     )
 
     def __init__(self, *args, **kwargs):

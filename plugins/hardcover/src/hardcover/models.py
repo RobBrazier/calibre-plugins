@@ -17,8 +17,9 @@ class Edition:
     title: str
     authors: List[str]
     image: Optional[str]
-    language: str
+    language: Optional[str]
     publisher: Optional[str]
+    users_count: int
     release_date: Optional[datetime]
 
 
@@ -40,13 +41,13 @@ class Book:
     tags: Optional[Tags]
     description: Optional[str]
     editions: List[Edition]
+    canonical_id: Optional[int]
 
 
-def create_series(data: Optional[List[dict[str, Any]]]) -> Optional[Series]:
+def create_series(data: Optional[dict[str, Any]]) -> Optional[Series]:
     if not data:
         return None
-    series = data[0]
-    return Series(name=series["series"]["name"], position=series["position"])
+    return Series(name=data["series"]["name"], position=data["position"])
 
 
 def create_tags(data: Optional[dict[str, Any]]) -> Optional[Tags]:
@@ -61,24 +62,22 @@ def create_tags(data: Optional[dict[str, Any]]) -> Optional[Tags]:
 
 
 def map_edition_data(data: dict[str, Any]) -> Edition:
+    release_date = (
+        datetime.strptime(data["release_date"], "%Y-%m-%d")
+        if data["release_date"]
+        else None
+    )
     return Edition(
         id=data["id"],
         isbn_13=data["isbn_13"],
         asin=data["asin"],
         title=data["title"],
-        authors=[
-            author["author"]["name"] for author in data.get("cached_contributors", [])
-        ],
-        image=data.get("cached_image", {}).get("url"),
-        language=data.get("language", {}).get("code3", "eng")
-        if data.get("language")
-        else "eng",
-        publisher=data.get("publisher", {}).get("name")
-        if data.get("publisher")
-        else None,
-        release_date=datetime.strptime(data["release_date"], "%Y-%m-%d")
-        if data["release_date"]
-        else None,
+        authors=[author["author"]["name"] for author in data.get("contributors", [])],
+        image=(data.get("image") or {}).get("url"),
+        language=(data.get("language") or {}).get("code3"),
+        publisher=(data.get("publisher") or {}).get("name"),
+        users_count=data.get("users_count", 0),
+        release_date=release_date,
     )
 
 
@@ -88,11 +87,12 @@ def map_from_edition_query(data: dict[str, Any]) -> Book:
         id=book["id"],
         title=book["title"],
         slug=book["slug"],
-        series=create_series(book["book_series"]),
+        series=create_series(book["series"]),
         rating=book["rating"],
-        tags=create_tags(book["cached_tags"]),
+        tags=create_tags(book["tags"]),
         description=book["description"],
         editions=[map_edition_data(data)],
+        canonical_id=book["canonical_id"],
     )
 
 
@@ -101,9 +101,10 @@ def map_from_book_query(data: dict[str, Any]) -> Book:
         id=data["id"],
         title=data["title"],
         slug=data["slug"],
-        series=create_series(data["book_series"]),
+        series=create_series(data["series"]),
         rating=data["rating"],
-        tags=create_tags(data["cached_tags"]),
+        tags=create_tags(data["tags"]),
         description=data["description"],
         editions=[map_edition_data(edition) for edition in data.get("editions", [])],
+        canonical_id=data["canonical_id"],
     )

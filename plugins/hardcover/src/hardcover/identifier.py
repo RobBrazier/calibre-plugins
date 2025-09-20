@@ -1,5 +1,7 @@
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, TypeVar
 from pyjarowinkler import distance
+from iso639 import Lang
+from iso639.exceptions import InvalidLanguageValue
 
 from graphql.client import GraphQLClient
 
@@ -7,6 +9,8 @@ from . import queries
 from .models import Book, Edition, map_from_book_query, map_from_edition_query
 
 from calibre.utils.logging import Log
+
+T = TypeVar("T", Book, Edition)
 
 
 class HardcoverIdentifier:
@@ -17,6 +21,7 @@ class HardcoverIdentifier:
         identifier: str,
         api_key: str,
         match_sensitivity: float,
+        languages: list[str],
         timeout=30,
     ) -> None:
         self.log = log
@@ -24,7 +29,22 @@ class HardcoverIdentifier:
         self.client.set_token(api_key)
         self.identifier = identifier
         self.match_sensitivity = match_sensitivity
+        self.languages = self._validate_languages(languages)
         self.timeout = timeout
+
+    def _validate_languages(self, languages: list[str]) -> list[str]:
+        result = []
+        for code in languages:
+            try:
+                lang = Lang(code)
+                result.append(lang.pt3)
+            except InvalidLanguageValue:
+                self.log.warn("Skipping invalid language code", code)
+        if not result:
+            self.log.warn("No languages specified - defaulting to eng")
+            result.append("eng")
+
+        return list(set(result))
 
     def identify(
         self,
@@ -37,33 +57,34 @@ class HardcoverIdentifier:
         isbn = identifiers.get("isbn", "")
         asin = identifiers.get("mobi-asin", "")
 
-        # Exact match with a Hardcover Edition ID
-        if hardcover_edition:
-            books = self.get_book_by_edition(hardcover_edition)
-            if len(books) > 0:
-                return books
-
-        # Exact match with a Hardcover ID
-        if hardcover_id:
-            books = self.get_book_by_slug(hardcover_id)
-            if len(books) > 0:
-                return books
-
-        # Exact match with an ISBN or ASIN
-        if isbn or asin:
-            books = self.get_book_by_isbn_asin(isbn, asin)
-            if len(books) > 0:
-                return books
-
         candidate_books: list[Book] = []
 
+        # Exact match with a Hardcover Edition ID
+        if hardcover_edition:
+            candidate_books = self.get_book_by_edition(hardcover_edition)
+
+        # Exact match with an ISBN or ASIN
+        if (isbn or asin) and not candidate_books:
+            candidate_books = self.get_book_by_isbn_asin(isbn, asin)
+
+        # Exact match with a Hardcover ID
+        if hardcover_id and not candidate_books:
+            candidate_books = self.get_book_by_slug(hardcover_id)
+            if len(candidate_books) > 0:
+                candidate_books = self._filter_editions(
+                    candidate_books,
+                    title if title else lambda book: book.title,
+                    lambda edition: edition.title,
+                )
+
         # Fuzzy Search by Title
-        if title:
+        if title and not candidate_books:
             author = None
             if authors:
                 author = authors[0]
             book_ids = self.search_book(title, author)
             if len(book_ids) == 0:
+                self.log.warn(f"No books found for {title=}, {author=}")
                 return []
             books = self.get_books_by_ids(book_ids)
 
@@ -72,23 +93,49 @@ class HardcoverIdentifier:
                 books, title, lambda book: book.title
             )
 
+            candidate_books = self._filter_editions(
+                candidate_books, title, lambda edition: edition.title
+            )
+
         # Filter by Authors
         if authors and candidate_books:
             # Join authors and remove spaces
             search_authors = ",".join(sorted(authors))
 
-            candidate_books = self._order_by_similarity(
+            candidate_books = self._filter_editions(
                 candidate_books, search_authors, self._normalise_authors, top_n=10
             )
 
-        # TODO: filter less relevant editions as well - maybe by language?
-        # need to see if I can grab the calibre configured language
-        return candidate_books
+        books = []
+        for book in candidate_books:
+            edition = self.find_matching_edition(book.editions)
+            self.log.info(f"Matched {book.slug=} to {edition=}")
+            if edition:
+                book.editions = [edition]
+                books.append(book)
 
-    def _normalise_authors(self, book: Book) -> Optional[str]:
-        edition = self.find_matching_edition(book.editions)
-        if not edition:
-            return None
+        return books
+
+    def _filter_editions(
+        self,
+        books: list[Book],
+        search: str | Callable[[Book], str],
+        fn: Callable[[Edition], Optional[str]],
+        top_n=20,
+    ) -> list[Book]:
+        for book in books:
+            if callable(search):
+                query = search(book)
+            else:
+                query = search
+            editions = self._order_by_similarity(book.editions, query, fn, top_n)
+            book.editions = editions
+
+        # Remove books that now have no editions
+        books = [book for book in books if len(book.editions) > 0]
+        return books
+
+    def _normalise_authors(self, edition: Edition) -> Optional[str]:
         authors = [
             item.strip() for sublist in edition.authors for item in sublist.split(",")
         ]
@@ -97,43 +144,39 @@ class HardcoverIdentifier:
 
     def _order_by_similarity(
         self,
-        books: list[Book],
+        items: list[T],
         query: str,
-        search_fn: Callable[[Book], Optional[str]],
+        search_fn: Callable[[T], Optional[str]],
         top_n=20,
-    ) -> list[Book]:
-        candidates: list[tuple[int, Book]] = []
-        for book in books:
-            book_comparison = search_fn(book)
-            if not book_comparison:
+    ) -> list[T]:
+        candidates: list[tuple[float, T]] = []
+        for item in items:
+            item_comparison = search_fn(item)
+            if not item_comparison:
                 continue
-            self.log.info(f"Comparing {query} to {book_comparison}")
-            similarity = distance.get_jaro_winkler_similarity(query, book_comparison)
+            try:
+                identifier = f"book:{item.slug}"  # pyright: ignore[reportAttributeAccessIssue]
+            except AttributeError:
+                identifier = f"edition:{item.id}"
+            self.log.debug(f"Comparing {query} to {item_comparison} ({identifier})")
+            similarity = distance.get_jaro_winkler_similarity(query, item_comparison)
             if similarity < self.match_sensitivity:
-                self.log.info(
-                    f"Dropping {book_comparison} ({book.slug}) as it's too distant"
+                self.log.debug(
+                    f"Dropping {item_comparison} ({identifier}) as it's too distant"
                 )
                 continue
-            candidates.append((similarity, book))
+            candidates.append((similarity, item))
         candidates = sorted(candidates, key=lambda x: x[0], reverse=True)
         if len(candidates) > top_n and top_n > 0:
             candidates = candidates[:top_n]
-        return [book[1] for book in candidates]
+        return [item[1] for item in candidates]
 
-    @staticmethod
-    def _sanitize(raw_input: str) -> str:
-        # remove whitespace around string
-        result = raw_input.strip()
-        # remove whitespace inside string
-        result = result.replace(" ", "")
-        # remove non-alphanumeric characters
-        result = "".join(c for c in result if c.isalnum())
-        return result
-
-    def find_matching_edition(self, editions: list[Edition]):
-        # TODO: do some actual matching here ...
-        if len(editions) > 0:
-            return editions[0]
+    def find_matching_edition(self, editions: list[Edition]) -> Optional[Edition]:
+        sorted_editions = sorted(editions, key=lambda e: e.users_count, reverse=True)
+        # Get the most 'popular' remaining edition
+        if sorted_editions:
+            return sorted_editions[0]
+        return None
 
     def _execute_internal(self, query: str, variables: Optional[dict] = None) -> dict:
         query_with_fragments = f"{queries.FRAGMENTS}{query}"
@@ -153,40 +196,53 @@ class HardcoverIdentifier:
                 result.append(map_from_edition_query(entry))
         return result
 
-    def search_book(self, name: str, author: str) -> list[int]:
-        self.log.info("Searching for ids by Name")
+    def search_book(self, name: str, author: Optional[str]) -> list[int]:
         query = name
         if author:
             query += f" {author}"
+        self.log.info("Searching for ids by Name", query)
         variables = {"query": query}
         search = self._execute_internal(queries.SEARCH_BY_NAME, variables)
-        hits = search.get("search", {}).get("results", {}).get("hits", [])
+        ids = search.get("search", {}).get("ids", [])
         results = []
-        for hit in hits:
-            book_id = hit.get("document", {}).get("id", "")
-            if book_id:
-                try:
-                    results.append(int(book_id))
-                except ValueError:
-                    self.log.error(f"Unable to parse book id {book_id} for {name}")
+        for book_id in ids:
+            try:
+                results.append(int(book_id))
+            except ValueError:
+                self.log.error(f"Unable to parse book id {book_id} for {name}")
+        self.log.info(f"Found {results=} for {query=}")
         return results
 
     def get_books_by_ids(self, book_ids: list[int]) -> list[Book]:
-        self.log.info("Finding by book id")
-        variables = {"ids": book_ids}
+        self.log.info("Finding by book id", book_ids)
+        variables = {"ids": book_ids, "languages": self.languages}
         return self._execute(queries.FIND_BOOKS_BY_IDS, variables)
 
     def get_book_by_isbn_asin(self, isbn: str, asin: str) -> list[Book]:
-        self.log.info("Finding by ISBN / ASIN")
+        self.log.info(f"Finding by ISBN / ASIN {isbn=} {asin=}")
         variables = {"isbn": isbn, "asin": asin}
         return self._execute(queries.FIND_BOOK_BY_ISBN_OR_ASIN, variables)
 
     def get_book_by_slug(self, slug: str) -> list[Book]:
-        self.log.info("Finding by Slug")
-        variables = {"slug": slug}
-        return self._execute(queries.FIND_BOOK_BY_SLUG, variables)
+        self.log.info("Finding by Slug", slug)
+        variables = {"slug": slug, "languages": self.languages}
+        books = self._execute(queries.FIND_BOOK_BY_SLUG, variables)
+        result = []
+        deduped_ids = []
+        book_ids = [book.id for book in books]
+        for book in books:
+            canonical_id = book.canonical_id
+            if canonical_id:
+                if canonical_id not in book_ids:
+                    deduped_ids.append(canonical_id)
+                continue
+            result.append(book)
+        if deduped_ids:
+            deduped_books = self.get_books_by_ids(deduped_ids)
+            result += deduped_books
+        return result
 
     def get_book_by_edition(self, edition: str) -> list[Book]:
-        self.log.info("Finding by Edition ID")
+        self.log.info("Finding by Edition ID", edition)
         variables = {"edition": edition}
         return self._execute(queries.FIND_BOOK_BY_EDITION, variables)

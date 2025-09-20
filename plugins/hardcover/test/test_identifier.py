@@ -19,7 +19,9 @@ ASIN = "0007458428"
 @pytest.fixture
 def identifier(mock_gql_client, monkeypatch):
     log = calibre_logging.ThreadSafeLog()
-    identifier = HardcoverIdentifier(mock_gql_client, log, "hardcover", "api_key", 0.7)
+    identifier = HardcoverIdentifier(
+        mock_gql_client, log, "hardcover", "api_key", 0.7, ["eng"]
+    )
     return identifier
 
 
@@ -39,7 +41,7 @@ def get_full_query(query: str) -> str:
         pytest.param(
             {"hardcover": SLUG},
             get_full_query(queries.FIND_BOOK_BY_SLUG),
-            {"slug": SLUG},
+            {"slug": SLUG, "languages": ["eng"]},
             id="hardcover-slug",
         ),
         pytest.param(
@@ -103,7 +105,7 @@ def test_identify_by_identifiers(
         pytest.param(
             {"hardcover": SLUG},
             get_full_query(queries.FIND_BOOK_BY_SLUG),
-            {"slug": SLUG},
+            {"slug": SLUG, "languages": ["eng"]},
             id="hardcover-slug",
         ),
         pytest.param(
@@ -153,39 +155,33 @@ def test_identify_by_title_and_author(identifier: HardcoverIdentifier, mock_gql_
     authors = ["J.R.R. Tolkien", "Christopher Tolkien"]
 
     result_ids = [
-        382700,
-        377938,
-        346073,
-        189932,
-        710182,
-        485045,
         492009,
+        1536197,
+        1278895,
+        346073,
+        1323776,
+        1421238,
         124077,
-        982529,
-        253171,
-        503279,
-        551645,
-        491273,
-        859461,
-        506520,
-        820935,
+        1728736,
+        1391802,
+        177190,
+        710182,
+        1397225,
+        377938,
+        382700,
+        485045,
         485044,
-        679221,
-        508399,
-        21179,
-        104966,
-        131746,
-        147014,
-        132369,
-        110661,
+        1927700,
+        1265587,
+        1683808,
+        491273,
+        503281,
+        1442491,
+        2003398,
+        1989667,
+        1638272,
     ]
-    search_results = {
-        "search": {
-            "results": {
-                "hits": [{"document": {"id": str(book_id)}} for book_id in result_ids]
-            }
-        }
-    }
+    search_results = {"search": {"ids": [str(book_id) for book_id in result_ids]}}
     with open(FIXTURE_DIR / "find_books_by_id.json") as f:
         books_result = json.loads(f.read())
     mock_gql_client.execute.side_effect = [search_results, books_result["data"]]
@@ -200,7 +196,11 @@ def test_identify_by_title_and_author(identifier: HardcoverIdentifier, mock_gql_
                 {"query": f"{title} {authors[0]}"},
                 30,
             ),
-            call(get_full_query(queries.FIND_BOOKS_BY_IDS), {"ids": result_ids}, 30),
+            call(
+                get_full_query(queries.FIND_BOOKS_BY_IDS),
+                {"ids": result_ids, "languages": ["eng"]},
+                30,
+            ),
         ]
     )
 
