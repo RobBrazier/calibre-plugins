@@ -149,7 +149,9 @@ class HardcoverIdentifier:
                         f"weighted similarity between {authors} and {edition_author}: {weighted_similarity}"
                     )
                     total_similarity += weighted_similarity
-                similarity = total_similarity / len(edition_authors)
+                similarity = 0.0
+                if edition_authors:
+                    similarity = total_similarity / len(edition_authors)
                 self.log.debug(
                     f"overall similarity for {edition.title} ({edition.id}): {similarity}"
                 )
