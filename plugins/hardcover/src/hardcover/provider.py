@@ -65,7 +65,7 @@ class HardcoverProvider:
             log.error("No matching edition")
             return None
         title = edition.title
-        authors = edition.authors
+        authors = [author.name for author in edition.authors]
         meta = self.init_metadata(title, authors)
         series = book.series
         if series:

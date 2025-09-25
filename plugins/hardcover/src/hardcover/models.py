@@ -10,12 +10,18 @@ class Series:
 
 
 @dataclass
+class Author:
+    name: str
+    contribution: str
+
+
+@dataclass
 class Edition:
     id: int
     isbn_13: Optional[str]
     asin: Optional[str]
     title: str
-    authors: List[str]
+    authors: List[Author]
     image: Optional[str]
     language: Optional[str]
     publisher: Optional[str]
@@ -42,6 +48,18 @@ class Book:
     description: Optional[str]
     editions: List[Edition]
     canonical_id: Optional[int]
+
+
+def create_authors(data: Optional[list[dict[str, Any]]]) -> list[Author]:
+    if not data:
+        return []
+    authors = []
+    for entry in data:
+        author = entry.get("author", {})
+        name = author.get("name")
+        contribution = entry.get("contribution") or "Author"
+        authors.append(Author(name, contribution))
+    return authors
 
 
 def create_series(data: Optional[dict[str, Any]]) -> Optional[Series]:
@@ -72,7 +90,7 @@ def map_edition_data(data: dict[str, Any]) -> Edition:
         isbn_13=data["isbn_13"],
         asin=data["asin"],
         title=data["title"],
-        authors=[author["author"]["name"] for author in data.get("contributors", [])],
+        authors=create_authors(data.get("contributors", [])),
         image=(data.get("image") or {}).get("url"),
         language=(data.get("language") or {}).get("code3"),
         publisher=(data.get("publisher") or {}).get("name"),

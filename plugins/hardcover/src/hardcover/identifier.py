@@ -1,7 +1,5 @@
 from typing import Callable, List, Optional, TypeVar
 from pyjarowinkler import distance
-from iso639 import Lang
-from iso639.exceptions import InvalidLanguageValue
 
 from graphql.client import GraphQLClient
 
@@ -11,6 +9,8 @@ from .models import Book, Edition, map_from_book_query, map_from_edition_query
 from calibre.utils.logging import Log
 
 T = TypeVar("T", Book, Edition)
+
+CONTRIBUTION_WEIGHTS = {"Author": 2.0}
 
 
 class HardcoverIdentifier:
@@ -35,11 +35,14 @@ class HardcoverIdentifier:
     def _validate_languages(self, languages: list[str]) -> list[str]:
         result = []
         for code in languages:
-            try:
-                lang = Lang(code)
-                result.append(lang.pt3)
-            except InvalidLanguageValue:
-                self.log.warn("Skipping invalid language code", code)
+            if len(code) == 3:
+                result.append(code)
+            else:
+                self.log.warn(
+                    "Skipping invalid language code (expected len=3, got len=%d)",
+                    code,
+                    len(code),
+                )
         if not result:
             self.log.warn("No languages specified - defaulting to eng")
             result.append("eng")
@@ -71,11 +74,7 @@ class HardcoverIdentifier:
         if hardcover_id and not candidate_books:
             candidate_books = self.get_book_by_slug(hardcover_id)
             if len(candidate_books) > 0:
-                candidate_books = self._filter_editions(
-                    candidate_books,
-                    title if title else lambda book: book.title,
-                    lambda edition: edition.title,
-                )
+                candidate_books = self._filter_editions_by_title(candidate_books, title)
 
         # Fuzzy Search by Title
         if title and not candidate_books:
@@ -93,18 +92,11 @@ class HardcoverIdentifier:
                 books, title, lambda book: book.title
             )
 
-            candidate_books = self._filter_editions(
-                candidate_books, title, lambda edition: edition.title
-            )
+            candidate_books = self._filter_editions_by_title(candidate_books, title)
 
         # Filter by Authors
         if authors and candidate_books:
-            # Join authors and remove spaces
-            search_authors = ",".join(sorted(authors))
-
-            candidate_books = self._filter_editions(
-                candidate_books, search_authors, self._normalise_authors, top_n=10
-            )
+            candidate_books = self._filter_editions_by_author(candidate_books, authors)
 
         books = []
         for book in candidate_books:
@@ -115,6 +107,65 @@ class HardcoverIdentifier:
                 books.append(book)
 
         return books
+
+    def _filter_editions_by_title(
+        self, books: list[Book], title: Optional[str]
+    ) -> list[Book]:
+        for book in books:
+            if not title:
+                title = book.title
+            editions = self._order_by_similarity(
+                book.editions, title, lambda edition: edition.title, top_n=20
+            )
+            book.editions = editions
+        # Remove books that now have no editions
+        return [book for book in books if len(book.editions) > 0]
+
+    def _filter_editions_by_author(
+        self, books: list[Book], authors: list[str]
+    ) -> list[Book]:
+        top_n = 10
+        for book in books:
+            candidates: list[tuple[float, Edition]] = []
+            for edition in book.editions:
+                self.log.debug("filtering edition", edition)
+                edition_authors = edition.authors
+                total_similarity = 0.0
+                for edition_author in edition_authors:
+                    weight = CONTRIBUTION_WEIGHTS.get(edition_author.contribution, 1.0)
+                    max_similarity = max(
+                        [
+                            distance.get_jaro_winkler_similarity(
+                                edition_author.name,
+                                author,
+                                ignore_case=True,
+                                scaling=0.0,
+                            )
+                            for author in authors
+                        ]
+                    )
+                    weighted_similarity = max_similarity * weight
+                    self.log.debug(
+                        f"weighted similarity between {authors} and {edition_author}: {weighted_similarity}"
+                    )
+                    total_similarity += weighted_similarity
+                similarity = total_similarity / len(edition_authors)
+                self.log.debug(
+                    f"overall similarity for {edition.title} ({edition.id}): {similarity}"
+                )
+                if similarity < self.match_sensitivity:
+                    self.log.debug(
+                        f"Dropping {edition.title} ({edition.id}) as it's too distant - similarity: {similarity}"
+                    )
+                    continue
+                candidates.append((similarity, edition))
+            candidates = sorted(candidates, key=lambda x: x[0], reverse=True)
+            if len(candidates) > top_n and top_n > 0:
+                candidates = candidates[:top_n]
+            editions = [item[1] for item in candidates]
+            book.editions = editions
+        # Remove books that now have no editions
+        return [book for book in books if len(book.editions) > 0]
 
     def _filter_editions(
         self,
@@ -134,13 +185,6 @@ class HardcoverIdentifier:
         # Remove books that now have no editions
         books = [book for book in books if len(book.editions) > 0]
         return books
-
-    def _normalise_authors(self, edition: Edition) -> Optional[str]:
-        authors = [
-            item.strip() for sublist in edition.authors for item in sublist.split(",")
-        ]
-        # Join authors and remove spaces
-        return ",".join(sorted(authors))
 
     def _order_by_similarity(
         self,
