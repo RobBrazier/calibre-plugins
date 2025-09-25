@@ -24,7 +24,7 @@ query TestQuery($test: String) {
     response = json.dumps({"data": {"test": "foo"}}).encode("utf-8")
     request_body = json.dumps({"query": query, "variables": vars}).encode("utf-8")
 
-    urlopen.return_value.read.return_value = response
+    urlopen.return_value.__enter__.return_value.read.return_value = response
 
     client.execute(query, vars)
     (request,), _ = urlopen.call_args
