@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional
 from urllib import request, error
 import json
 import logging
@@ -7,14 +7,15 @@ logger = logging.getLogger(__name__)
 
 
 class GraphQLClient:
-    def __init__(self, endpoint: str):
+    def __init__(self, endpoint: str, useragent: Optional[str] = None):
         self.endpoint = endpoint
         self.token = None
+        self.useragent = useragent
 
     def set_token(self, token: str):
         self.token = token
 
-    def execute(self, query: str, variables: Union[dict, None] = None, timeout=30):
+    def execute(self, query: str, variables: Optional[dict] = None, timeout=30):
         data = {"query": query, "variables": variables}
         headers = {"Accept": "application/json", "Content-Type": "application/json"}
 
@@ -25,6 +26,8 @@ class GraphQLClient:
             ):  # does it have a 'prefix' like Bearer already there?
                 token = f"Bearer {token}"
             headers["Authorization"] = token
+        if self.useragent:
+            headers["User-Agent"] = self.useragent
 
         body = json.dumps(data).encode("utf-8")
 

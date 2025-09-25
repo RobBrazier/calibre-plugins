@@ -10,6 +10,7 @@ from graphql.client import GraphQLClient
 
 from .identifier import HardcoverIdentifier
 from .models import Book
+from ._version import __version__
 
 
 class HardcoverProvider:
@@ -19,7 +20,8 @@ class HardcoverProvider:
     def __init__(self, source):
         self.source = source
         self.prefs = source.prefs
-        self.client = GraphQLClient(self.API_URL)
+        useragent = f"hardcover-calibre-plugin/{__version__} (https://github.com/RobBrazier/calibre-plugins)"
+        self.client = GraphQLClient(self.API_URL, useragent)
 
     def get_book_url(self, identifiers) -> tuple[str, str, str] | None:
         hardcover_id: str | None = identifiers.get(self.ID_NAME, None)
