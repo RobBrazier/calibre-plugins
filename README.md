@@ -7,7 +7,8 @@
 ## Current Plugins
 
 - [Hardcover](./plugins/hardcover/): Metadata Plugin for Hardcover.app
-- [Manga Chapter Extractor](./plugins/manga-chapters/) Editor Plugin for extracting Manga chapters from the Contents page
+- [Manga Chapter Extractor](./plugins/manga-chapters/) Editor Plugin for
+extracting Manga chapters from the Contents page
 
 ## Local Setup
 
@@ -17,14 +18,16 @@ isolates your main calibre library from development
 
 You can see all available scripts with `task list`
 
-### Required tools:
+### Required tools
 
 #### Installed via Mise
+
 1. [uv](https://docs.astral.sh/uv/) - Python Package Manager
 2. [task](https://taskfile.dev/) - Task Runner
 3. Python (uv can install this for you with `uv python install`)
 
 #### Install externally
+
 1. Calibre - to install/run the plugins - Calibre source is downloaded in
    `task calibre:source` (called in `task install`)
 

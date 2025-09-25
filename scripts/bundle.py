@@ -7,6 +7,8 @@ import subprocess
 import tempfile
 import zipfile
 
+import shutil
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 
@@ -21,11 +23,15 @@ def get_version(file: str) -> str:
 
 def download_dependencies(
     name: str, path: str, temp_dir: tempfile.TemporaryDirectory[str]
-) -> list[str]:
+) -> dict[str, str]:
+    uv_exe = shutil.which("uv")
+    if not uv_exe:
+        raise RuntimeError("uv executable not found in PATH")
+
     try:
-        subprocess.run(
+        subprocess.run(  # noqa: S603 - uv is a trusted CLI tool with no user input
             [
-                "uv",
+                uv_exe,
                 "--directory",
                 path,
                 "pip",
@@ -35,7 +41,8 @@ def download_dependencies(
                 temp_dir.name,
                 "--link-mode",
                 "copy",
-            ]
+            ],
+            check=True,  # Raise exception on non-zero exit
         )
     except subprocess.SubprocessError:
         logger.exception("Failed to install dependencies")

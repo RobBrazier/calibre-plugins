@@ -53,6 +53,18 @@ tasks:
       LD_LIBRARY_PATH: "{{ .CALIBRE_LIBRARY_PATH }}"
     cmd: uv run pytest {{ .CLI_ARGS }}
 
+  lint:
+    desc: Run linters
+    cmds:
+      - uv run ruff check {{ .CLI_ARGS }}
+      - uv run pymarkdownlnt scan **/*.md
+
+  fix:
+    desc: Run linters
+    cmds:
+      - uv run ruff check --fix {{ .CLI_ARGS }}
+      - uv run pymarkdownlnt fix **/*.md
+
   clean:
     aliases: [c]
     desc: Clean temporary / build files

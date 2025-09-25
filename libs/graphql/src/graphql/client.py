@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 class GraphQLClient:
-    def __init__(self, endpoint):
+    def __init__(self, endpoint: str):
         self.endpoint = endpoint
         self.token = None
 
@@ -28,15 +28,18 @@ class GraphQLClient:
 
         body = json.dumps(data).encode("utf-8")
 
-        req = request.Request(self.endpoint, body, headers)
+        if not self.endpoint.startswith(("http:", "https:")):
+            raise ValueError("invalid endpoint")
+
+        req = request.Request(self.endpoint, body, headers)  # noqa: S310
 
         try:
-            res = request.urlopen(req, timeout=timeout)
-            body = res.read()
-            json_result = json.loads(body.decode("utf-8"))
-            if "data" in json_result:
-                json_result = json_result.get("data")
-            return json_result
+            with request.urlopen(req, timeout=timeout) as res:  # noqa: S310
+                body = res.read()
+                json_result = json.loads(body.decode("utf-8"))
+                if "data" in json_result:
+                    json_result = json_result.get("data")
+                return json_result
         except error.HTTPError as e:
             logger.exception("GraphQL request failed")
             raise e
