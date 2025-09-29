@@ -30,7 +30,7 @@ jobs:
           sudo apt-get install -y libegl1 libopengl0 libxcb-cursor0
 
       - name: Download calibre sources
-        run: task calibre:source
+        run: just .calibre/source
 
       - name: Get calibre version
         id: calibre
@@ -46,10 +46,10 @@ jobs:
           key: uv-${{ runner.os }}-${{ hashFiles('uv.lock') }}
 
       - name: Install the project
-        run: task install
+        run: just install
 
       - name: Run Unit Tests
-        run: task test -- --cov-report xml --junitxml=junit.xml -o junit_family=legacy
+        run: just test --cov-report xml --junitxml=junit.xml -o junit_family=legacy
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5.5.1
@@ -81,10 +81,10 @@ jobs:
           key: uv-${{ runner.os }}-${{ hashFiles('uv.lock') }}
 
       - name: Install the project
-        run: task install
+        run: just install
 
       - name: Build Plugins
-        run: task package
+        run: just build-all
 
       - name: Upload Plugin Artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

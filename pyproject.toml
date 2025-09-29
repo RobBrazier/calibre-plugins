@@ -3,7 +3,7 @@ name = "calibre-plugins"
 version = "0.0.0"
 description = "Add your description here"
 readme = "README.md"
-authors = [{ name = "Rob Brazier", email = "git+github@brzr.co" }]
+authors = [{ name = "Rob Brazier" }]
 requires-python = ">=3.9"
 dependencies = ["pymarkdownlnt>=0.9.29", "pyqt5>=5.15.11"]
 

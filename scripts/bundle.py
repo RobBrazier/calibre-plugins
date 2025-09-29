@@ -124,6 +124,8 @@ def main(args: argparse.Namespace):
     if not os.path.exists(pyproject_path):
         raise ValueError(f"pyproject.toml not found at {pyproject_path}")
 
+    subprocess.run(["uv", "build", plugin_dir])  # noqa: S603, S607
+
     if not os.path.exists(version_path):
         raise ValueError(f"No _version.py found at {version_path}")
 

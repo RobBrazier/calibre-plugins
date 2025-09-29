@@ -23,19 +23,19 @@ You can see all available scripts with `task list`
 #### Installed via Mise
 
 1. [uv](https://docs.astral.sh/uv/) - Python Package Manager
-2. [task](https://taskfile.dev/) - Task Runner
+2. [just](https://just.systems) - Task Runner
 3. Python (uv can install this for you with `uv python install`)
 
 #### Install externally
 
 1. Calibre - to install/run the plugins - Calibre source is downloaded in
-   `task calibre:source` (called in `task install`)
+   `just .calibre/source` (called in `just install`)
 
 ### Running Tests Locally
 
 Tests are run with unstubbed calibre libraries - most of the required config is
-setup by `task setenv` (part of `task install`), however if you are running
-tests outside of `task test`, one manual tweak is needed:
+setup by `just setenv` (part of `just install`), however if you are running
+tests outside of `just test`, one manual tweak is needed:
 
 - Linux / Mac (maybe): you'll need to set `LD_LIBRARY_PATH` to the value of
   `CALIBRE_LIBRARY_PATH` environment variable (in .env file)
