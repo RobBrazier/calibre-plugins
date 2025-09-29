@@ -1,9 +1,8 @@
 {
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
     "extends": [
-        "config:recommended",
+        "config:best-practices",
         ":approveMajorUpdates",
-        ":semanticCommits",
         ":rebaseStalePrs",
         ":maintainLockFilesWeekly",
         ":automergePatch",
@@ -11,46 +10,26 @@
         "helpers:pinGitHubActionDigestsToSemver",
         "schedule:weekends",
         ":prConcurrentLimit10",
-        ":prHourlyLimit2"
+        ":prHourlyLimit2",
+        ":label(dependencies)"
     ],
-    "labels": [
-        "dependencies"
+    "ignoreDeps": [
+        "python"
     ],
     "packageRules": [
         {
-            "matchDatasources": [
-                "pypi"
+            "matchManagers": [
+                "*"
             ],
-            "matchFileNames": [
-                "**/pyproject.toml"
-            ],
+            "minimumReleaseAge": "14 days",
             "addLabels": [
-                "python"
+                "{{ manager }}"
             ]
         },
         {
             "groupName": "Github Actions",
             "matchManagers": [
                 "github-actions"
-            ],
-            "addLabels": [
-                "github-actions"
-            ]
-        },
-        {
-            "matchManagers": [
-                "dockerfile"
-            ],
-            "addLabels": [
-                "dockerfile"
-            ]
-        },
-        {
-            "matchManagers": [
-                "mise"
-            ],
-            "addLabels": [
-                "mise"
             ]
         }
     ]
