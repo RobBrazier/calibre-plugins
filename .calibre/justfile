@@ -1,0 +1,40 @@
+export CALIBRE_HOME := justfile_directory()
+calibre_temp := CALIBRE_HOME / "temp"
+calibre_source := CALIBRE_HOME / "source"
+export CALIBRE_LIBRARY := CALIBRE_HOME / "library"
+export CALIBRE_CONFIG_DIRECTORY := CALIBRE_HOME / "config"
+export CALIBRE_DEVELOP_FROM := calibre_source / "src"
+calibre_version := "8.11.1"
+
+# list available tasks
+list:
+	@just --list
+
+# Clean all (LOCAL) calibre data in the .calibre folder
+clean:
+	find {{CALIBRE_HOME}} -maxdepth 1 -mindepth 1 -type d -exec rm -rv "{}" \;
+
+_create-dirs:
+	mkdir -p {{calibre_source}}
+	mkdir -p {{calibre_temp}}
+
+# Setup calibre for first use (and download some sample books)
+setup: _create-dirs
+	for name in "1513.epub" "345.epub"; do \
+		wget "https://www.gutenberg.org/ebooks/$name.noimages" -O "{{calibre_temp}}/$name" && \
+		calibredb add --with-library {{CALIBRE_LIBRARY}} "{{calibre_temp}}/$name"; \
+	done
+	rm -r "{{calibre_temp}}"
+	calibre --with-library {{CALIBRE_LIBRARY}}
+
+# Start calibre in debug mode
+run *ARGS:
+	calibre-debug {{ARGS}}
+
+# Download Calibre source for IDE completion
+[working-directory: 'source']
+source: _create-dirs
+	@echo "Downloading calibre v{{calibre_version}} to $PWD"
+	find {{calibre_source}} -mindepth 1 -maxdepth 1 -type d -exec rm -r "{}" \;
+	wget -qO - "https://github.com/kovidgoyal/calibre/archive/refs/tags/v{{calibre_version}}.tar.gz" | tar xz --strip-components=1 --wildcards 'calibre-*/src/*' --wildcards 'calibre-*/resources/*'
+	echo {{calibre_version}} > .version

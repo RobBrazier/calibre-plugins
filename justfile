@@ -52,6 +52,7 @@ install-plugins:
         just install-plugin $name
     done
 
+# Run a plugin in CLI mode
 run PLUGIN *ARGS:
     #!/usr/bin/env sh
     if [[ ! -f ".calibre/config/plugins/{{titlecase(PLUGIN)}}.zip" ]]; then
@@ -59,8 +60,10 @@ run PLUGIN *ARGS:
     fi
     just .calibre/run -r {{titlecase(PLUGIN)}} -- {{ARGS}}
 
+# Launch Calibre in Debug mode
 calibre *ARGS:
     just .calibre/run -g {{ARGS}}
 
+# Bump the version for a plugin, following SemVer
 bump PLUGIN:
     bash scripts/bump.sh {{PLUGIN}}
