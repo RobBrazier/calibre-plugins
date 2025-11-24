@@ -65,6 +65,28 @@ query FindBookBySlug($slug: String, $languages: [String!]) {
 }
 """
 
+FIND_BOOK_BY_ID = """
+query FindBookById($id: Int!, $languages: [String!]) {
+  books: books_by_pk(id: $id) {
+    ...BookData
+    editions(
+      where: {
+        reading_format_id: {_in: [1, 4]},
+        language: {
+          _or: [
+            {code3: {_in: $languages}},
+            {code3: {_is_null: true}}
+          ]
+        }
+      }
+      order_by: {users_count: desc_nulls_last, language_id: desc_nulls_last}
+    ) {
+      ...EditionData
+    }
+  }
+}
+"""
+
 FIND_BOOK_BY_ISBN_OR_ASIN = """
 query FindBookByIsbnOrAsin($isbn: String, $asin: String) {
   editions(
@@ -96,7 +118,7 @@ query FindBookByIsbnOrAsin($isbn: String, $asin: String) {
 
 FIND_BOOK_BY_EDITION = """
 query FindBookByEdition($edition: Int!) {
-  editions_by_pk(id: $edition) {
+  editions: editions_by_pk(id: $edition) {
     ...EditionData
     book {
       ...BookData

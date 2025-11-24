@@ -49,14 +49,29 @@ class HardcoverIdentifier:
 
         return list(set(result))
 
+    def ensure_int(self, value: str | None) -> int | None:
+        if not value:
+            return None
+        try:
+            return int(value)
+        except ValueError:
+            self.log.warn(f"{value} is not a valid integer")
+            return None
+
     def identify(
         self,
         title: Optional[str],
         authors: Optional[list[str]],
         identifiers: dict[str, str],
     ):
-        hardcover_id = identifiers.get(self.identifier, None)
-        hardcover_edition = identifiers.get(f"{self.identifier}-edition", None)
+        hardcover_slug_legacy = identifiers.get(self.identifier, None)
+        hardcover_slug = identifiers.get(
+            f"{self.identifier}-slug", hardcover_slug_legacy
+        )
+        hardcover_id = self.ensure_int(identifiers.get(f"{self.identifier}-id", None))
+        hardcover_edition = self.ensure_int(
+            identifiers.get(f"{self.identifier}-edition", None)
+        )
         isbn = identifiers.get("isbn", "")
         asin = identifiers.get("mobi-asin", "")
 
@@ -70,9 +85,15 @@ class HardcoverIdentifier:
         if (isbn or asin) and not candidate_books:
             candidate_books = self.get_book_by_isbn_asin(isbn, asin)
 
-        # Exact match with a Hardcover ID
         if hardcover_id and not candidate_books:
-            candidate_books = self.get_book_by_slug(hardcover_id)
+            candidate_books = self.get_book_by_id(hardcover_id)
+            self.log.info("book", candidate_books)
+            if len(candidate_books) > 0:
+                candidate_books = self._filter_editions_by_title(candidate_books, title)
+
+        # Exact match with a Hardcover ID
+        if hardcover_slug and not candidate_books:
+            candidate_books = self.get_book_by_slug(hardcover_slug)
             if len(candidate_books) > 0:
                 candidate_books = self._filter_editions_by_title(candidate_books, title)
 
@@ -237,9 +258,9 @@ class HardcoverIdentifier:
         entries = res.get(key, []) if isinstance(res.get(key), list) else [res.get(key)]
         for entry in entries:
             if key == "books":
-                result.append(map_from_book_query(entry))
-            elif key in ["editions", "editions_by_pk"]:
-                result.append(map_from_edition_query(entry))
+                result.append(map_from_book_query(entry))  # pyright: ignore[reportArgumentType]
+            elif key == "editions":
+                result.append(map_from_edition_query(entry))  # pyright: ignore[reportArgumentType]
         return result
 
     def search_book(self, name: str, author: Optional[str]) -> list[int]:
@@ -269,6 +290,11 @@ class HardcoverIdentifier:
         variables = {"isbn": isbn, "asin": asin}
         return self._execute(queries.FIND_BOOK_BY_ISBN_OR_ASIN, variables)
 
+    def get_book_by_id(self, book_id: int) -> list[Book]:
+        self.log.info("Finding by ID", book_id)
+        variables = {"id": book_id, "languages": self.languages}
+        return self._execute(queries.FIND_BOOK_BY_ID, variables)
+
     def get_book_by_slug(self, slug: str) -> list[Book]:
         self.log.info("Finding by Slug", slug)
         variables = {"slug": slug, "languages": self.languages}
@@ -288,7 +314,7 @@ class HardcoverIdentifier:
             result += deduped_books
         return result
 
-    def get_book_by_edition(self, edition: str) -> list[Book]:
+    def get_book_by_edition(self, edition: int) -> list[Book]:
         self.log.info("Finding by Edition ID", edition)
         variables = {"edition": edition}
         return self._execute(queries.FIND_BOOK_BY_EDITION, variables)

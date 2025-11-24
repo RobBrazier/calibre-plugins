@@ -4,7 +4,7 @@ calibre_source := CALIBRE_HOME / "source"
 export CALIBRE_LIBRARY := CALIBRE_HOME / "library"
 export CALIBRE_CONFIG_DIRECTORY := CALIBRE_HOME / "config"
 export CALIBRE_DEVELOP_FROM := calibre_source / "src"
-calibre_version := "8.11.1"
+calibre_version := "8.15.0"
 
 # list available tasks
 list:

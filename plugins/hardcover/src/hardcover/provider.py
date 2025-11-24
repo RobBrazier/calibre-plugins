@@ -24,12 +24,14 @@ class HardcoverProvider:
         self.client = GraphQLClient(self.API_URL, useragent)
 
     def get_book_url(self, identifiers) -> tuple[str, str, str] | None:
-        hardcover_id: str | None = identifiers.get(self.ID_NAME, None)
-        if hardcover_id:
+        hardcover_slug: str | None = identifiers.get(
+            f"{self.ID_NAME}-slug", identifiers.get(self.ID_NAME, None)
+        )
+        if hardcover_slug:
             return (
                 self.ID_NAME,
-                hardcover_id,
-                f"https://hardcover.app/books/{hardcover_id}",
+                hardcover_slug,
+                f"https://hardcover.app/books/{hardcover_slug}",
             )
         return None
 
@@ -75,6 +77,8 @@ class HardcoverProvider:
             if series.position:
                 meta.series_index = series.position  # pyright: ignore
         meta.set_identifier("hardcover", book.slug)
+        meta.set_identifier("hardcover-slug", book.slug)
+        meta.set_identifier("hardcover-id", str(book.id))
         meta.set_identifier("hardcover-edition", str(edition.id))
         if isbn := edition.isbn_13:
             meta.set_identifier("isbn", isbn)

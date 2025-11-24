@@ -10,7 +10,7 @@ from calibre.utils import logging as calibre_logging
 
 FIXTURE_DIR = Path(__file__).parent.resolve() / "data"
 
-EDITION_ID = "8548995"
+EDITION_ID = 8548995
 SLUG = "the-hobbit"
 ISBN = "9780618968633"
 ASIN = "0007458428"

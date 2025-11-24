@@ -20,8 +20,10 @@ class Hardcover(Source):
         [
             "title",
             "authors",
-            f"identifier:{ID_NAME}",
+            f"identifier:{ID_NAME}",  # Legacy identifier
             f"identifier:{ID_NAME}-edition",
+            f"identifier:{ID_NAME}-slug",
+            f"identifier:{ID_NAME}-id",
             "pubdate",
             "series",
             "series_index",
