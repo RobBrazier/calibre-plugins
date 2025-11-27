@@ -1,8 +1,8 @@
 # calibre-plugins
 
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/RobBrazier/calibre-plugins/build.yaml)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=RobBrazier_calibre-plugins&metric=coverage)](https://sonarcloud.io/summary/new_code?id=RobBrazier_calibre-plugins)
-[![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=RobBrazier_calibre-plugins)](https://sonarcloud.io/summary/new_code?id=RobBrazier_calibre-plugins)
+[![Sonar Coverage](https://img.shields.io/sonar/coverage/RobBrazier_calibre-plugins?server=https%3A%2F%2Fsonarcloud.io)](https://sonarcloud.io/summary/new_code?id=RobBrazier_calibre-plugins)
+[![Sonar Quality Gate](https://img.shields.io/sonar/quality_gate/RobBrazier_calibre-plugins?server=https%3A%2F%2Fsonarcloud.io)](https://sonarcloud.io/summary/new_code?id=RobBrazier_calibre-plugins)
 
 ## Current Plugins
 

@@ -49,7 +49,7 @@ jobs:
         run: just install
 
       - name: Run Unit Tests
-        run: just test --cov-report xml --junitxml=junit.xml -o junit_family=legacy
+        run: just test --cov-report xml --junitxml=xunit.xml -o junit_family=xunit2
 
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0
